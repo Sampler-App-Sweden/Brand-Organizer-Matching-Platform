@@ -5,7 +5,7 @@ import { HelpCircle, AlertCircle } from 'lucide-react'
 import { useLogin } from '../hooks/useLogin'
 import { useCopyToClipboard } from '../utils/clipboard'
 import { LoginForm, DemoAccountCard } from '../components/login'
-import { demoAccounts } from '../constants/demoAccounts'
+import { DEMO_ACCOUNTS } from '../utils/constants'
 
 export function Login() {
   const {
@@ -42,7 +42,7 @@ export function Login() {
             </div>
 
             <div className='space-y-4'>
-              {demoAccounts.map((account) => (
+              {DEMO_ACCOUNTS.map((account) => (
                 <DemoAccountCard
                   key={account.type}
                   account={account}

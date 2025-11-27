@@ -26,5 +26,5 @@ export * from './login'
 // Standalone Components
 export { ErrorBoundary } from './ErrorBoundary'
 export { HelpChat } from './HelpChat'
-export { ContractForm, ContractDetails } from './ContractForm'
+export { ContractForm } from './ContractForm'
 export { RegistrationDebugHelper } from './RegistrationDebugHelper'

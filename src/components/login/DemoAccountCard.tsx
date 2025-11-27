@@ -1,5 +1,5 @@
 import { Copy, Check } from 'lucide-react'
-import { DemoAccount } from '../../constants/demoAccounts'
+import { DemoAccount } from '../../utils/constants'
 
 interface DemoAccountCardProps {
   account: DemoAccount
