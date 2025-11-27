@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
@@ -8,7 +8,6 @@ import {
   MessageSquareIcon,
   BellIcon,
   UsersIcon,
-  LayoutDashboardIcon,
   Menu as MenuIcon,
   X as XIcon
 } from 'lucide-react'
@@ -29,13 +28,8 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
   const navItems = {
     brand: [
       {
-        label: 'Home',
-        icon: <HomeIcon className='h-5 w-5' />,
-        path: '/'
-      },
-      {
         label: 'Dashboard',
-        icon: <LayoutDashboardIcon className='h-5 w-5' />,
+        icon: <HomeIcon className='h-5 w-5' />,
         path: '/dashboard/brand'
       },
       {
@@ -51,13 +45,8 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
     ],
     organizer: [
       {
-        label: 'Home',
-        icon: <HomeIcon className='h-5 w-5' />,
-        path: '/'
-      },
-      {
         label: 'Dashboard',
-        icon: <LayoutDashboardIcon className='h-5 w-5' />,
+        icon: <HomeIcon className='h-5 w-5' />,
         path: '/dashboard/organizer'
       },
       {
@@ -73,13 +62,8 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
     ],
     admin: [
       {
-        label: 'Home',
-        icon: <HomeIcon className='h-5 w-5' />,
-        path: '/'
-      },
-      {
         label: 'Dashboard',
-        icon: <LayoutDashboardIcon className='h-5 w-5' />,
+        icon: <HomeIcon className='h-5 w-5' />,
         path: '/admin'
       },
       {

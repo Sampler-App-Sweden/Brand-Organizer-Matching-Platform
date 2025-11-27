@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { FormField, Button, Toast } from '../components/ui'
@@ -24,9 +24,9 @@ export function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [userType, setUserType] = useState<
-    'brand' | 'organizer' | 'community'
-  >('brand')
+  const [userType, setUserType] = useState<'brand' | 'organizer' | 'community'>(
+    'brand'
+  )
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -91,10 +91,6 @@ export function Register() {
       }
     }
     loadExperiment()
-    // If user is already logged in, redirect to dashboard
-    if (currentUser) {
-      navigate(redirectPath)
-    }
     // Check password strength
     const hasLength = password.length >= 8
     const hasUppercase = /[A-Z]/.test(password)
@@ -584,9 +580,7 @@ export function Register() {
             ]}
             value={userType}
             onChange={(e) =>
-              setUserType(
-                e.target.value as 'brand' | 'organizer' | 'community'
-              )
+              setUserType(e.target.value as 'brand' | 'organizer' | 'community')
             }
           />
           <FormField
@@ -799,9 +793,7 @@ export function Register() {
             ]}
             value={userType}
             onChange={(e) => {
-              setUserType(
-                e.target.value as 'brand' | 'organizer' | 'community'
-              )
+              setUserType(e.target.value as 'brand' | 'organizer' | 'community')
               trackEvent(
                 EVENTS.FORM_SUBMITTED,
                 {
