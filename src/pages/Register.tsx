@@ -588,7 +588,9 @@ export function Register() {
             ]}
             value={userType}
             onChange={(e) =>
-              setUserType(e.target.value as 'brand' | 'organizer' | 'community' | 'admin')
+              setUserType(
+                e.target.value as 'brand' | 'organizer' | 'community' | 'admin'
+              )
             }
           />
           <FormField
@@ -805,7 +807,9 @@ export function Register() {
             ]}
             value={userType}
             onChange={(e) => {
-              setUserType(e.target.value as 'brand' | 'organizer' | 'community' | 'admin')
+              setUserType(
+                e.target.value as 'brand' | 'organizer' | 'community' | 'admin'
+              )
               trackEvent(
                 EVENTS.FORM_SUBMITTED,
                 {
