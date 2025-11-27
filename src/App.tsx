@@ -10,6 +10,7 @@ import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandDashboard } from './pages/dashboard/BrandDashboard'
 import { OrganizerDashboard } from './pages/dashboard/OrganizerDashboard'
 import { MatchDetails } from './pages/dashboard/MatchDetails'
+import { EditProfilePage } from './pages/dashboard/EditProfilePage'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { CommunityPage } from './pages/CommunityPage'
 import { CommunityRegistration } from './pages/CommunityRegistration'
@@ -113,6 +114,14 @@ const AppRoutes = () => {
         }
       />
       {/* Shared dashboard routes */}
+      <Route
+        path='/dashboard/edit-profile'
+        element={
+          <ProtectedRoute>
+            <EditProfilePage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path='/dashboard/saved'
         element={

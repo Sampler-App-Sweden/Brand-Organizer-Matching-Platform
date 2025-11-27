@@ -9,6 +9,7 @@ import {
   Toast
 } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../services/supabaseClient'
 import {
   BuildingIcon,
   UserIcon,
@@ -175,19 +176,66 @@ export function OrganizerForm() {
         'organizer',
         formData.organizerName
       )
-      // Save organizer data
-      const organizerData = {
-        id: `organizer-${Date.now()}-${Math.random()
-          .toString(36)
-          .substr(2, 9)}`,
-        userId: user.id,
-        ...formData,
-        mediaFiles: [],
-        createdAt: new Date()
+      // Insert organizer data into Supabase
+      const { error: organizerError } = await supabase
+        .from('organizers')
+        .insert([
+          {
+            user_id: user.id,
+            organizer_name: formData.organizerName,
+            contact_name: formData.contactName,
+            email: formData.email,
+            phone: formData.phone,
+            website: formData.website,
+            address: formData.address,
+            postal_code: formData.postalCode,
+            city: formData.city,
+            event_name: formData.eventName,
+            event_type: formData.eventType,
+            elevator_pitch: formData.elevatorPitch,
+            event_frequency: formData.eventFrequency,
+            event_date: formData.eventDate,
+            location: formData.location,
+            attendee_count: formData.attendeeCount,
+            audience_description: formData.audienceDescription,
+            audience_demographics: formData.audienceDemographics,
+            sponsorship_needs: formData.sponsorshipNeeds,
+            seeking_financial_sponsorship: formData.seekingFinancialSponsorship,
+            financial_sponsorship_amount: formData.financialSponsorshipAmount,
+            financial_sponsorship_offers: formData.financialSponsorshipOffers,
+            offering_types: formData.offeringTypes,
+            brand_visibility: formData.brandVisibility,
+            content_creation: formData.contentCreation,
+            lead_generation: formData.leadGeneration,
+            product_feedback: formData.productFeedback,
+            bonus_value: formData.bonusValue,
+            bonus_value_details: formData.bonusValueDetails,
+            additional_info: formData.additionalInfo,
+            media_files: []
+          }
+        ])
+
+      if (organizerError) {
+        throw new Error(
+          `Failed to create organizer profile: ${organizerError.message}`
+        )
       }
-      const organizers = JSON.parse(localStorage.getItem('organizers') || '[]')
-      organizers.push(organizerData)
-      localStorage.setItem('organizers', JSON.stringify(organizers))
+
+      // Update profile with additional details
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          name: formData.organizerName,
+          phone: formData.phone,
+          description: formData.elevatorPitch,
+          logo_url: formData.website
+        })
+        .eq('id', user.id)
+
+      if (profileError) {
+        console.warn('Failed to update profile:', profileError)
+      }
+
       setToast({
         isVisible: true,
         type: 'success',

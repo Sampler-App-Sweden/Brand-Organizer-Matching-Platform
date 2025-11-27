@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Safely access environment variables with fallbacks
-const supabaseUrl =
-  (typeof process !== 'undefined' && process.env?.REACT_APP_SUPABASE_URL) ||
-  'https://your-project-url.supabase.co'
+// Vite uses import.meta.env instead of process.env
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-const supabaseAnonKey =
-  (typeof process !== 'undefined' &&
-    process.env?.REACT_APP_SUPABASE_ANON_KEY) ||
-  'your-anon-key'
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase environment variables. Please check your .env file.'
+  )
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)

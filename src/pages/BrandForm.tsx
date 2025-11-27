@@ -23,7 +23,7 @@ import {
   UsersIcon,
   BarChart3Icon
 } from 'lucide-react'
-import { createProfile } from '../services/profileService'
+import { supabase } from '../services/supabaseClient'
 export function BrandForm() {
   const navigate = useNavigate()
   const { register } = useAuth()
@@ -167,31 +167,58 @@ export function BrandForm() {
         formData.companyName
       )
       // Save brand data
-      const brandData = {
-        id: `brand-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        userId: user.id,
-        ...formData,
-        createdAt: new Date()
-      }
-      const brands = JSON.parse(localStorage.getItem('brands') || '[]')
-      brands.push(brandData)
-      localStorage.setItem('brands', JSON.stringify(brands))
-      // Create profile in Supabase
-      await createProfile({
-        role: 'Brand',
-        name: formData.companyName,
-        description: formData.productDescription,
-        whatTheySeek: {
-          sponsorshipTypes: formData.sponsorshipType,
-          budgetRange: formData.budget,
-          quantity: parseInt(formData.productQuantity) || 0,
-          audienceTags: [
-            formData.ageRange,
-            ...formData.targetAudience.split(',').map((tag) => tag.trim())
-          ],
-          notes: formData.marketingGoals
+      // Insert brand data into Supabase
+      const { error: brandError } = await supabase.from('brands').insert([
+        {
+          user_id: user.id,
+          company_name: formData.companyName,
+          contact_name: formData.contactName,
+          contact_title: formData.contactTitle,
+          email: formData.email,
+          phone: formData.phone,
+          website: formData.website,
+          address: formData.address,
+          postal_code: formData.postalCode,
+          city: formData.city,
+          industry: formData.industry,
+          product_name: formData.productName,
+          product_description: formData.productDescription,
+          product_quantity: formData.productQuantity,
+          target_audience: formData.targetAudience,
+          age_range: formData.ageRange,
+          sponsorship_type: formData.sponsorshipType,
+          marketing_goals: formData.marketingGoals,
+          budget: formData.budget,
+          event_marketing_budget: formData.eventMarketingBudget,
+          interested_in_financial_sponsorship:
+            formData.interestedInFinancialSponsorship,
+          financial_sponsorship_amount: formData.financialSponsorshipAmount,
+          success_metrics: formData.successMetrics,
+          interested_in_sampling_tools: formData.interestedInSamplingTools,
+          has_test_panels: formData.hasTestPanels,
+          test_panel_details: formData.testPanelDetails,
+          additional_info: formData.additionalInfo
         }
-      })
+      ])
+
+      if (brandError) {
+        throw new Error(`Failed to create brand profile: ${brandError.message}`)
+      }
+
+      // Update profile with additional details
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          name: formData.companyName,
+          phone: formData.phone,
+          description: formData.productDescription,
+          logo_url: formData.website
+        })
+        .eq('id', user.id)
+
+      if (profileError) {
+        console.warn('Failed to update profile:', profileError)
+      }
       setToast({
         isVisible: true,
         type: 'success',

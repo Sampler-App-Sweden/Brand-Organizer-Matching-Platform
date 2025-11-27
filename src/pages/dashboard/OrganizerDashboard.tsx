@@ -55,9 +55,14 @@ export function OrganizerDashboard() {
             You need to complete your event organizer profile before you can
             start matching with brands.
           </p>
-          <Link to='/organizer'>
-            <Button variant='primary'>Complete Profile</Button>
-          </Link>
+          <div className='flex gap-3'>
+            <Link to='/organizer'>
+              <Button variant='primary'>Create Organizer Profile</Button>
+            </Link>
+            <Link to='/dashboard/edit-profile'>
+              <Button variant='outline'>Edit Basic Info</Button>
+            </Link>
+          </div>
         </div>
       </DashboardLayout>
     )
@@ -66,14 +71,19 @@ export function OrganizerDashboard() {
   const acceptedMatches = matches.filter((m) => m.status === 'accepted')
   return (
     <DashboardLayout userType='organizer'>
-      <div className='mb-6'>
-        <h1 className='text-2xl font-bold text-gray-900'>
-          Organizer Dashboard
-        </h1>
-        <p className='text-gray-600'>
-          Welcome back, {currentUser?.name}. Here's an overview of your
-          sponsorship opportunities.
-        </p>
+      <div className='mb-6 flex justify-between items-start'>
+        <div>
+          <h1 className='text-2xl font-bold text-gray-900'>
+            Organizer Dashboard
+          </h1>
+          <p className='text-gray-600'>
+            Welcome back, {currentUser?.name}. Here's an overview of your
+            sponsorship opportunities.
+          </p>
+        </div>
+        <Link to='/dashboard/edit-profile'>
+          <Button variant='outline'>Edit Profile</Button>
+        </Link>
       </div>
 
       {/* Stats */}
