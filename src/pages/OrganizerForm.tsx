@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Layout } from '../components/layout'
 import {
@@ -29,7 +29,7 @@ import {
 } from 'lucide-react'
 export function OrganizerForm() {
   const navigate = useNavigate()
-  const { register } = useAuth()
+  const { register, currentUser } = useAuth()
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
     organizerName: '',
@@ -67,11 +67,85 @@ export function OrganizerForm() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [toast, setToast] = useState({
     isVisible: false,
     type: 'success' as 'success' | 'error' | 'info' | 'warning',
     message: ''
   })
+
+  // Fetch existing organizer data if user is logged in
+  useEffect(() => {
+    const fetchOrganizerData = async () => {
+      if (!currentUser) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const { data: organizerData, error } = await supabase
+          .from('organizers')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .single()
+
+        if (error) {
+          if (error.code !== 'PGRST116') {
+            // PGRST116 means no rows found, which is fine
+            console.error('Error fetching organizer data:', error)
+          }
+          setIsLoading(false)
+          return
+        }
+
+        if (organizerData) {
+          setFormData({
+            organizerName: organizerData.organizer_name || '',
+            contactName: organizerData.contact_name || '',
+            email: organizerData.email || currentUser.email,
+            password: '',
+            confirmPassword: '',
+            phone: organizerData.phone || '',
+            website: organizerData.website || '',
+            address: organizerData.address || '',
+            postalCode: organizerData.postal_code || '',
+            city: organizerData.city || '',
+            eventName: organizerData.event_name || '',
+            eventType: organizerData.event_type || '',
+            elevatorPitch: organizerData.elevator_pitch || '',
+            eventFrequency: organizerData.event_frequency || '',
+            eventDate: organizerData.event_date || '',
+            location: organizerData.location || '',
+            attendeeCount: organizerData.attendee_count || '',
+            audienceDescription: organizerData.audience_description || '',
+            audienceDemographics: organizerData.audience_demographics || [],
+            sponsorshipNeeds: organizerData.sponsorship_needs || '',
+            seekingFinancialSponsorship:
+              organizerData.seeking_financial_sponsorship || 'no',
+            financialSponsorshipAmount:
+              organizerData.financial_sponsorship_amount || '',
+            financialSponsorshipOffers:
+              organizerData.financial_sponsorship_offers || '',
+            offeringTypes: organizerData.offering_types || [],
+            brandVisibility: organizerData.brand_visibility || '',
+            contentCreation: organizerData.content_creation || '',
+            leadGeneration: organizerData.lead_generation || '',
+            productFeedback: organizerData.product_feedback || '',
+            bonusValue: organizerData.bonus_value || [],
+            bonusValueDetails: organizerData.bonus_value_details || '',
+            additionalInfo: organizerData.additional_info || '',
+            mediaFiles: []
+          })
+        }
+      } catch (error) {
+        console.error('Error loading organizer data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchOrganizerData()
+  }, [currentUser])
   const totalSteps = 4
   const stepLabels = ['Organization', 'Event', 'Audience', 'Offerings']
   const handleInputChange = (
@@ -126,11 +200,15 @@ export function OrganizerForm() {
       if (!formData.email.trim()) newErrors.email = 'Email is required'
       else if (!/\S+@\S+\.\S+/.test(formData.email))
         newErrors.email = 'Email is invalid'
-      if (!formData.password.trim()) newErrors.password = 'Password is required'
-      else if (formData.password.length < 6)
-        newErrors.password = 'Password must be at least 6 characters'
-      if (formData.password !== formData.confirmPassword)
-        newErrors.confirmPassword = 'Passwords do not match'
+      
+      // Only validate password for new registrations (not logged-in users)
+      if (!currentUser) {
+        if (!formData.password.trim()) newErrors.password = 'Password is required'
+        else if (formData.password.length < 6)
+          newErrors.password = 'Password must be at least 6 characters'
+        if (formData.password !== formData.confirmPassword)
+          newErrors.confirmPassword = 'Passwords do not match'
+      }
     } else if (step === 2) {
       if (!formData.eventName.trim())
         newErrors.eventName = 'Event name is required'
@@ -166,22 +244,98 @@ export function OrganizerForm() {
     if (!validateStep(currentStep)) return
     setIsSubmitting(true)
     try {
-      // In a real app, this would be an API call
-      // For now, we'll simulate a delay and save to localStorage
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      // Register the user
-      const user = await register(
-        formData.email,
-        formData.password,
-        'organizer',
-        formData.organizerName
-      )
-      // Insert organizer data into Supabase
-      const { error: organizerError } = await supabase
-        .from('organizers')
-        .insert([
-          {
-            user_id: user.id,
+      let userId: string
+
+      if (currentUser) {
+        // Updating existing organizer profile
+        userId = currentUser.id
+
+        const organizerData = {
+          organizer_name: formData.organizerName,
+          contact_name: formData.contactName,
+          email: formData.email,
+          phone: formData.phone,
+          website: formData.website,
+          address: formData.address,
+          postal_code: formData.postalCode,
+          city: formData.city,
+          event_name: formData.eventName,
+          event_type: formData.eventType,
+          elevator_pitch: formData.elevatorPitch,
+          event_frequency: formData.eventFrequency,
+          event_date: formData.eventDate,
+          location: formData.location,
+          attendee_count: formData.attendeeCount,
+          audience_description: formData.audienceDescription,
+          audience_demographics: formData.audienceDemographics,
+          sponsorship_needs: formData.sponsorshipNeeds,
+          seeking_financial_sponsorship: formData.seekingFinancialSponsorship,
+          financial_sponsorship_amount: formData.financialSponsorshipAmount,
+          financial_sponsorship_offers: formData.financialSponsorshipOffers,
+          offering_types: formData.offeringTypes,
+          brand_visibility: formData.brandVisibility,
+          content_creation: formData.contentCreation,
+          lead_generation: formData.leadGeneration,
+          product_feedback: formData.productFeedback,
+          bonus_value: formData.bonusValue,
+          bonus_value_details: formData.bonusValueDetails,
+          additional_info: formData.additionalInfo,
+          media_files: []
+        }
+
+        // Check if organizer exists
+        const { data: existing } = await supabase
+          .from('organizers')
+          .select('id')
+          .eq('user_id', userId)
+          .single()
+
+        if (existing) {
+          // Update existing organizer
+          const { error: organizerError } = await supabase
+            .from('organizers')
+            .update(organizerData)
+            .eq('user_id', userId)
+
+          if (organizerError) {
+            throw new Error(`Failed to update organizer profile: ${organizerError.message}`)
+          }
+        } else {
+          // Insert new organizer for existing user
+          const { error: organizerError } = await supabase
+            .from('organizers')
+            .insert([{ ...organizerData, user_id: userId }])
+
+          if (organizerError) {
+            throw new Error(`Failed to create organizer profile: ${organizerError.message}`)
+          }
+        }
+
+        setToast({
+          isVisible: true,
+          type: 'success',
+          message: 'Organizer profile updated successfully!'
+        })
+
+        setTimeout(() => {
+          navigate('/dashboard/organizer')
+        }, 1500)
+      } else {
+        // New registration
+        const user = await register(
+          formData.email,
+          formData.password,
+          'organizer',
+          formData.organizerName
+        )
+        userId = user.id
+
+        // Insert organizer data into Supabase
+        const { error: organizerError } = await supabase
+          .from('organizers')
+          .insert([
+            {
+              user_id: userId,
             organizer_name: formData.organizerName,
             contact_name: formData.contactName,
             email: formData.email,
@@ -210,15 +364,26 @@ export function OrganizerForm() {
             product_feedback: formData.productFeedback,
             bonus_value: formData.bonusValue,
             bonus_value_details: formData.bonusValueDetails,
-            additional_info: formData.additionalInfo,
-            media_files: []
-          }
-        ])
+              additional_info: formData.additionalInfo,
+              media_files: []
+            }
+          ])
 
-      if (organizerError) {
-        throw new Error(
-          `Failed to create organizer profile: ${organizerError.message}`
-        )
+        if (organizerError) {
+          throw new Error(
+            `Failed to create organizer profile: ${organizerError.message}`
+          )
+        }
+
+        setToast({
+          isVisible: true,
+          type: 'success',
+          message: 'Registration successful! Redirecting to dashboard...'
+        })
+
+        setTimeout(() => {
+          navigate('/dashboard/organizer')
+        }, 2000)
       }
 
       // Update profile with additional details
@@ -230,21 +395,11 @@ export function OrganizerForm() {
           description: formData.elevatorPitch,
           logo_url: formData.website
         })
-        .eq('id', user.id)
+        .eq('id', userId)
 
       if (profileError) {
         console.warn('Failed to update profile:', profileError)
       }
-
-      setToast({
-        isVisible: true,
-        type: 'success',
-        message: 'Registration successful! Redirecting to dashboard...'
-      })
-      // Redirect after a short delay
-      setTimeout(() => {
-        navigate('/dashboard/organizer')
-      }, 2000)
     } catch (error) {
       setToast({
         isVisible: true,
@@ -430,12 +585,22 @@ export function OrganizerForm() {
         <div className='max-w-3xl mx-auto px-4 py-12'>
           <div className='text-center mb-8'>
             <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-              Organizer Registration
+              {currentUser ? 'Update Organizer Profile' : 'Organizer Registration'}
             </h1>
             <p className='text-gray-600'>
-              Register your event to find the perfect brand sponsors
+              {currentUser
+                ? 'Update your event information and sponsorship offerings'
+                : 'Register your event to find the perfect brand sponsors'}
             </p>
           </div>
+          {isLoading && (
+            <div className='text-center py-12'>
+              <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto'></div>
+              <p className='mt-4 text-gray-600'>Loading your organizer information...</p>
+            </div>
+          )}
+          {!isLoading && (
+          <>
           <div className='mb-8'>
             <StepIndicator
               currentStep={currentStep}
@@ -477,27 +642,30 @@ export function OrganizerForm() {
                     value={formData.email}
                     onChange={handleInputChange}
                     error={errors.email}
+                    disabled={!!currentUser}
                   />
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <FormField
-                      label='Password'
-                      id='password'
-                      type='password'
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      error={errors.password}
-                    />
-                    <FormField
-                      label='Confirm Password'
-                      id='confirmPassword'
-                      type='password'
-                      required
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      error={errors.confirmPassword}
-                    />
-                  </div>
+                  {!currentUser && (
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                      <FormField
+                        label='Password'
+                        id='password'
+                        type='password'
+                        required
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        error={errors.password}
+                      />
+                      <FormField
+                        label='Confirm Password'
+                        id='confirmPassword'
+                        type='password'
+                        required
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        error={errors.confirmPassword}
+                      />
+                    </div>
+                  )}
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                     <FormField
                       label='Phone Number'
@@ -829,12 +997,18 @@ export function OrganizerForm() {
                     className='ml-auto'
                     isLoading={isSubmitting}
                   >
-                    {isSubmitting ? 'Submitting...' : 'Complete Registration'}
+                    {isSubmitting 
+                      ? 'Submitting...' 
+                      : currentUser 
+                      ? 'Update Profile' 
+                      : 'Complete Registration'}
                   </Button>
                 )}
               </div>
             </form>
           </div>
+          </>
+          )}
         </div>
       </div>
       <Toast

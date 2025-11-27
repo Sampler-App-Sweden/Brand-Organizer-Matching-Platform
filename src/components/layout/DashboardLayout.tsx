@@ -11,7 +11,7 @@ import {
   Menu as MenuIcon,
   X as XIcon
 } from 'lucide-react'
-import { TechBackground, TechGrid } from '../effects'
+import { TechBackground } from '../effects'
 interface DashboardLayoutProps {
   children: React.ReactNode
   userType: 'brand' | 'organizer' | 'admin'

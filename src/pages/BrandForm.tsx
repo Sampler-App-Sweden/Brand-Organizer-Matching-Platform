@@ -1,32 +1,34 @@
+import {
+  BadgePercentIcon,
+  BarChart3Icon,
+  BriefcaseIcon,
+  BuildingIcon,
+  CheckCircleIcon,
+  DollarSignIcon,
+  GlobeIcon,
+  PackageIcon,
+  PhoneIcon,
+  TargetIcon,
+  UserIcon,
+  UsersIcon
+} from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { Layout } from '../components/layout'
 import {
-  FormField,
   Button,
+  FormField,
   SelectionCard,
   StepIndicator,
   Toast
 } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
-import {
-  BuildingIcon,
-  UserIcon,
-  PhoneIcon,
-  GlobeIcon,
-  BriefcaseIcon,
-  TargetIcon,
-  DollarSignIcon,
-  CheckCircleIcon,
-  PackageIcon,
-  BadgePercentIcon,
-  UsersIcon,
-  BarChart3Icon
-} from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
+
 export function BrandForm() {
   const navigate = useNavigate()
-  const { register } = useAuth()
+  const { register, currentUser } = useAuth()
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
     companyName: '',
@@ -60,11 +62,81 @@ export function BrandForm() {
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [toast, setToast] = useState({
     isVisible: false,
     type: 'success' as 'success' | 'error' | 'info' | 'warning',
     message: ''
   })
+
+  // Fetch existing brand data if user is logged in
+  useEffect(() => {
+    const fetchBrandData = async () => {
+      if (!currentUser) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const { data: brandData, error } = await supabase
+          .from('brands')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .single()
+
+        if (error) {
+          if (error.code !== 'PGRST116') {
+            // PGRST116 means no rows found, which is fine
+            console.error('Error fetching brand data:', error)
+          }
+          setIsLoading(false)
+          return
+        }
+
+        if (brandData) {
+          setFormData({
+            companyName: brandData.company_name || '',
+            contactName: brandData.contact_name || '',
+            contactTitle: brandData.contact_title || '',
+            email: brandData.email || currentUser.email,
+            password: '',
+            confirmPassword: '',
+            phone: brandData.phone || '',
+            website: brandData.website || '',
+            address: brandData.address || '',
+            postalCode: brandData.postal_code || '',
+            city: brandData.city || '',
+            industry: brandData.industry || '',
+            productName: brandData.product_name || '',
+            productDescription: brandData.product_description || '',
+            productQuantity: brandData.product_quantity || '',
+            targetAudience: brandData.target_audience || '',
+            ageRange: brandData.age_range || '',
+            sponsorshipType: brandData.sponsorship_type || [],
+            marketingGoals: brandData.marketing_goals || '',
+            budget: brandData.budget || '',
+            eventMarketingBudget: brandData.event_marketing_budget || '',
+            interestedInFinancialSponsorship:
+              brandData.interested_in_financial_sponsorship || 'no',
+            financialSponsorshipAmount:
+              brandData.financial_sponsorship_amount || '',
+            successMetrics: brandData.success_metrics || '',
+            interestedInSamplingTools:
+              brandData.interested_in_sampling_tools || 'no',
+            hasTestPanels: brandData.has_test_panels || 'no',
+            testPanelDetails: brandData.test_panel_details || '',
+            additionalInfo: brandData.additional_info || ''
+          })
+        }
+      } catch (error) {
+        console.error('Error loading brand data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchBrandData()
+  }, [currentUser])
   const totalSteps = 4
   const stepLabels = ['Company', 'Product', 'Sponsorship', 'Details']
   const handleInputChange = (
@@ -119,11 +191,16 @@ export function BrandForm() {
       if (!formData.email.trim()) newErrors.email = 'Email is required'
       else if (!/\S+@\S+\.\S+/.test(formData.email))
         newErrors.email = 'Email is invalid'
-      if (!formData.password.trim()) newErrors.password = 'Password is required'
-      else if (formData.password.length < 6)
-        newErrors.password = 'Password must be at least 6 characters'
-      if (formData.password !== formData.confirmPassword)
-        newErrors.confirmPassword = 'Passwords do not match'
+
+      // Only validate password for new registrations (not logged-in users)
+      if (!currentUser) {
+        if (!formData.password.trim())
+          newErrors.password = 'Password is required'
+        else if (formData.password.length < 6)
+          newErrors.password = 'Password must be at least 6 characters'
+        if (formData.password !== formData.confirmPassword)
+          newErrors.confirmPassword = 'Passwords do not match'
+      }
     } else if (step === 2) {
       if (!formData.industry) newErrors.industry = 'Industry is required'
       if (!formData.productName.trim())
@@ -156,21 +233,13 @@ export function BrandForm() {
     if (!validateStep(currentStep)) return
     setIsSubmitting(true)
     try {
-      // In a real app, this would be an API call
-      // For now, we'll simulate a delay and save to localStorage
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      // Register the user
-      const user = await register(
-        formData.email,
-        formData.password,
-        'brand',
-        formData.companyName
-      )
-      // Save brand data
-      // Insert brand data into Supabase
-      const { error: brandError } = await supabase.from('brands').insert([
-        {
-          user_id: user.id,
+      let userId: string
+
+      if (currentUser) {
+        // Updating existing brand profile
+        userId = currentUser.id
+
+        const brandData = {
           company_name: formData.companyName,
           contact_name: formData.contactName,
           contact_title: formData.contactTitle,
@@ -199,10 +268,107 @@ export function BrandForm() {
           test_panel_details: formData.testPanelDetails,
           additional_info: formData.additionalInfo
         }
-      ])
 
-      if (brandError) {
-        throw new Error(`Failed to create brand profile: ${brandError.message}`)
+        // Check if brand exists
+        const { data: existing } = await supabase
+          .from('brands')
+          .select('id')
+          .eq('user_id', userId)
+          .single()
+
+        if (existing) {
+          // Update existing brand
+          const { error: brandError } = await supabase
+            .from('brands')
+            .update(brandData)
+            .eq('user_id', userId)
+
+          if (brandError) {
+            throw new Error(
+              `Failed to update brand profile: ${brandError.message}`
+            )
+          }
+        } else {
+          // Insert new brand for existing user
+          const { error: brandError } = await supabase
+            .from('brands')
+            .insert([{ ...brandData, user_id: userId }])
+
+          if (brandError) {
+            throw new Error(
+              `Failed to create brand profile: ${brandError.message}`
+            )
+          }
+        }
+
+        setToast({
+          isVisible: true,
+          type: 'success',
+          message: 'Brand profile updated successfully!'
+        })
+
+        setTimeout(() => {
+          navigate('/dashboard/brand')
+        }, 1500)
+      } else {
+        // New registration
+        const user = await register(
+          formData.email,
+          formData.password,
+          'brand',
+          formData.companyName
+        )
+        userId = user.id
+
+        // Insert brand data into Supabase
+        const { error: brandError } = await supabase.from('brands').insert([
+          {
+            user_id: userId,
+            company_name: formData.companyName,
+            contact_name: formData.contactName,
+            contact_title: formData.contactTitle,
+            email: formData.email,
+            phone: formData.phone,
+            website: formData.website,
+            address: formData.address,
+            postal_code: formData.postalCode,
+            city: formData.city,
+            industry: formData.industry,
+            product_name: formData.productName,
+            product_description: formData.productDescription,
+            product_quantity: formData.productQuantity,
+            target_audience: formData.targetAudience,
+            age_range: formData.ageRange,
+            sponsorship_type: formData.sponsorshipType,
+            marketing_goals: formData.marketingGoals,
+            budget: formData.budget,
+            event_marketing_budget: formData.eventMarketingBudget,
+            interested_in_financial_sponsorship:
+              formData.interestedInFinancialSponsorship,
+            financial_sponsorship_amount: formData.financialSponsorshipAmount,
+            success_metrics: formData.successMetrics,
+            interested_in_sampling_tools: formData.interestedInSamplingTools,
+            has_test_panels: formData.hasTestPanels,
+            test_panel_details: formData.testPanelDetails,
+            additional_info: formData.additionalInfo
+          }
+        ])
+
+        if (brandError) {
+          throw new Error(
+            `Failed to create brand profile: ${brandError.message}`
+          )
+        }
+
+        setToast({
+          isVisible: true,
+          type: 'success',
+          message: 'Registration successful! Redirecting to dashboard...'
+        })
+
+        setTimeout(() => {
+          navigate('/dashboard/brand')
+        }, 2000)
       }
 
       // Update profile with additional details
@@ -214,20 +380,11 @@ export function BrandForm() {
           description: formData.productDescription,
           logo_url: formData.website
         })
-        .eq('id', user.id)
+        .eq('id', userId)
 
       if (profileError) {
         console.warn('Failed to update profile:', profileError)
       }
-      setToast({
-        isVisible: true,
-        type: 'success',
-        message: 'Registration successful! Redirecting to dashboard...'
-      })
-      // Redirect after a short delay
-      setTimeout(() => {
-        navigate('/dashboard/brand')
-      }, 2000)
     } catch (error) {
       setToast({
         isVisible: true,
@@ -364,391 +521,431 @@ export function BrandForm() {
         <div className='max-w-3xl mx-auto px-4 py-12'>
           <div className='text-center mb-8'>
             <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-              Brand Registration
+              {currentUser ? 'Update Brand Profile' : 'Brand Registration'}
             </h1>
             <p className='text-gray-600'>
-              Register your brand to discover perfect sponsorship opportunities
+              {currentUser
+                ? 'Update your brand information and sponsorship preferences'
+                : 'Register your brand to discover perfect sponsorship opportunities'}
             </p>
           </div>
-          <div className='mb-8'>
-            <StepIndicator
-              currentStep={currentStep}
-              totalSteps={totalSteps}
-              labels={stepLabels}
-            />
-          </div>
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8'>
-            <form onSubmit={handleSubmit}>
-              {currentStep === 1 && (
-                <div className='space-y-6'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-                    <BuildingIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    Company Information
-                  </h2>
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <FormField
-                      label='Company Name'
-                      id='companyName'
-                      required
-                      value={formData.companyName}
-                      onChange={handleInputChange}
-                      error={errors.companyName}
-                    />
-                    <FormField
-                      label='Contact Name'
-                      id='contactName'
-                      required
-                      value={formData.contactName}
-                      onChange={handleInputChange}
-                      error={errors.contactName}
-                    />
-                  </div>
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <FormField
-                      label='Contact Title/Position'
-                      id='contactTitle'
-                      value={formData.contactTitle}
-                      onChange={handleInputChange}
-                    />
-                    <FormField
-                      label='Phone Number'
-                      id='phone'
-                      type='tel'
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <FormField
-                    label='Email Address'
-                    id='email'
-                    type='email'
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    error={errors.email}
-                  />
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <FormField
-                      label='Password'
-                      id='password'
-                      type='password'
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      error={errors.password}
-                    />
-                    <FormField
-                      label='Confirm Password'
-                      id='confirmPassword'
-                      type='password'
-                      required
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      error={errors.confirmPassword}
-                    />
-                  </div>
-                  <FormField
-                    label='Website'
-                    id='website'
-                    type='url'
-                    value={formData.website}
-                    onChange={handleInputChange}
-                  />
-                  <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                    <div className='md:col-span-1'>
-                      <FormField
-                        label='Address'
-                        id='address'
-                        value={formData.address}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <FormField
-                        label='Postal Code'
-                        id='postalCode'
-                        value={formData.postalCode}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <FormField
-                        label='City'
-                        id='city'
-                        value={formData.city}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              {currentStep === 2 && (
-                <div className='space-y-6'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-                    <PackageIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    Product Information
-                  </h2>
-                  <FormField
-                    label='Industry'
-                    id='industry'
-                    type='select'
-                    options={industryOptions}
-                    required
-                    value={formData.industry}
-                    onChange={handleInputChange}
-                    error={errors.industry}
-                  />
-                  <FormField
-                    label='Product Name'
-                    id='productName'
-                    required
-                    value={formData.productName}
-                    onChange={handleInputChange}
-                    error={errors.productName}
-                  />
-                  <FormField
-                    label='Product Description'
-                    id='productDescription'
-                    textarea
-                    required
-                    value={formData.productDescription}
-                    onChange={handleInputChange}
-                    error={errors.productDescription}
-                    helpText='Describe your product, its features, and what makes it unique'
-                  />
-                  <FormField
-                    label='Product Quantity Available for Sampling'
-                    id='productQuantity'
-                    placeholder='e.g., 500 samples, 1000 units, etc.'
-                    value={formData.productQuantity}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              )}
-              {currentStep === 3 && (
-                <div className='space-y-6'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-                    <TargetIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    Sponsorship Details
-                  </h2>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-800 mb-2'>
-                      Sponsorship Type
-                      {errors.sponsorshipType && (
-                        <span className='text-red-500 ml-1 text-xs'>
-                          {errors.sponsorshipType}
-                        </span>
-                      )}
-                    </label>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                      {sponsorshipTypes.map((type) => (
-                        <SelectionCard
-                          key={type.id}
-                          id={type.id}
-                          label={type.label}
-                          description={type.description}
-                          icon={type.icon}
-                          isSelected={formData.sponsorshipType.includes(
-                            type.id
-                          )}
-                          onClick={() =>
-                            handleMultiSelectChange('sponsorshipType', type.id)
-                          }
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <FormField
-                    label='Target Audience'
-                    id='targetAudience'
-                    textarea
-                    required
-                    placeholder='Describe your ideal customer or audience'
-                    value={formData.targetAudience}
-                    onChange={handleInputChange}
-                    error={errors.targetAudience}
-                  />
-                  <FormField
-                    label='Target Age Range'
-                    id='ageRange'
-                    type='select'
-                    options={ageRangeOptions}
-                    required
-                    value={formData.ageRange}
-                    onChange={handleInputChange}
-                    error={errors.ageRange}
-                  />
-                  <FormField
-                    label='Marketing Goals'
-                    id='marketingGoals'
-                    textarea
-                    placeholder='What do you hope to achieve through event sponsorships?'
-                    value={formData.marketingGoals}
-                    onChange={handleInputChange}
-                  />
-                  <FormField
-                    label='Sponsorship Budget Range'
-                    id='budget'
-                    type='select'
-                    options={budgetOptions}
-                    required
-                    value={formData.budget}
-                    onChange={handleInputChange}
-                    error={errors.budget}
-                  />
-                </div>
-              )}
-              {currentStep === 4 && (
-                <div className='space-y-6'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-                    <BarChart3Icon className='h-5 w-5 text-indigo-500 mr-2' />
-                    Additional Details
-                  </h2>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-800 mb-2'>
-                      Are you interested in financial sponsorship opportunities?
-                    </label>
-                    <div className='grid grid-cols-2 gap-4'>
-                      <SelectionCard
-                        id='financial-yes'
-                        label='Yes'
-                        isSelected={
-                          formData.interestedInFinancialSponsorship === 'yes'
-                        }
-                        onClick={() =>
-                          handleRadioChange(
-                            'interestedInFinancialSponsorship',
-                            'yes'
-                          )
-                        }
-                      />
-                      <SelectionCard
-                        id='financial-no'
-                        label='No'
-                        isSelected={
-                          formData.interestedInFinancialSponsorship === 'no'
-                        }
-                        onClick={() =>
-                          handleRadioChange(
-                            'interestedInFinancialSponsorship',
-                            'no'
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                  {formData.interestedInFinancialSponsorship === 'yes' && (
-                    <FormField
-                      label='Financial Sponsorship Amount'
-                      id='financialSponsorshipAmount'
-                      placeholder='e.g., 50,000 SEK'
-                      value={formData.financialSponsorshipAmount}
-                      onChange={handleInputChange}
-                    />
-                  )}
-                  <FormField
-                    label='Success Metrics'
-                    id='successMetrics'
-                    textarea
-                    placeholder='How will you measure the success of your sponsorship?'
-                    value={formData.successMetrics}
-                    onChange={handleInputChange}
-                  />
-                  <div>
-                    <label className='block text-sm font-medium text-gray-800 mb-2'>
-                      Are you interested in product sampling tools?
-                    </label>
-                    <div className='grid grid-cols-2 gap-4'>
-                      <SelectionCard
-                        id='sampling-yes'
-                        label='Yes'
-                        isSelected={
-                          formData.interestedInSamplingTools === 'yes'
-                        }
-                        onClick={() =>
-                          handleRadioChange('interestedInSamplingTools', 'yes')
-                        }
-                      />
-                      <SelectionCard
-                        id='sampling-no'
-                        label='No'
-                        isSelected={formData.interestedInSamplingTools === 'no'}
-                        onClick={() =>
-                          handleRadioChange('interestedInSamplingTools', 'no')
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-800 mb-2'>
-                      Do you have upcoming test panels or sampling
-                      opportunities?
-                    </label>
-                    <div className='grid grid-cols-2 gap-4'>
-                      <SelectionCard
-                        id='testpanel-yes'
-                        label='Yes'
-                        isSelected={formData.hasTestPanels === 'yes'}
-                        onClick={() =>
-                          handleRadioChange('hasTestPanels', 'yes')
-                        }
-                      />
-                      <SelectionCard
-                        id='testpanel-no'
-                        label='No'
-                        isSelected={formData.hasTestPanels === 'no'}
-                        onClick={() => handleRadioChange('hasTestPanels', 'no')}
-                      />
-                    </div>
-                  </div>
-                  {formData.hasTestPanels === 'yes' && (
-                    <FormField
-                      label='Test Panel Details'
-                      id='testPanelDetails'
-                      textarea
-                      placeholder='Describe your upcoming test panels or sampling opportunities'
-                      value={formData.testPanelDetails}
-                      onChange={handleInputChange}
-                    />
-                  )}
-                  <FormField
-                    label='Additional Information'
-                    id='additionalInfo'
-                    textarea
-                    placeholder="Any other details you'd like to share"
-                    value={formData.additionalInfo}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              )}
-              <div className='mt-8 flex justify-between'>
-                {currentStep > 1 && (
-                  <Button type='button' onClick={prevStep} variant='outline'>
-                    Previous
-                  </Button>
-                )}
-                {currentStep < totalSteps ? (
-                  <Button
-                    type='button'
-                    onClick={nextStep}
-                    variant='primary'
-                    className='ml-auto'
-                  >
-                    Next
-                  </Button>
-                ) : (
-                  <Button
-                    type='submit'
-                    variant='primary'
-                    className='ml-auto'
-                    isLoading={isSubmitting}
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Complete Registration'}
-                  </Button>
-                )}
+          {isLoading && (
+            <div className='text-center py-12'>
+              <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto'></div>
+              <p className='mt-4 text-gray-600'>
+                Loading your brand information...
+              </p>
+            </div>
+          )}
+          {!isLoading && (
+            <>
+              <div className='mb-8'>
+                <StepIndicator
+                  currentStep={currentStep}
+                  totalSteps={totalSteps}
+                  labels={stepLabels}
+                />
               </div>
-            </form>
-          </div>
+              <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8'>
+                <form onSubmit={handleSubmit}>
+                  {currentStep === 1 && (
+                    <div className='space-y-6'>
+                      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
+                        <BuildingIcon className='h-5 w-5 text-indigo-500 mr-2' />
+                        Company Information
+                      </h2>
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                        <FormField
+                          label='Company Name'
+                          id='companyName'
+                          required
+                          value={formData.companyName}
+                          onChange={handleInputChange}
+                          error={errors.companyName}
+                        />
+                        <FormField
+                          label='Contact Name'
+                          id='contactName'
+                          required
+                          value={formData.contactName}
+                          onChange={handleInputChange}
+                          error={errors.contactName}
+                        />
+                      </div>
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                        <FormField
+                          label='Contact Title/Position'
+                          id='contactTitle'
+                          value={formData.contactTitle}
+                          onChange={handleInputChange}
+                        />
+                        <FormField
+                          label='Phone Number'
+                          id='phone'
+                          type='tel'
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <FormField
+                        label='Email Address'
+                        id='email'
+                        type='email'
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        error={errors.email}
+                        disabled={!!currentUser}
+                      />
+                      {!currentUser && (
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                          <FormField
+                            label='Password'
+                            id='password'
+                            type='password'
+                            required
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            error={errors.password}
+                          />
+                          <FormField
+                            label='Confirm Password'
+                            id='confirmPassword'
+                            type='password'
+                            required
+                            value={formData.confirmPassword}
+                            onChange={handleInputChange}
+                            error={errors.confirmPassword}
+                          />
+                        </div>
+                      )}
+                      <FormField
+                        label='Website'
+                        id='website'
+                        type='url'
+                        value={formData.website}
+                        onChange={handleInputChange}
+                      />
+                      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                        <div className='md:col-span-1'>
+                          <FormField
+                            label='Address'
+                            id='address'
+                            value={formData.address}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div>
+                          <FormField
+                            label='Postal Code'
+                            id='postalCode'
+                            value={formData.postalCode}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div>
+                          <FormField
+                            label='City'
+                            id='city'
+                            value={formData.city}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {currentStep === 2 && (
+                    <div className='space-y-6'>
+                      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
+                        <PackageIcon className='h-5 w-5 text-indigo-500 mr-2' />
+                        Product Information
+                      </h2>
+                      <FormField
+                        label='Industry'
+                        id='industry'
+                        type='select'
+                        options={industryOptions}
+                        required
+                        value={formData.industry}
+                        onChange={handleInputChange}
+                        error={errors.industry}
+                      />
+                      <FormField
+                        label='Product Name'
+                        id='productName'
+                        required
+                        value={formData.productName}
+                        onChange={handleInputChange}
+                        error={errors.productName}
+                      />
+                      <FormField
+                        label='Product Description'
+                        id='productDescription'
+                        textarea
+                        required
+                        value={formData.productDescription}
+                        onChange={handleInputChange}
+                        error={errors.productDescription}
+                        helpText='Describe your product, its features, and what makes it unique'
+                      />
+                      <FormField
+                        label='Product Quantity Available for Sampling'
+                        id='productQuantity'
+                        placeholder='e.g., 500 samples, 1000 units, etc.'
+                        value={formData.productQuantity}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+                  {currentStep === 3 && (
+                    <div className='space-y-6'>
+                      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
+                        <TargetIcon className='h-5 w-5 text-indigo-500 mr-2' />
+                        Sponsorship Details
+                      </h2>
+                      <div>
+                        <label className='block text-sm font-medium text-gray-800 mb-2'>
+                          Sponsorship Type
+                          {errors.sponsorshipType && (
+                            <span className='text-red-500 ml-1 text-xs'>
+                              {errors.sponsorshipType}
+                            </span>
+                          )}
+                        </label>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                          {sponsorshipTypes.map((type) => (
+                            <SelectionCard
+                              key={type.id}
+                              id={type.id}
+                              label={type.label}
+                              description={type.description}
+                              icon={type.icon}
+                              isSelected={formData.sponsorshipType.includes(
+                                type.id
+                              )}
+                              onClick={() =>
+                                handleMultiSelectChange(
+                                  'sponsorshipType',
+                                  type.id
+                                )
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <FormField
+                        label='Target Audience'
+                        id='targetAudience'
+                        textarea
+                        required
+                        placeholder='Describe your ideal customer or audience'
+                        value={formData.targetAudience}
+                        onChange={handleInputChange}
+                        error={errors.targetAudience}
+                      />
+                      <FormField
+                        label='Target Age Range'
+                        id='ageRange'
+                        type='select'
+                        options={ageRangeOptions}
+                        required
+                        value={formData.ageRange}
+                        onChange={handleInputChange}
+                        error={errors.ageRange}
+                      />
+                      <FormField
+                        label='Marketing Goals'
+                        id='marketingGoals'
+                        textarea
+                        placeholder='What do you hope to achieve through event sponsorships?'
+                        value={formData.marketingGoals}
+                        onChange={handleInputChange}
+                      />
+                      <FormField
+                        label='Sponsorship Budget Range'
+                        id='budget'
+                        type='select'
+                        options={budgetOptions}
+                        required
+                        value={formData.budget}
+                        onChange={handleInputChange}
+                        error={errors.budget}
+                      />
+                    </div>
+                  )}
+                  {currentStep === 4 && (
+                    <div className='space-y-6'>
+                      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
+                        <BarChart3Icon className='h-5 w-5 text-indigo-500 mr-2' />
+                        Additional Details
+                      </h2>
+                      <div>
+                        <label className='block text-sm font-medium text-gray-800 mb-2'>
+                          Are you interested in financial sponsorship
+                          opportunities?
+                        </label>
+                        <div className='grid grid-cols-2 gap-4'>
+                          <SelectionCard
+                            id='financial-yes'
+                            label='Yes'
+                            isSelected={
+                              formData.interestedInFinancialSponsorship ===
+                              'yes'
+                            }
+                            onClick={() =>
+                              handleRadioChange(
+                                'interestedInFinancialSponsorship',
+                                'yes'
+                              )
+                            }
+                          />
+                          <SelectionCard
+                            id='financial-no'
+                            label='No'
+                            isSelected={
+                              formData.interestedInFinancialSponsorship === 'no'
+                            }
+                            onClick={() =>
+                              handleRadioChange(
+                                'interestedInFinancialSponsorship',
+                                'no'
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                      {formData.interestedInFinancialSponsorship === 'yes' && (
+                        <FormField
+                          label='Financial Sponsorship Amount'
+                          id='financialSponsorshipAmount'
+                          placeholder='e.g., 50,000 SEK'
+                          value={formData.financialSponsorshipAmount}
+                          onChange={handleInputChange}
+                        />
+                      )}
+                      <FormField
+                        label='Success Metrics'
+                        id='successMetrics'
+                        textarea
+                        placeholder='How will you measure the success of your sponsorship?'
+                        value={formData.successMetrics}
+                        onChange={handleInputChange}
+                      />
+                      <div>
+                        <label className='block text-sm font-medium text-gray-800 mb-2'>
+                          Are you interested in product sampling tools?
+                        </label>
+                        <div className='grid grid-cols-2 gap-4'>
+                          <SelectionCard
+                            id='sampling-yes'
+                            label='Yes'
+                            isSelected={
+                              formData.interestedInSamplingTools === 'yes'
+                            }
+                            onClick={() =>
+                              handleRadioChange(
+                                'interestedInSamplingTools',
+                                'yes'
+                              )
+                            }
+                          />
+                          <SelectionCard
+                            id='sampling-no'
+                            label='No'
+                            isSelected={
+                              formData.interestedInSamplingTools === 'no'
+                            }
+                            onClick={() =>
+                              handleRadioChange(
+                                'interestedInSamplingTools',
+                                'no'
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className='block text-sm font-medium text-gray-800 mb-2'>
+                          Do you have upcoming test panels or sampling
+                          opportunities?
+                        </label>
+                        <div className='grid grid-cols-2 gap-4'>
+                          <SelectionCard
+                            id='testpanel-yes'
+                            label='Yes'
+                            isSelected={formData.hasTestPanels === 'yes'}
+                            onClick={() =>
+                              handleRadioChange('hasTestPanels', 'yes')
+                            }
+                          />
+                          <SelectionCard
+                            id='testpanel-no'
+                            label='No'
+                            isSelected={formData.hasTestPanels === 'no'}
+                            onClick={() =>
+                              handleRadioChange('hasTestPanels', 'no')
+                            }
+                          />
+                        </div>
+                      </div>
+                      {formData.hasTestPanels === 'yes' && (
+                        <FormField
+                          label='Test Panel Details'
+                          id='testPanelDetails'
+                          textarea
+                          placeholder='Describe your upcoming test panels or sampling opportunities'
+                          value={formData.testPanelDetails}
+                          onChange={handleInputChange}
+                        />
+                      )}
+                      <FormField
+                        label='Additional Information'
+                        id='additionalInfo'
+                        textarea
+                        placeholder="Any other details you'd like to share"
+                        value={formData.additionalInfo}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+                  <div className='mt-8 flex justify-between'>
+                    {currentStep > 1 && (
+                      <Button
+                        type='button'
+                        onClick={prevStep}
+                        variant='outline'
+                      >
+                        Previous
+                      </Button>
+                    )}
+                    {currentStep < totalSteps ? (
+                      <Button
+                        type='button'
+                        onClick={nextStep}
+                        variant='primary'
+                        className='ml-auto'
+                      >
+                        Next
+                      </Button>
+                    ) : (
+                      <Button
+                        type='submit'
+                        variant='primary'
+                        className='ml-auto'
+                        isLoading={isSubmitting}
+                      >
+                        {isSubmitting
+                          ? 'Submitting...'
+                          : currentUser
+                          ? 'Update Profile'
+                          : 'Complete Registration'}
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
         </div>
       </div>
       <Toast

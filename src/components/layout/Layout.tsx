@@ -1,9 +1,11 @@
-import React from 'react'
-import { Navbar } from './Navbar'
-import { useLocation } from 'react-router-dom'
 import { HandshakeIcon } from 'lucide-react'
+import React from 'react'
+import { useLocation } from 'react-router-dom'
+
+import { TechBackground, TechGrid } from '../effects'
 import { DashboardListingsBar } from './DashboardListingsBar'
-import { TechBackground, TechGrid, TechParticles, TechGlow } from '../effects'
+import { Navbar } from './Navbar'
+
 interface LayoutProps {
   children: React.ReactNode
 }

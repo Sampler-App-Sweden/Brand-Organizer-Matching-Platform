@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
 import {
-  Menu,
-  X,
+  CalendarIcon,
   HandshakeIcon,
   LogInIcon,
+  Menu,
+  PackageIcon,
+  SparklesIcon,
+  StarIcon,
   UserIcon,
   UsersIcon,
-  StarIcon,
-  PackageIcon,
-  CalendarIcon,
-  SparklesIcon
+  X
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+
 import { useAuth } from '../../context/AuthContext'
 import { CommunityDropdown } from '../community/CommunityDropdown'
+
 interface NavbarProps {
   transparent?: boolean
 }
@@ -22,6 +24,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
   const [isCommunityOpen, setIsCommunityOpen] = useState(false)
   const { currentUser } = useAuth()
   const navigate = useNavigate()
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,7 +47,8 @@ export function Navbar({ transparent = false }: NavbarProps) {
   // Determine dashboard link based on user type
   const getDashboardLink = () => {
     if (!currentUser) return '/login'
-    switch (currentUser.type) {
+    const userType = currentUser.type?.toLowerCase()
+    switch (userType) {
       case 'brand':
         return '/dashboard/brand'
       case 'organizer':
@@ -52,7 +56,8 @@ export function Navbar({ transparent = false }: NavbarProps) {
       case 'admin':
         return '/admin'
       default:
-        return '/login'
+        // Fallback to brand dashboard if type is unclear
+        return '/dashboard/brand'
     }
   }
   return (

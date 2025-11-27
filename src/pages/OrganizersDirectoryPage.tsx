@@ -1,12 +1,14 @@
+import { ArrowRightIcon, SparklesIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Layout } from '../components/layout'
+import { Link } from 'react-router-dom'
+
 import { DirectoryFilters } from '../components/directory/DirectoryFilters'
 import { DirectoryGrid } from '../components/directory/DirectoryGrid'
 import { Pagination } from '../components/directory/Pagination'
+import { Layout } from '../components/layout'
 import { getAllCommunityMembers } from '../services/communityService'
 import { CommunityMember, CommunityQueryParams } from '../types/community'
-import { SparklesIcon, ArrowRightIcon } from 'lucide-react'
-import { Link } from 'react-router-dom'
+
 export function OrganizersDirectoryPage() {
   const [members, setMembers] = useState<CommunityMember[]>([])
   const [loading, setLoading] = useState(true)

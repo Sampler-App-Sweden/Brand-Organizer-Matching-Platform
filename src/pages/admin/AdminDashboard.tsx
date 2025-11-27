@@ -1,21 +1,23 @@
-import React, { useEffect, useState, createElement } from 'react'
-import { Link } from 'react-router-dom'
-import { DashboardLayout } from '../../components/layout'
-import { User } from '../../services/authService'
-import { Match } from '../../services/matchingService'
-import { sendDataByEmail } from '../../services/emailService'
 import {
-  UsersIcon,
-  PackageIcon,
-  CalendarIcon,
-  HandshakeIcon,
   ArrowDownIcon,
   ArrowUpIcon,
-  SearchIcon,
+  CalendarIcon,
   DownloadIcon,
-  MailIcon
+  HandshakeIcon,
+  MailIcon,
+  PackageIcon,
+  SearchIcon,
+  UsersIcon
 } from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import { DashboardLayout } from '../../components/layout'
 import { Button } from '../../components/ui'
+import { User } from '../../services/authService'
+import { sendDataByEmail } from '../../services/emailService'
+import { Match } from '../../services/matchingService'
+
 export function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])
   const [brands, setBrands] = useState<any[]>([])

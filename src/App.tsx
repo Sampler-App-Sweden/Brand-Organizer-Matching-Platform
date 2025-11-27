@@ -29,7 +29,6 @@ import { RegistrationDebugHelper } from './components/RegistrationDebugHelper'
 import { initializeCommunityMembers } from './services/communityService'
 import { initializeCollaborations } from './services/collaborationService'
 import { initEmailJS } from './services/emailService'
-import { TechCursor } from './components/effects'
 import './styles/tech-effects.css'
 // Protected route component
 const ProtectedRoute = ({
@@ -181,7 +180,6 @@ export function App() {
         <DraftProfileProvider>
           <AppRoutes />
           <HelpChat />
-          <TechCursor />
           {typeof process !== 'undefined' &&
             process.env?.NODE_ENV === 'development' && (
               <RegistrationDebugHelper />

@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import {
-  StarIcon,
-  HeartIcon,
+  ChevronLeftIcon,
   ChevronRightIcon,
-  ChevronLeftIcon
+  HeartIcon,
+  StarIcon
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+
 import { useAuth } from '../../context/AuthContext'
+
 // This component displays relevant listings in the dashboard header
 // Brands will see organizers, and organizers will see brands
 export function DashboardListingsBar() {

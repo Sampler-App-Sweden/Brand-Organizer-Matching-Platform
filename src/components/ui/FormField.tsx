@@ -66,11 +66,11 @@ export function FormField({
           id={id}
           name={id}
           rows={4}
-          className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+          className={`block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors ${
             error
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
               : ''
-          }`}
+          } ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
           placeholder={placeholder}
           value={value as string}
           onChange={onChange}
@@ -81,11 +81,11 @@ export function FormField({
         <select
           id={id}
           name={id}
-          className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+          className={`block w-full h-10 px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors ${
             error
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
               : ''
-          }`}
+          } ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
           value={value as string}
           onChange={onChange}
           required={required}
@@ -103,11 +103,11 @@ export function FormField({
           id={id}
           name={id}
           type={type}
-          className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+          className={`block w-full h-10 px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors ${
             error
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+              ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
               : ''
-          }`}
+          } ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
           placeholder={placeholder}
           value={value as string}
           onChange={onChange}
