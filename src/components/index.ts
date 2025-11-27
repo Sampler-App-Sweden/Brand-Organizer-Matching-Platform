@@ -16,6 +16,10 @@ export * from './community'
 export * from './directory'
 export * from './sponsorship'
 
+// Form Components
+export * from './forms/brand'
+export * from './forms/organizer'
+
 // Standalone Components
 export { ErrorBoundary } from './ErrorBoundary'
 export { HelpChat } from './HelpChat'

@@ -310,15 +310,15 @@ export function Login() {
                 <div className='space-y-1'>
                   <label
                     htmlFor='password'
-                    className='block text-sm font-medium text-gray-800'
+                    className='block text-sm font-medium text-gray-800 mb-1'
                   >
-                    Password <span className='text-red-500'>*</span>
+                    Password <span className='text-red-500 ml-1'>*</span>
                   </label>
                   <div className='relative'>
                     <input
                       id='password'
                       type={showPassword ? 'text' : 'password'}
-                      className='block w-full rounded-md shadow-sm border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50'
+                      className='block w-full h-10 px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors'
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
