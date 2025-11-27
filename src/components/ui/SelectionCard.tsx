@@ -1,6 +1,5 @@
 import React from 'react'
 interface SelectionCardProps {
-  id: string
   label: string
   description?: string
   icon?: React.ReactNode
@@ -9,7 +8,6 @@ interface SelectionCardProps {
   className?: string
 }
 export function SelectionCard({
-  id,
   label,
   description,
   icon,
