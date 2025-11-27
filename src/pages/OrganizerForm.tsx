@@ -85,26 +85,30 @@ export function OrganizerForm() {
       }
 
       try {
-        const { data: organizerData, error } = await supabase
+        // Fetch existing organizer data
+        const { data: organizerData, error: organizerError } = await supabase
           .from('organizers')
           .select('*')
           .eq('user_id', currentUser.id)
           .single()
 
-        if (error) {
-          if (error.code !== 'PGRST116') {
-            // PGRST116 means no rows found, which is fine
-            console.error('Error fetching organizer data:', error)
+        if (organizerError) {
+          // If error is "not found", that's okay - user hasn't filled form yet
+          if (organizerError.code === 'PGRST116') {
+            console.log('No existing organizer profile found')
+          } else {
+            console.error('Error fetching organizer data:', organizerError)
           }
           setIsLoading(false)
           return
         }
 
         if (organizerData) {
+          // Populate form with existing data
           setFormData({
             organizerName: organizerData.organizer_name || '',
             contactName: organizerData.contact_name || '',
-            email: organizerData.email || currentUser.email,
+            email: currentUser.email || '',
             password: '',
             confirmPassword: '',
             phone: organizerData.phone || '',
@@ -140,7 +144,7 @@ export function OrganizerForm() {
           })
         }
       } catch (error) {
-        console.error('Error loading organizer data:', error)
+        console.error('Unexpected error:', error)
       } finally {
         setIsLoading(false)
       }
