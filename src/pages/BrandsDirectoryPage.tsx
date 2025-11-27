@@ -24,40 +24,49 @@ export function BrandsDirectoryPage() {
         // Fetch brands from Supabase
         const page = queryParams.page || 1
         const limit = queryParams.limit || 12
-        
-        const { data: brands, error, count } = await supabase
+
+        const {
+          data: brands,
+          error,
+          count
+        } = await supabase
           .from('brands')
           .select('*', { count: 'exact' })
           .range((page - 1) * limit, page * limit - 1)
 
         if (error) throw error
 
+        console.log('Fetched brands from Supabase:', brands)
+        console.log('Total count:', count)
+
         // Transform brands data to CommunityMember format
-        const transformedData: CommunityMember[] = (brands || []).map((brand) => ({
-          id: brand.id,
-          userId: brand.user_id || '',
-          name: brand.company_name,
-          type: 'brand' as const,
-          shortDescription: brand.product_name || '',
-          description: brand.product_description || '',
-          industry: brand.industry || '',
-          location: brand.city || '',
-          website: brand.website || '',
-          logoUrl: '',
-          memberCount: 0,
-          projectsCompleted: 0,
-          imageUrl: '',
-          rating: 0,
-          tags: brand.sponsorship_type || [],
-          interests: [brand.industry].filter(Boolean) as string[],
-          lookingFor: brand.target_audience || '',
-          achievements: [],
-          email: brand.email || '',
-          phone: brand.phone || '',
-          socialLinks: '',
-          featured: false,
-          dateRegistered: brand.created_at || new Date().toISOString()
-        }))
+        const transformedData: CommunityMember[] = (brands || []).map(
+          (brand) => ({
+            id: brand.id,
+            userId: brand.user_id || '',
+            name: brand.company_name,
+            type: 'brand' as const,
+            shortDescription: brand.product_name || '',
+            description: brand.product_description || '',
+            industry: brand.industry || '',
+            location: brand.city || '',
+            website: brand.website || '',
+            logoUrl: '',
+            memberCount: 0,
+            projectsCompleted: 0,
+            imageUrl: '',
+            rating: 0,
+            tags: brand.sponsorship_type || [],
+            interests: [brand.industry].filter(Boolean) as string[],
+            lookingFor: brand.target_audience || '',
+            achievements: [],
+            email: brand.email || '',
+            phone: brand.phone || '',
+            socialLinks: '',
+            featured: false,
+            dateRegistered: brand.created_at || new Date().toISOString()
+          })
+        )
 
         setMembers(transformedData)
         setTotalPages(Math.ceil((count || 0) / limit))
