@@ -184,21 +184,24 @@ Brand-Organizer-Matching-Platform/
 ## 🎯 Key Organizational Principles
 
 ### 1. Barrel Exports (index.ts)
+
 All major folders include `index.ts` files for clean imports:
 
 ```typescript
 // ❌ Before
-import { Button } from '../../../components/Button';
-import { FormField } from '../../../components/FormField';
+import { Button } from '../../../components/Button'
+import { FormField } from '../../../components/FormField'
 
 // ✅ After
-import { Button, FormField } from '../../components/ui';
+import { Button, FormField } from '../../components/ui'
 ```
 
 ### 2. Component Categorization
 
 #### **UI Components** (`components/ui/`)
+
 Basic, reusable UI elements:
+
 - Buttons
 - Form fields
 - Toasts
@@ -206,7 +209,9 @@ Basic, reusable UI elements:
 - Selection cards
 
 #### **Layout Components** (`components/layout/`)
+
 Structural components for page layout:
+
 - Main layout wrapper
 - Navigation bar
 - Dashboard layout
@@ -214,18 +219,23 @@ Structural components for page layout:
 - Dashboard listings bar
 
 #### **Landing Components** (`components/landing/`)
+
 Specific to the landing/marketing pages:
+
 - Hero sections
 - Feature cards
 - Feature sections
 
 #### **Effects Components** (`components/effects/`)
+
 Visual effects and animations:
+
 - Technical effects
 - Background animations
 - Circuit lines
 
 #### **Feature-Specific Components**
+
 - `ai-assistant/` - AI onboarding flow
 - `community/` - Community features
 - `directory/` - Brand/organizer listings
@@ -234,6 +244,7 @@ Visual effects and animations:
 ### 3. Page Organization
 
 Pages are organized by access level:
+
 - **Public pages** - Root level (`/pages`)
 - **Dashboard pages** - User-specific (`/pages/dashboard`)
 - **Admin pages** - Admin only (`/pages/admin`)
@@ -241,6 +252,7 @@ Pages are organized by access level:
 ### 4. Services Layer
 
 All business logic and API calls are in the `services/` folder:
+
 - Each service handles a specific domain
 - Services are stateless
 - Import via barrel exports
@@ -248,6 +260,7 @@ All business logic and API calls are in the `services/` folder:
 ### 5. Utilities
 
 Common helper functions organized by purpose:
+
 - **constants.ts** - App-wide constants, config values
 - **formatting.ts** - Date, currency, text formatting
 - **validation.ts** - Input validation, sanitization
@@ -258,19 +271,19 @@ Common helper functions organized by purpose:
 
 ```typescript
 // Components
-import { Button, FormField, Toast } from '@/components/ui';
-import { Layout, Navbar } from '@/components/layout';
-import { CommunityCard } from '@/components/community';
+import { Button, FormField, Toast } from '@/components/ui'
+import { Layout, Navbar } from '@/components/layout'
+import { CommunityCard } from '@/components/community'
 
 // Services
-import { trackEvent, EVENTS } from '@/services';
-import { getCommunityMembers } from '@/services/communityService';
+import { trackEvent, EVENTS } from '@/services'
+import { getCommunityMembers } from '@/services/communityService'
 
 // Types
-import { BrandProfile, OrganizerProfile } from '@/types';
+import { BrandProfile, OrganizerProfile } from '@/types'
 
 // Utils
-import { formatDate, formatCurrency } from '@/utils';
+import { formatDate, formatCurrency } from '@/utils'
 ```
 
 ## 🔧 Configuration Files
@@ -283,6 +296,7 @@ import { formatDate, formatCurrency } from '@/utils';
 ## 📚 Documentation
 
 All documentation is centralized in the `docs/` folder:
+
 - User guides
 - Deployment instructions
 - Security guidelines
@@ -300,39 +314,42 @@ All documentation is centralized in the `docs/` folder:
 ## 🔄 Adding New Code
 
 ### New Component
+
 ```typescript
 // 1. Create component in appropriate folder
-src/components/ui/NewButton.tsx
+src / components / ui / NewButton.tsx
 
 // 2. Export from folder's index.ts
-export { NewButton } from './NewButton';
+export { NewButton } from './NewButton'
 
 // 3. Use anywhere with clean import
-import { NewButton } from '@/components/ui';
+import { NewButton } from '@/components/ui'
 ```
 
 ### New Service
+
 ```typescript
 // 1. Create service file
-src/services/notificationService.ts
+src / services / notificationService.ts
 
 // 2. Export from services/index.ts
-export * from './notificationService';
+export * from './notificationService'
 
 // 3. Import and use
-import { sendNotification } from '@/services';
+import { sendNotification } from '@/services'
 ```
 
 ### New Utility
+
 ```typescript
 // 1. Add to existing utility file or create new one
-src/utils/arrayHelpers.ts
+src / utils / arrayHelpers.ts
 
 // 2. Export from utils/index.ts
-export * from './arrayHelpers';
+export * from './arrayHelpers'
 
 // 3. Import and use
-import { unique, sortBy } from '@/utils';
+import { unique, sortBy } from '@/utils'
 ```
 
 ## 📊 Project Statistics
