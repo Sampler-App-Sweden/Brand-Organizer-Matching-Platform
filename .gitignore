@@ -26,6 +26,12 @@ dist-ssr
 # environment files
 .env
 .env.test
-.env.production
 .env.local
 .env.*.local
+
+# Keep .env.production.example but ignore actual production env
+.env.production
+!.env.production.example
+
+# Sensitive credentials
+docs/LOGIN_CREDENTIALS.txt
