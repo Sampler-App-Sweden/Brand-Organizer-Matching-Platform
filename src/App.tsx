@@ -1,58 +1,39 @@
-import React, { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+
+import { HelpChat } from './components/HelpChat'
 import { Layout } from './components/layout'
-import { Home } from './pages/Home'
-import { BrandForm } from './pages/BrandForm'
-import { OrganizerForm } from './pages/OrganizerForm'
-import { Login } from './pages/Login'
-import { Register } from './pages/Register'
-import { AiOnboarding } from './pages/AiOnboarding'
-import { BrandDashboard } from './pages/dashboard/BrandDashboard'
-import { OrganizerDashboard } from './pages/dashboard/OrganizerDashboard'
-import { MatchDetails } from './pages/dashboard/MatchDetails'
-import { EditProfilePage } from './pages/dashboard/EditProfilePage'
-import { AdminDashboard } from './pages/admin/AdminDashboard'
-import { CommunityPage } from './pages/CommunityPage'
-import { CommunityRegistration } from './pages/CommunityRegistration'
-import { CommunityMemberDetail } from './pages/CommunityMemberDetail'
-import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
-import { OrganizersDirectoryPage } from './pages/OrganizersDirectoryPage'
-import { SavedItemsPage } from './pages/dashboard/SavedItemsPage'
-import { InspirationBoardPage } from './pages/dashboard/InspirationBoardPage'
-import { LoginTroubleshooting } from './pages/LoginTroubleshooting'
-import { MessagesPage } from './pages/dashboard/MessagesPage'
-import { MatchesPage } from './pages/dashboard/MatchesPage'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { RegistrationDebugHelper } from './components/RegistrationDebugHelper'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DraftProfileProvider } from './context/DraftProfileContext'
-import { HelpChat } from './components/HelpChat'
-import { RegistrationDebugHelper } from './components/RegistrationDebugHelper'
-import { initializeCommunityMembers } from './services/communityService'
+import { AdminDashboard } from './pages/admin/AdminDashboard'
+import { AiOnboarding } from './pages/AiOnboarding'
+import { BrandForm } from './pages/BrandForm'
+import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
+import { CommunityMemberDetail } from './pages/CommunityMemberDetail'
+import { CommunityPage } from './pages/CommunityPage'
+import { CommunityRegistration } from './pages/CommunityRegistration'
+import { BrandDashboard } from './pages/dashboard/BrandDashboard'
+import { EditProfilePage } from './pages/dashboard/EditProfilePage'
+import { InspirationBoardPage } from './pages/dashboard/InspirationBoardPage'
+import { MatchDetails } from './pages/dashboard/MatchDetails'
+import { MatchesPage } from './pages/dashboard/MatchesPage'
+import { MessagesPage } from './pages/dashboard/MessagesPage'
+import { OrganizerDashboard } from './pages/dashboard/OrganizerDashboard'
+import { SavedItemsPage } from './pages/dashboard/SavedItemsPage'
+import { Home } from './pages/Home'
+import { Login } from './pages/Login'
+import { LoginTroubleshooting } from './pages/LoginTroubleshooting'
+import { OrganizerForm } from './pages/OrganizerForm'
+import { OrganizersDirectoryPage } from './pages/OrganizersDirectoryPage'
+import { Register } from './pages/Register'
 import { initializeCollaborations } from './services/collaborationService'
+import { initializeCommunityMembers } from './services/communityService'
 import { initEmailJS } from './services/emailService'
+
 import './styles/tech-effects.css'
-// Protected route component
-const ProtectedRoute = ({
-  children,
-  requiredType
-}: {
-  children: React.ReactNode
-  requiredType?: 'brand' | 'organizer' | 'admin'
-}) => {
-  const { currentUser } = useAuth()
-  if (!currentUser) {
-    return <Navigate to='/login' replace />
-  }
-  if (requiredType && currentUser.type !== requiredType) {
-    if (currentUser.type === 'brand') {
-      return <Navigate to='/dashboard/brand' replace />
-    } else if (currentUser.type === 'organizer') {
-      return <Navigate to='/dashboard/organizer' replace />
-    } else {
-      return <Navigate to='/admin' replace />
-    }
-  }
-  return <>{children}</>
-}
+
 const AppRoutes = () => {
   useEffect(() => {
     // Initialize sample community members

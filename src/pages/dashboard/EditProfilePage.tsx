@@ -63,6 +63,8 @@ export function EditProfilePage() {
     setSaving(true)
 
     try {
+      console.log('Updating profile with name:', profile.name)
+
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -76,8 +78,12 @@ export function EditProfilePage() {
 
       if (error) throw error
 
+      console.log('Profile updated successfully, refreshing user...')
+
       // Refresh user data in AuthContext
       await refreshUser()
+
+      console.log('User refreshed')
 
       showToast('Profile updated successfully!', 'success')
     } catch (error) {

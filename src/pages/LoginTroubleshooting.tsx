@@ -1,22 +1,24 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Layout } from '../components/layout'
-import { Button } from '../components/ui'
 import {
   AlertCircleIcon,
   CheckCircleIcon,
+  CookieIcon,
+  DatabaseIcon,
   KeyIcon,
+  LockIcon,
   MailIcon,
   RefreshCwIcon,
-  ShieldIcon,
-  WifiOffIcon,
-  DatabaseIcon,
-  LockIcon,
-  UserIcon,
-  CookieIcon,
   ServerIcon,
-  SparklesIcon
+  ShieldIcon,
+  SparklesIcon,
+  UserIcon,
+  WifiOffIcon
 } from 'lucide-react'
+import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import { Layout } from '../components/layout'
+import { Button } from '../components/ui'
+
 type TroubleshootingStep =
   | 'initial'
   | 'account-check'

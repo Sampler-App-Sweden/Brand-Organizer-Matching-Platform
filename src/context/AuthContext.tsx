@@ -35,19 +35,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const user = await getCurrentUser()
       if (user) {
         // Fetch updated profile data from Supabase
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('name, role')
           .eq('id', user.id)
           .single()
 
-        setCurrentUser({
+        if (error) {
+          console.error('Error fetching profile in refreshUser:', error)
+          return
+        }
+
+        const updatedUser = {
           id: user.id,
           email: user.email || '',
           type:
             profile?.role?.toLowerCase() || user.user_metadata?.type || 'brand',
           name: profile?.name || user.user_metadata?.name || ''
-        })
+        }
+
+        console.log('Refreshing user with updated name:', updatedUser.name)
+        setCurrentUser(updatedUser)
       }
     } catch (error) {
       console.error('Error refreshing user:', error)

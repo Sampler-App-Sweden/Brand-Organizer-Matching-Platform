@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 
+// TechParticles component
 export function TechParticles({ className = '' }: { className?: string }) {
   return (
     <div className={`tech-particles-container ${className}`}>
@@ -20,9 +21,13 @@ export function TechParticles({ className = '' }: { className?: string }) {
     </div>
   )
 }
+
+// TechGrid component
 export function TechGrid({ className = '' }: { className?: string }) {
   return <div className={`tech-grid ${className}`} />
 }
+
+// TechGlow component
 export function TechGlow({ className = '' }: { className?: string }) {
   return (
     <div className={`tech-glow ${className}`}>
@@ -32,6 +37,8 @@ export function TechGlow({ className = '' }: { className?: string }) {
     </div>
   )
 }
+
+// TechCircuitLines component
 export function TechCircuitLines({ className = '' }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
@@ -97,6 +104,8 @@ export function TechCircuitLines({ className = '' }: { className?: string }) {
     <canvas ref={canvasRef} className={`tech-circuit-lines ${className}`} />
   )
 }
+
+// TechDataStream component
 export function TechDataStream({ className = '' }: { className?: string }) {
   return (
     <div className={`tech-data-stream ${className}`}>
@@ -115,6 +124,8 @@ export function TechDataStream({ className = '' }: { className?: string }) {
     </div>
   )
 }
+
+// TechCursor component
 export function TechCursor({ className = '' }: { className?: string }) {
   const cursorRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -135,6 +146,8 @@ export function TechCursor({ className = '' }: { className?: string }) {
   }, [])
   return <div ref={cursorRef} className={`tech-cursor ${className}`} />
 }
+
+// TechBackground component
 export function TechBackground() {
   return (
     <div className='tech-background'>
