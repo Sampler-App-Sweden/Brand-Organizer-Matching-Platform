@@ -25,7 +25,7 @@ export function Register() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [userType, setUserType] = useState<
-    'brand' | 'organizer' | 'community' | 'admin'
+    'brand' | 'organizer' | 'community'
   >('brand')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -580,16 +580,12 @@ export function Register() {
               {
                 value: 'community',
                 label: 'Community Member'
-              },
-              {
-                value: 'admin',
-                label: 'Admin / Staff'
               }
             ]}
             value={userType}
             onChange={(e) =>
               setUserType(
-                e.target.value as 'brand' | 'organizer' | 'community' | 'admin'
+                e.target.value as 'brand' | 'organizer' | 'community'
               )
             }
           />
@@ -799,16 +795,12 @@ export function Register() {
               {
                 value: 'community',
                 label: 'Community Member'
-              },
-              {
-                value: 'admin',
-                label: 'Admin / Staff'
               }
             ]}
             value={userType}
             onChange={(e) => {
               setUserType(
-                e.target.value as 'brand' | 'organizer' | 'community' | 'admin'
+                e.target.value as 'brand' | 'organizer' | 'community'
               )
               trackEvent(
                 EVENTS.FORM_SUBMITTED,
@@ -829,8 +821,6 @@ export function Register() {
                   ? 'Brand / Sponsor'
                   : userType === 'organizer'
                   ? 'Event Organizer'
-                  : userType === 'admin'
-                  ? 'Admin / Staff'
                   : 'Community Member'}
               </strong>
               :
@@ -838,8 +828,6 @@ export function Register() {
                 ? ' Perfect for companies looking to promote products or services through events.'
                 : userType === 'organizer'
                 ? ' Ideal for those organizing events and seeking brand partnerships.'
-                : userType === 'admin'
-                ? ' Full access to manage the platform and support users.'
                 : ' Join our community to participate in events and test panels.'}
             </p>
           </div>
