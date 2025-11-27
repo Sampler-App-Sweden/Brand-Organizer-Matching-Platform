@@ -1,0 +1,8 @@
+
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /admin
+Disallow: /dashboard
+Allow: /
+
+Sitemap: https://www.sponsrai.se/sitemap.xml

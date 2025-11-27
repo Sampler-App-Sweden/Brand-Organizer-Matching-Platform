@@ -1,0 +1,149 @@
+import { supabase } from './supabaseClient';
+export interface ProfileData {
+  role: 'Brand' | 'Organizer';
+  name: string;
+  logoURL?: string;
+  description: string;
+  whatTheySeek: {
+    sponsorshipTypes: string[];
+    budgetRange: string;
+    quantity?: number;
+    eventTypes?: string[];
+    audienceTags?: string[];
+    notes?: string;
+  };
+}
+// Create a new profile
+export async function createProfile(profileData: ProfileData) {
+  // First, get the current user
+  const {
+    data: {
+      user
+    }
+  } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  // Insert into profiles table
+  const {
+    data,
+    error
+  } = await supabase.from('profiles').insert([{
+    id: user.id,
+    role: profileData.role,
+    name: profileData.name,
+    email: user.email,
+    logo_url: profileData.logoURL,
+    description: profileData.description
+  }]).select();
+  if (error) {
+    console.error('Error creating profile:', error);
+    throw new Error(`Error creating profile: ${error.message}`);
+  }
+  // If it's a brand, insert into brands table
+  if (profileData.role === 'Brand') {
+    const brandData = {
+      user_id: user.id,
+      company_name: profileData.name,
+      contact_name: profileData.name,
+      // Default to profile name
+      email: user.email,
+      product_name: 'Default Product',
+      // These would be updated later
+      product_description: profileData.description,
+      target_audience: profileData.whatTheySeek.audienceTags?.join(', ') || '',
+      age_range: 'all',
+      sponsorship_type: profileData.whatTheySeek.sponsorshipTypes,
+      budget: profileData.whatTheySeek.budgetRange,
+      marketing_goals: profileData.whatTheySeek.notes || ''
+    };
+    const {
+      error: brandError
+    } = await supabase.from('brands').insert([brandData]);
+    if (brandError) {
+      console.error('Error creating brand:', brandError);
+      throw new Error(`Error creating brand: ${brandError.message}`);
+    }
+  }
+  // If it's an organizer, insert into organizers table
+  if (profileData.role === 'Organizer') {
+    const organizerData = {
+      user_id: user.id,
+      organizer_name: profileData.name,
+      contact_name: profileData.name,
+      // Default to profile name
+      email: user.email,
+      event_name: 'Default Event',
+      // These would be updated later
+      event_type: profileData.whatTheySeek.eventTypes?.[0] || 'conference',
+      event_date: new Date().toISOString().split('T')[0],
+      // Today's date as default
+      location: 'TBD',
+      attendee_count: '100_500',
+      // Default value
+      audience_description: profileData.description,
+      sponsorship_needs: profileData.whatTheySeek.notes || ''
+    };
+    const {
+      error: organizerError
+    } = await supabase.from('organizers').insert([organizerData]);
+    if (organizerError) {
+      console.error('Error creating organizer:', organizerError);
+      throw new Error(`Error creating organizer: ${organizerError.message}`);
+    }
+  }
+  return data?.[0];
+}
+// Get all profiles
+export async function getProfiles() {
+  const {
+    data,
+    error
+  } = await supabase.from('profiles').select('*');
+  if (error) {
+    console.error('Error fetching profiles:', error);
+    throw new Error(`Error fetching profiles: ${error.message}`);
+  }
+  return data || [];
+}
+// Get profile by ID
+export async function getProfileById(id: string) {
+  const {
+    data,
+    error
+  } = await supabase.from('profiles').select('*').eq('id', id).single();
+  if (error) {
+    console.error('Error fetching profile:', error);
+    throw new Error(`Error fetching profile: ${error.message}`);
+  }
+  return data;
+}
+// Get profiles by role
+export async function getProfilesByRole(role: 'Brand' | 'Organizer') {
+  const {
+    data,
+    error
+  } = await supabase.from('profiles').select('*').eq('role', role);
+  if (error) {
+    console.error('Error fetching profiles by role:', error);
+    throw new Error(`Error fetching profiles by role: ${error.message}`);
+  }
+  return data || [];
+}
+// Update a profile
+export async function updateProfile(id: string, updates: Partial<ProfileData>) {
+  const {
+    data,
+    error
+  } = await supabase.from('profiles').update({
+    name: updates.name,
+    logo_url: updates.logoURL,
+    description: updates.description,
+    updated_at: new Date()
+  }).eq('id', id).select();
+  if (error) {
+    console.error('Error updating profile:', error);
+    throw new Error(`Error updating profile: ${error.message}`);
+  }
+  return data?.[0];
+}
