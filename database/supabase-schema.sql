@@ -161,14 +161,126 @@ CREATE TABLE public.messages (
 );
 -- Enable RLS
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+-- Function to auto-create profile when new user signs up
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, role, name, email)
+  VALUES (
+    new.id,
+    COALESCE(new.raw_user_meta_data->>'role', 'Brand'),
+    COALESCE(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
+    new.email
+  );
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger on auth.users to auto-create profile
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
 -- Create RLS policies
 -- These are basic policies that you should customize based on your security needs
 -- Profiles policy - users can read all profiles but only update their own
 CREATE POLICY "Allow users to read all profiles"
   ON public.profiles FOR SELECT
   USING (true);
+
+CREATE POLICY "Allow users to insert own profile"
+  ON public.profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
 CREATE POLICY "Allow users to update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
--- Similar policies for other tables
--- (Add more specific policies based on your app's security requirements)
+
+-- Brands policies
+CREATE POLICY "Allow users to read all brands"
+  ON public.brands FOR SELECT
+  USING (true);
+
+CREATE POLICY "Allow brands to insert own data"
+  ON public.brands FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Allow brands to update own data"
+  ON public.brands FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Organizers policies
+CREATE POLICY "Allow users to read all organizers"
+  ON public.organizers FOR SELECT
+  USING (true);
+
+CREATE POLICY "Allow organizers to insert own data"
+  ON public.organizers FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Allow organizers to update own data"
+  ON public.organizers FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Matches policies
+CREATE POLICY "Allow users to read matches"
+  ON public.matches FOR SELECT
+  USING (
+    auth.uid() IN (
+      SELECT user_id FROM public.brands WHERE id = brand_id
+      UNION
+      SELECT user_id FROM public.organizers WHERE id = organizer_id
+    )
+  );
+
+-- Contracts policies
+CREATE POLICY "Allow users to read their contracts"
+  ON public.contracts FOR SELECT
+  USING (
+    auth.uid() IN (
+      SELECT user_id FROM public.brands WHERE id = brand_id
+      UNION
+      SELECT user_id FROM public.organizers WHERE id = organizer_id
+    )
+  );
+
+-- Community members policies
+CREATE POLICY "Allow users to read community members"
+  ON public.community_members FOR SELECT
+  USING (true);
+
+CREATE POLICY "Allow users to insert own community profile"
+  ON public.community_members FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Conversations policies
+CREATE POLICY "Allow users to read their conversations"
+  ON public.conversations FOR SELECT
+  USING (
+    auth.uid() IN (
+      SELECT user_id FROM public.brands WHERE id = brand_id
+      UNION
+      SELECT user_id FROM public.organizers WHERE id = organizer_id
+    )
+  );
+
+-- Messages policies
+CREATE POLICY "Allow users to read their messages"
+  ON public.messages FOR SELECT
+  USING (
+    conversation_id IN (
+      SELECT id FROM public.conversations
+      WHERE brand_id IN (SELECT id FROM public.brands WHERE user_id = auth.uid())
+         OR organizer_id IN (SELECT id FROM public.organizers WHERE user_id = auth.uid())
+    )
+  );
+
+CREATE POLICY "Allow users to insert messages in their conversations"
+  ON public.messages FOR INSERT
+  WITH CHECK (
+    conversation_id IN (
+      SELECT id FROM public.conversations
+      WHERE brand_id IN (SELECT id FROM public.brands WHERE user_id = auth.uid())
+         OR organizer_id IN (SELECT id FROM public.organizers WHERE user_id = auth.uid())
+    )
+  );

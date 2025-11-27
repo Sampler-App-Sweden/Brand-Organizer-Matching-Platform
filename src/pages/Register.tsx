@@ -24,9 +24,9 @@ export function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [userType, setUserType] = useState<'brand' | 'organizer' | 'community'>(
-    'brand'
-  )
+  const [userType, setUserType] = useState<
+    'brand' | 'organizer' | 'community' | 'admin'
+  >('brand')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,8 +54,13 @@ export function Register() {
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const role = params.get('role')
-    if (role === 'brand' || role === 'organizer' || role === 'community') {
-      setUserType(role)
+    if (
+      role === 'brand' ||
+      role === 'organizer' ||
+      role === 'community' ||
+      role === 'admin'
+    ) {
+      setUserType(role as 'brand' | 'organizer' | 'community')
     }
     // Pre-fill email from draft profile if available
     if (draftProfile?.email) {
@@ -200,8 +205,11 @@ export function Register() {
     try {
       // Log registration attempt for debugging
       console.log(`Attempting to register with: ${email}, type: ${userType}`)
-      // Community users aren't supported by register yet, default to organizer
-      const actualType = userType === 'community' ? 'organizer' : userType
+      // Map userType to the correct type for register function
+      const actualType =
+        userType === 'community'
+          ? 'organizer'
+          : (userType as 'brand' | 'organizer' | 'admin')
       const user = await register(
         email,
         password,
@@ -572,11 +580,15 @@ export function Register() {
               {
                 value: 'community',
                 label: 'Community Member'
+              },
+              {
+                value: 'admin',
+                label: 'Admin / Staff'
               }
             ]}
             value={userType}
             onChange={(e) =>
-              setUserType(e.target.value as 'brand' | 'organizer' | 'community')
+              setUserType(e.target.value as 'brand' | 'organizer' | 'community' | 'admin')
             }
           />
           <FormField
@@ -785,11 +797,15 @@ export function Register() {
               {
                 value: 'community',
                 label: 'Community Member'
+              },
+              {
+                value: 'admin',
+                label: 'Admin / Staff'
               }
             ]}
             value={userType}
             onChange={(e) => {
-              setUserType(e.target.value as 'brand' | 'organizer' | 'community')
+              setUserType(e.target.value as 'brand' | 'organizer' | 'community' | 'admin')
               trackEvent(
                 EVENTS.FORM_SUBMITTED,
                 {
@@ -809,6 +825,8 @@ export function Register() {
                   ? 'Brand / Sponsor'
                   : userType === 'organizer'
                   ? 'Event Organizer'
+                  : userType === 'admin'
+                  ? 'Admin / Staff'
                   : 'Community Member'}
               </strong>
               :
@@ -816,6 +834,8 @@ export function Register() {
                 ? ' Perfect for companies looking to promote products or services through events.'
                 : userType === 'organizer'
                 ? ' Ideal for those organizing events and seeking brand partnerships.'
+                : userType === 'admin'
+                ? ' Full access to manage the platform and support users.'
                 : ' Join our community to participate in events and test panels.'}
             </p>
           </div>
