@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PackageIcon, PercentIcon, DollarSignIcon, HelpCircleIcon, SaveIcon, SendIcon, StarIcon, KeyIcon } from 'lucide-react';
-import { Button } from '../Button';
+import { Button } from '../ui';
 interface SponsorshipRequest {
   id: 'product' | 'discount' | 'financial' | 'any';
   name: string;

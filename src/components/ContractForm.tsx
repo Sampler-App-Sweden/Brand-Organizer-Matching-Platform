@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Button } from './Button';
-import { FormField } from './FormField';
+import { Button } from './ui';
+import { FormField } from './ui';
 import { CheckCircleIcon } from 'lucide-react';
 interface ContractFormProps {
   brandName: string;

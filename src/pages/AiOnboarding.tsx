@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Layout } from '../components/Layout'
-import { Button } from '../components/Button'
+import { Layout } from '../components/layout'
+import { Button } from '../components/ui'
 import {
   SendIcon,
   RefreshCwIcon,
@@ -11,7 +11,7 @@ import {
   ArrowRightIcon,
   LightbulbIcon,
   TargetIcon,
-  TrendingUpIcon,
+  TrendingUpIcon
 } from 'lucide-react'
 export function AiOnboarding() {
   const navigate = useNavigate()
@@ -28,15 +28,15 @@ export function AiOnboarding() {
       role: 'assistant',
       content:
         "Welcome to SponsrAI! I'm here to help you understand what's possible on our platform. Tell me whether you're a brand looking to sponsor events or an event organizer seeking sponsors, and I'll show you how to succeed.",
-      timestamp: new Date(),
-    },
+      timestamp: new Date()
+    }
   ])
   const [suggestions, setSuggestions] = useState<string[]>([
     'What makes a brand attractive to event organizers?',
     'How can I make my event appealing to sponsors?',
     'What are successful sponsorship strategies?',
     'What metrics should I track for sponsorship success?',
-    'How do I set realistic sponsorship goals?',
+    'How do I set realistic sponsorship goals?'
   ])
   const [detectedRole, setDetectedRole] = useState<
     'brand' | 'organizer' | null
@@ -54,7 +54,7 @@ export function AiOnboarding() {
   // Scroll to bottom of conversation
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
-      behavior: 'smooth',
+      behavior: 'smooth'
     })
   }, [conversation])
   // Update suggestions based on detected role
@@ -65,7 +65,7 @@ export function AiOnboarding() {
         'How to measure ROI on event sponsorships?',
         'What types of events match my target audience?',
         'How to negotiate better sponsorship deals?',
-        'What sponsorship activations are most effective?',
+        'What sponsorship activations are most effective?'
       ])
     } else if (detectedRole === 'organizer') {
       setSuggestions([
@@ -73,13 +73,13 @@ export function AiOnboarding() {
         'What do brands look for in event partnerships?',
         'How to price my sponsorship opportunities?',
         'What metrics should I share with potential sponsors?',
-        'How to build long-term relationships with sponsors?',
+        'How to build long-term relationships with sponsors?'
       ])
     }
   }, [detectedRole])
   const handleSubmit = async (
     e: React.FormEvent | null,
-    initialInput?: string,
+    initialInput?: string
   ) => {
     if (e) e.preventDefault()
     const input = initialInput || userInput
@@ -87,7 +87,7 @@ export function AiOnboarding() {
     const userMessage = {
       role: 'user' as const,
       content: input,
-      timestamp: new Date(),
+      timestamp: new Date()
     }
     setConversation((prev) => [...prev, userMessage])
     setUserInput('')
@@ -108,8 +108,8 @@ export function AiOnboarding() {
           {
             role: 'assistant',
             content: response,
-            timestamp: new Date(),
-          },
+            timestamp: new Date()
+          }
         ])
         setLoading(false)
       }, 1000) // Simulate API delay
@@ -121,8 +121,8 @@ export function AiOnboarding() {
           role: 'assistant',
           content:
             "I'm sorry, I had trouble processing that. Could you try rephrasing or providing more details?",
-          timestamp: new Date(),
-        },
+          timestamp: new Date()
+        }
       ])
       setLoading(false)
     }
@@ -134,15 +134,15 @@ export function AiOnboarding() {
       brand:
         "Great! As a brand, you're looking to connect with events that can showcase your products or services. I'll help you understand what makes for successful sponsorships and how to set effective goals.",
       organizer:
-        "Perfect! As an event organizer, you're looking to attract sponsors that align with your audience and event values. I'll help you understand what brands are looking for and how to create attractive opportunities.",
+        "Perfect! As an event organizer, you're looking to attract sponsors that align with your audience and event values. I'll help you understand what brands are looking for and how to create attractive opportunities."
     }
     setConversation((prev) => [
       ...prev,
       {
         role: 'assistant',
         content: roleMessages[role],
-        timestamp: new Date(),
-      },
+        timestamp: new Date()
+      }
     ])
   }
   const handleSuggestionClick = (suggestion: string) => {
@@ -162,7 +162,7 @@ export function AiOnboarding() {
       'sell',
       'advertise',
       'showcase',
-      'launch',
+      'launch'
     ]
     // Organizer signals
     const organizerKeywords = [
@@ -176,7 +176,7 @@ export function AiOnboarding() {
       'venue',
       'attendees',
       'planning',
-      'running',
+      'running'
     ]
     let brandScore = 0
     let organizerScore = 0
@@ -195,7 +195,7 @@ export function AiOnboarding() {
   }
   const generateResponse = (
     input: string,
-    role: 'brand' | 'organizer' | null,
+    role: 'brand' | 'organizer' | null
   ): string => {
     const lowerInput = input.toLowerCase()
     // Generic responses if role is not detected
@@ -265,29 +265,29 @@ export function AiOnboarding() {
   }
   return (
     <Layout>
-      <div className="min-h-screen w-full bg-white">
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              <span className="text-indigo-600">AI</span> Inspiration Engine
+      <div className='min-h-screen w-full bg-white'>
+        <div className='max-w-4xl mx-auto px-4 py-12'>
+          <div className='text-center mb-8'>
+            <h1 className='text-3xl md:text-4xl font-bold text-gray-900 mb-2'>
+              <span className='text-indigo-600'>AI</span> Inspiration Engine
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className='text-xl text-gray-600'>
               Discover what's possible and set effective partnership goals
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
             {/* Main conversation area */}
-            <div className="md:col-span-2 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-              <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                <div className="flex items-center">
-                  <SparklesIcon className="h-5 w-5 text-indigo-600 mr-2" />
-                  <h3 className="font-medium text-gray-800">
+            <div className='md:col-span-2 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden'>
+              <div className='p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center'>
+                <div className='flex items-center'>
+                  <SparklesIcon className='h-5 w-5 text-indigo-600 mr-2' />
+                  <h3 className='font-medium text-gray-800'>
                     SponsrAI Advisor
                   </h3>
                 </div>
                 {detectedRole && (
-                  <div className="flex items-center">
-                    <span className="text-sm text-gray-500 mr-2">
+                  <div className='flex items-center'>
+                    <span className='text-sm text-gray-500 mr-2'>
                       Perspective:
                     </span>
                     <span
@@ -303,7 +303,7 @@ export function AiOnboarding() {
                 )}
               </div>
               {/* Conversation messages */}
-              <div className="p-4 h-96 overflow-y-auto bg-gray-50">
+              <div className='p-4 h-96 overflow-y-auto bg-gray-50'>
                 {conversation.map((message, index) => (
                   <div
                     key={index}
@@ -320,7 +320,7 @@ export function AiOnboarding() {
                           : 'bg-white border border-gray-200 text-gray-800'
                       }`}
                     >
-                      <p className="text-sm">{message.content}</p>
+                      <p className='text-sm'>{message.content}</p>
                       <p
                         className={`text-xs mt-1 ${
                           message.role === 'user'
@@ -330,16 +330,16 @@ export function AiOnboarding() {
                       >
                         {message.timestamp.toLocaleTimeString([], {
                           hour: '2-digit',
-                          minute: '2-digit',
+                          minute: '2-digit'
                         })}
                       </p>
                     </div>
                   </div>
                 ))}
                 {loading && (
-                  <div className="flex justify-start mb-4">
-                    <div className="bg-white border border-gray-200 rounded-lg p-3 flex items-center">
-                      <div className="typing-indicator">
+                  <div className='flex justify-start mb-4'>
+                    <div className='bg-white border border-gray-200 rounded-lg p-3 flex items-center'>
+                      <div className='typing-indicator'>
                         <span></span>
                         <span></span>
                         <span></span>
@@ -348,25 +348,25 @@ export function AiOnboarding() {
                   </div>
                 )}
                 {!detectedRole && !loading && conversation.length < 3 && (
-                  <div className="flex justify-start mb-4">
-                    <div className="bg-white border border-gray-200 rounded-lg p-3">
-                      <p className="text-sm font-medium mb-2">
+                  <div className='flex justify-start mb-4'>
+                    <div className='bg-white border border-gray-200 rounded-lg p-3'>
+                      <p className='text-sm font-medium mb-2'>
                         I can provide more tailored insights if you tell me your
                         role:
                       </p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className='flex flex-wrap gap-2'>
                         <button
                           onClick={() => handleRoleSelection('brand')}
-                          className="flex items-center px-3 py-1.5 rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200"
+                          className='flex items-center px-3 py-1.5 rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200'
                         >
-                          <BuildingIcon className="h-4 w-4 mr-1" />
+                          <BuildingIcon className='h-4 w-4 mr-1' />
                           I'm a Brand / Sponsor
                         </button>
                         <button
                           onClick={() => handleRoleSelection('organizer')}
-                          className="flex items-center px-3 py-1.5 rounded-md bg-green-100 text-green-800 hover:bg-green-200"
+                          className='flex items-center px-3 py-1.5 rounded-md bg-green-100 text-green-800 hover:bg-green-200'
                         >
-                          <CalendarIcon className="h-4 w-4 mr-1" />
+                          <CalendarIcon className='h-4 w-4 mr-1' />
                           I'm an Event Organizer
                         </button>
                       </div>
@@ -376,18 +376,18 @@ export function AiOnboarding() {
                 <div ref={messagesEndRef} />
               </div>
               {/* Input area */}
-              <div className="p-4 border-t border-gray-200">
-                <form onSubmit={handleSubmit} className="flex items-center">
+              <div className='p-4 border-t border-gray-200'>
+                <form onSubmit={handleSubmit} className='flex items-center'>
                   <input
-                    type="text"
+                    type='text'
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Ask about sponsorship strategies, goals, or best practices..."
-                    className="flex-1 rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    placeholder='Ask about sponsorship strategies, goals, or best practices...'
+                    className='flex-1 rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
                     disabled={loading}
                   />
                   <button
-                    type="submit"
+                    type='submit'
                     className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-r-md text-white ${
                       loading
                         ? 'bg-gray-400 cursor-not-allowed'
@@ -396,23 +396,23 @@ export function AiOnboarding() {
                     disabled={loading}
                   >
                     {loading ? (
-                      <RefreshCwIcon className="h-4 w-4 animate-spin" />
+                      <RefreshCwIcon className='h-4 w-4 animate-spin' />
                     ) : (
-                      <SendIcon className="h-4 w-4" />
+                      <SendIcon className='h-4 w-4' />
                     )}
                   </button>
                 </form>
                 {/* Suggestions */}
-                <div className="mt-3">
-                  <p className="text-xs text-gray-500 mb-1">
+                <div className='mt-3'>
+                  <p className='text-xs text-gray-500 mb-1'>
                     Try asking about:
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className='flex flex-wrap gap-2'>
                     {suggestions.slice(0, 3).map((suggestion, index) => (
                       <button
                         key={index}
                         onClick={() => handleSuggestionClick(suggestion)}
-                        className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-md text-xs text-gray-700"
+                        className='px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-md text-xs text-gray-700'
                       >
                         {suggestion}
                       </button>
@@ -422,84 +422,84 @@ export function AiOnboarding() {
               </div>
             </div>
             {/* Value proposition sidebar */}
-            <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
-                <h3 className="font-medium text-gray-800">Platform Benefits</h3>
+            <div className='bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden'>
+              <div className='p-4 border-b border-gray-200 bg-gray-50'>
+                <h3 className='font-medium text-gray-800'>Platform Benefits</h3>
               </div>
-              <div className="p-4">
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                      <TargetIcon className="h-4 w-4 text-indigo-600" />
+              <div className='p-4'>
+                <div className='space-y-4'>
+                  <div className='flex items-start'>
+                    <div className='flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3'>
+                      <TargetIcon className='h-4 w-4 text-indigo-600' />
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-800">
+                      <h4 className='text-sm font-medium text-gray-800'>
                         Targeted Connections
                       </h4>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className='text-xs text-gray-600 mt-1'>
                         Our matching algorithm connects brands with events that
                         align with their target audience and marketing goals.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                      <LightbulbIcon className="h-4 w-4 text-indigo-600" />
+                  <div className='flex items-start'>
+                    <div className='flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3'>
+                      <LightbulbIcon className='h-4 w-4 text-indigo-600' />
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-800">
+                      <h4 className='text-sm font-medium text-gray-800'>
                         Strategic Insights
                       </h4>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className='text-xs text-gray-600 mt-1'>
                         Get data-driven recommendations to optimize your
                         sponsorship strategy and maximize ROI.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                      <TrendingUpIcon className="h-4 w-4 text-indigo-600" />
+                  <div className='flex items-start'>
+                    <div className='flex-shrink-0 h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center mr-3'>
+                      <TrendingUpIcon className='h-4 w-4 text-indigo-600' />
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-800">
+                      <h4 className='text-sm font-medium text-gray-800'>
                         Growth Opportunities
                       </h4>
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className='text-xs text-gray-600 mt-1'>
                         Discover new markets, audiences, and partnership models
                         to scale your business.
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="mt-6 space-y-3">
+                <div className='mt-6 space-y-3'>
                   <Button
-                    variant="primary"
-                    className="w-full flex items-center justify-center"
+                    variant='primary'
+                    className='w-full flex items-center justify-center'
                     onClick={() => navigate('/register')}
                   >
                     Create Your Account
-                    <ArrowRightIcon className="h-4 w-4 ml-2" />
+                    <ArrowRightIcon className='h-4 w-4 ml-2' />
                   </Button>
                   {detectedRole === 'brand' ? (
                     <Button
-                      variant="outline"
-                      className="w-full"
+                      variant='outline'
+                      className='w-full'
                       onClick={() => navigate('/organizers')}
                     >
                       Browse Event Organizers
                     </Button>
                   ) : detectedRole === 'organizer' ? (
                     <Button
-                      variant="outline"
-                      className="w-full"
+                      variant='outline'
+                      className='w-full'
                       onClick={() => navigate('/brands')}
                     >
                       Browse Potential Sponsors
                     </Button>
                   ) : (
                     <Button
-                      variant="outline"
-                      className="w-full"
+                      variant='outline'
+                      className='w-full'
                       onClick={() => navigate('/community')}
                     >
                       Explore Our Community
@@ -549,19 +549,19 @@ function LightbulbIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      xmlns='http://www.w3.org/2000/svg'
+      width='24'
+      height='24'
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
     >
-      <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
-      <path d="M9 18h6" />
-      <path d="M10 22h4" />
+      <path d='M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5' />
+      <path d='M9 18h6' />
+      <path d='M10 22h4' />
     </svg>
   )
 }
@@ -569,19 +569,19 @@ function TargetIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      xmlns='http://www.w3.org/2000/svg'
+      width='24'
+      height='24'
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
     >
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
+      <circle cx='12' cy='12' r='10' />
+      <circle cx='12' cy='12' r='6' />
+      <circle cx='12' cy='12' r='2' />
     </svg>
   )
 }

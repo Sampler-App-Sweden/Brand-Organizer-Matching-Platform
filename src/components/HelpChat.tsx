@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MessageSquareIcon, XIcon, SendIcon } from 'lucide-react';
-import { Button } from './Button';
+import { Button } from './ui';
 export function HelpChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');

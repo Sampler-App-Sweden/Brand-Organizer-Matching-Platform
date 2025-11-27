@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { PackageIcon, PlusIcon, ImageIcon, XIcon, EditIcon, TrashIcon, GripIcon, Sparkles } from 'lucide-react';
-import { Button } from '../Button';
+import { Button } from '../ui';
 // Types
 interface ProductImage {
   id: string;
