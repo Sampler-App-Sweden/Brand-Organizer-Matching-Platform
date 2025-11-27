@@ -3,7 +3,7 @@ import { Layout } from '../components/layout'
 import { DirectoryFilters } from '../components/directory/DirectoryFilters'
 import { DirectoryGrid } from '../components/directory/DirectoryGrid'
 import { Pagination } from '../components/directory/Pagination'
-import { getAllCommunityMembers } from '../services/communityService'
+import { supabase } from '../services/supabaseClient'
 import { CommunityMember, CommunityQueryParams } from '../types/community'
 import { SparklesIcon, ArrowRightIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -21,9 +21,46 @@ export function BrandsDirectoryPage() {
     const fetchMembers = async () => {
       setLoading(true)
       try {
-        const { data, totalPages } = await getAllCommunityMembers(queryParams)
-        setMembers(data)
-        setTotalPages(totalPages)
+        // Fetch brands from Supabase
+        const page = queryParams.page || 1
+        const limit = queryParams.limit || 12
+        
+        const { data: brands, error, count } = await supabase
+          .from('brands')
+          .select('*', { count: 'exact' })
+          .range((page - 1) * limit, page * limit - 1)
+
+        if (error) throw error
+
+        // Transform brands data to CommunityMember format
+        const transformedData: CommunityMember[] = (brands || []).map((brand) => ({
+          id: brand.id,
+          userId: brand.user_id || '',
+          name: brand.company_name,
+          type: 'brand' as const,
+          shortDescription: brand.product_name || '',
+          description: brand.product_description || '',
+          industry: brand.industry || '',
+          location: brand.city || '',
+          website: brand.website || '',
+          logoUrl: '',
+          memberCount: 0,
+          projectsCompleted: 0,
+          imageUrl: '',
+          rating: 0,
+          tags: brand.sponsorship_type || [],
+          interests: [brand.industry].filter(Boolean) as string[],
+          lookingFor: brand.target_audience || '',
+          achievements: [],
+          email: brand.email || '',
+          phone: brand.phone || '',
+          socialLinks: '',
+          featured: false,
+          dateRegistered: brand.created_at || new Date().toISOString()
+        }))
+
+        setMembers(transformedData)
+        setTotalPages(Math.ceil((count || 0) / limit))
       } catch (error) {
         console.error('Failed to fetch brands:', error)
       } finally {

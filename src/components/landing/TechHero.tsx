@@ -150,7 +150,7 @@ export function TechHero({
         ></div>
       </div>
       {/* CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes pulse-data {
           0% {
             transform: scale(1);

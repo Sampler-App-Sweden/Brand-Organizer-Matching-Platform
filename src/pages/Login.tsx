@@ -98,7 +98,7 @@ export function Login() {
     setError('')
     setIsLoading(true)
     try {
-      const user = await login(email, password, rememberMe)
+      const user = await login(email, password)
       trackEvent(EVENTS.LOGIN_SUCCESS, {
         userType: user.type,
         hasDraft: !!draftId
@@ -116,12 +116,8 @@ export function Login() {
               draftId
             }
           })
-        } else if (user.type === 'community') {
-          navigate('/community/register', {
-            state: {
-              draftId
-            }
-          })
+        } else if (user.type === 'admin') {
+          navigate('/admin')
         } else {
           navigate('/dashboard/brand')
         }
@@ -139,8 +135,6 @@ export function Login() {
           navigate('/dashboard/brand')
         } else if (user.type === 'organizer') {
           navigate('/dashboard/organizer')
-        } else if (user.type === 'community') {
-          navigate('/community')
         } else if (user.type === 'admin') {
           navigate('/admin')
         } else {
@@ -148,8 +142,7 @@ export function Login() {
         }
       }
     } catch (error) {
-      console.error('Login error:', error)
-      setError('Failed to log in. Please check your credentials.')
+      setError('Invalid email or password.')
       trackEvent(EVENTS.LOGIN_FAILURE, {
         reason: 'invalid_credentials'
       })
@@ -462,7 +455,7 @@ export function Login() {
         isVisible={toast.isVisible}
       />
 
-      <style jsx>{`
+      <style>{`
         @keyframes spin-slow {
           from {
             transform: rotate(0deg);

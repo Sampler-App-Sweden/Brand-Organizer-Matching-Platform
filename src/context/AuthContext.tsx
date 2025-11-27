@@ -6,6 +6,7 @@ import {
   getCurrentUser,
   getSession
 } from '../services/supabaseAuthService'
+import { supabase } from '../services/supabaseClient'
 interface User {
   id: string
   email: string
@@ -23,11 +24,36 @@ interface AuthContextType {
     name: string
   ) => Promise<User>
   logout: () => Promise<void>
+  refreshUser: () => Promise<void>
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const refreshUser = async () => {
+    try {
+      const user = await getCurrentUser()
+      if (user) {
+        // Fetch updated profile data from Supabase
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, role')
+          .eq('id', user.id)
+          .single()
+
+        setCurrentUser({
+          id: user.id,
+          email: user.email || '',
+          type:
+            profile?.role?.toLowerCase() || user.user_metadata?.type || 'brand',
+          name: profile?.name || user.user_metadata?.name || ''
+        })
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error)
+    }
+  }
+
   useEffect(() => {
     // Check for existing session on load
     const checkSession = async () => {
@@ -35,12 +61,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const session = await getSession()
         if (session) {
           const user = await getCurrentUser()
-          if (user && user.user_metadata) {
+          if (user) {
+            // Fetch profile data from Supabase
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('name, role')
+              .eq('id', user.id)
+              .single()
+
             setCurrentUser({
               id: user.id,
               email: user.email || '',
-              type: user.user_metadata.type || 'brand',
-              name: user.user_metadata.name || ''
+              type:
+                profile?.role?.toLowerCase() ||
+                user.user_metadata?.type ||
+                'brand',
+              name: profile?.name || user.user_metadata?.name || ''
             })
           }
         }
@@ -124,7 +160,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         login,
         register,
-        logout
+        logout,
+        refreshUser
       }}
     >
       {children}

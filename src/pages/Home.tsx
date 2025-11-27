@@ -1,4 +1,4 @@
-import React, { useState, Component } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { TechLayout } from '../components/layout'
 import { TechHero, TechFeatureSection, TechCard } from '../components/landing'
@@ -14,6 +14,7 @@ import {
   BarChartIcon,
   ZapIcon
 } from 'lucide-react'
+
 export function Home() {
   const navigate = useNavigate()
   const [searchInput, setSearchInput] = useState('')

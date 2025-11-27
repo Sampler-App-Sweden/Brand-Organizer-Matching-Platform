@@ -7,7 +7,7 @@ import { Button } from '../../components/ui'
 import { supabase } from '../../services/supabaseClient'
 
 export function EditProfilePage() {
-  const { currentUser } = useAuth()
+  const { currentUser, refreshUser } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -75,6 +75,9 @@ export function EditProfilePage() {
         .eq('id', currentUser?.id)
 
       if (error) throw error
+
+      // Refresh user data in AuthContext
+      await refreshUser()
 
       showToast('Profile updated successfully!', 'success')
     } catch (error) {
