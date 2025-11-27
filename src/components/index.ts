@@ -20,6 +20,9 @@ export * from './sponsorship'
 export * from './forms/brand'
 export * from './forms/organizer'
 
+// Login Components
+export * from './login'
+
 // Standalone Components
 export { ErrorBoundary } from './ErrorBoundary'
 export { HelpChat } from './HelpChat'

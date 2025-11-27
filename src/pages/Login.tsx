@@ -1,155 +1,31 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { FormField, Button, Toast } from '../components/ui'
+import { Link } from 'react-router-dom'
+import { Toast } from '../components/ui'
 import { TechLayout } from '../components/layout'
-import {
-  AlertCircleIcon,
-  HelpCircleIcon,
-  EyeIcon,
-  EyeOffIcon,
-  UserIcon,
-  BuildingIcon,
-  CalendarIcon,
-  UsersIcon,
-  CopyIcon,
-  CheckIcon
-} from 'lucide-react'
-import { getDraftsByEmail } from '../services/draftService'
-import { trackEvent, EVENTS } from '../services/analyticsService'
+import { HelpCircle, AlertCircle } from 'lucide-react'
+import { useLogin } from '../hooks/useLogin'
+import { useCopyToClipboard } from '../utils/clipboard'
+import { LoginForm, DemoAccountCard } from '../components/login'
+import { demoAccounts } from '../constants/demoAccounts'
 
 export function Login() {
-  const location = useLocation()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const [copiedField, setCopiedField] = useState<string | null>(null)
-  const [toast, setToast] = useState({
-    isVisible: false,
-    type: 'success' as 'success' | 'error' | 'info' | 'warning',
-    message: ''
-  })
-  const { login } = useAuth()
-  const navigate = useNavigate()
-  const redirectPath = location.state?.from || '/'
-  const draftId = location.state?.draftId || null
-  const searchParams = new URLSearchParams(location.search)
-  const verified = searchParams.get('verified') === 'true'
-  useEffect(() => {
-    if (verified) {
-      setToast({
-        isVisible: true,
-        type: 'success',
-        message: 'Email verified successfully! You can now log in.'
-      })
-      trackEvent(EVENTS.EMAIL_VERIFIED, {
-        source: 'email_link'
-      })
-    }
-  }, [verified])
-  const demoAccounts = [
-    {
-      type: 'brand',
-      name: 'Brand Demo',
-      email: 'brand@demo.com',
-      password: 'demo123',
-      description: 'EcoRefresh Beverages - Organic energy drink brand',
-      icon: <BuildingIcon className='h-5 w-5' />,
-      color: 'blue'
-    },
-    {
-      type: 'organizer',
-      name: 'Organizer Demo',
-      email: 'organizer@demo.com',
-      password: 'demo123',
-      description: 'Active Life Events - Stockholm Fitness Festival',
-      icon: <CalendarIcon className='h-5 w-5' />,
-      color: 'green'
-    },
-    {
-      type: 'community',
-      name: 'Community Demo',
-      email: 'community@demo.com',
-      password: 'demo123',
-      description: 'Sarah Johnson - Test panel participant',
-      icon: <UsersIcon className='h-5 w-5' />,
-      color: 'purple'
-    }
-  ]
-  const copyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedField(field)
-    setTimeout(() => setCopiedField(null), 2000)
-  }
-  const quickLogin = (email: string, password: string) => {
-    setEmail(email)
-    setPassword(password)
-    // Small delay for visual feedback
-    setTimeout(() => {
-      const form = document.querySelector('form') as HTMLFormElement
-      form?.requestSubmit()
-    }, 100)
-  }
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
-    try {
-      const user = await login(email, password)
-      trackEvent(EVENTS.LOGIN_SUCCESS, {
-        userType: user.type,
-        hasDraft: !!draftId
-      })
-      if (draftId) {
-        if (user.type === 'brand') {
-          navigate('/brand', {
-            state: {
-              draftId
-            }
-          })
-        } else if (user.type === 'organizer') {
-          navigate('/organizer', {
-            state: {
-              draftId
-            }
-          })
-        } else if (user.type === 'admin') {
-          navigate('/admin')
-        } else {
-          navigate('/dashboard/brand')
-        }
-      } else {
-        const drafts = await getDraftsByEmail(email)
-        if (drafts.length > 0) {
-          setToast({
-            isVisible: true,
-            type: 'info',
-            message:
-              'We found draft profiles associated with your email. You can continue them from your dashboard.'
-          })
-        }
-        if (user.type === 'brand') {
-          navigate('/dashboard/brand')
-        } else if (user.type === 'organizer') {
-          navigate('/dashboard/organizer')
-        } else if (user.type === 'admin') {
-          navigate('/admin')
-        } else {
-          navigate(redirectPath)
-        }
-      }
-    } catch (error) {
-      setError('Invalid email or password.')
-      trackEvent(EVENTS.LOGIN_FAILURE, {
-        reason: 'invalid_credentials'
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    error,
+    isLoading,
+    showPassword,
+    setShowPassword,
+    rememberMe,
+    setRememberMe,
+    toast,
+    setToast,
+    quickLogin,
+    handleSubmit
+  } = useLogin()
+
+  const { copiedId, handleCopy } = useCopyToClipboard()
   return (
     <TechLayout>
       <div className='max-w-6xl mx-auto px-4 py-8'>
@@ -167,89 +43,13 @@ export function Login() {
 
             <div className='space-y-4'>
               {demoAccounts.map((account) => (
-                <div
+                <DemoAccountCard
                   key={account.type}
-                  className='bg-white rounded-lg border border-gray-200 p-5 hover:border-blue-300 transition-all group'
-                >
-                  <div className='flex items-start justify-between mb-3'>
-                    <div className='flex items-center space-x-3'>
-                      <div
-                        className={`p-2 rounded-lg bg-${account.color}-50 text-${account.color}-600`}
-                      >
-                        {account.icon}
-                      </div>
-                      <div>
-                        <h3 className='font-semibold text-gray-900'>
-                          {account.name}
-                        </h3>
-                        <p className='text-sm text-gray-500'>
-                          {account.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className='space-y-2 mb-4'>
-                    <div className='flex items-center justify-between bg-gray-50 rounded px-3 py-2'>
-                      <div className='flex-1'>
-                        <p className='text-xs text-gray-500'>Email</p>
-                        <p className='text-sm font-mono text-gray-900'>
-                          {account.email}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() =>
-                          copyToClipboard(
-                            account.email,
-                            `${account.type}-email`
-                          )
-                        }
-                        className='p-1.5 hover:bg-gray-200 rounded transition-colors'
-                        title='Copy email'
-                      >
-                        {copiedField === `${account.type}-email` ? (
-                          <CheckIcon className='h-4 w-4 text-green-600' />
-                        ) : (
-                          <CopyIcon className='h-4 w-4 text-gray-400' />
-                        )}
-                      </button>
-                    </div>
-
-                    <div className='flex items-center justify-between bg-gray-50 rounded px-3 py-2'>
-                      <div className='flex-1'>
-                        <p className='text-xs text-gray-500'>Password</p>
-                        <p className='text-sm font-mono text-gray-900'>
-                          {account.password}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() =>
-                          copyToClipboard(
-                            account.password,
-                            `${account.type}-password`
-                          )
-                        }
-                        className='p-1.5 hover:bg-gray-200 rounded transition-colors'
-                        title='Copy password'
-                      >
-                        {copiedField === `${account.type}-password` ? (
-                          <CheckIcon className='h-4 w-4 text-green-600' />
-                        ) : (
-                          <CopyIcon className='h-4 w-4 text-gray-400' />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant='outline'
-                    className='w-full group-hover:bg-blue-50 group-hover:text-blue-700 group-hover:border-blue-300 transition-all'
-                    onClick={() => quickLogin(account.email, account.password)}
-                  >
-                    <UserIcon className='h-4 w-4 mr-2' />
-                    Quick Login as {account.name}
-                  </Button>
-                </div>
+                  account={account}
+                  copiedId={copiedId}
+                  onCopy={handleCopy}
+                  onQuickLogin={quickLogin}
+                />
               ))}
             </div>
 
@@ -283,7 +83,7 @@ export function Login() {
 
             {error && (
               <div className='bg-red-50 text-red-700 p-3 rounded-md mb-4 flex items-start'>
-                <AlertCircleIcon className='h-5 w-5 mr-2 flex-shrink-0 mt-0.5' />
+                <AlertCircle className='h-5 w-5 mr-2 flex-shrink-0 mt-0.5' />
                 <div>
                   <p>{error}</p>
                   <Link
@@ -296,84 +96,19 @@ export function Login() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-              <div className='space-y-4'>
-                <FormField
-                  label='Email Address'
-                  id='email'
-                  type='email'
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-
-                <div className='space-y-1'>
-                  <label
-                    htmlFor='password'
-                    className='block text-sm font-medium text-gray-800 mb-1'
-                  >
-                    Password <span className='text-red-500 ml-1'>*</span>
-                  </label>
-                  <div className='relative'>
-                    <input
-                      id='password'
-                      type={showPassword ? 'text' : 'password'}
-                      className='block w-full h-10 px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-colors'
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type='button'
-                      className='absolute inset-y-0 right-0 pr-3 flex items-center'
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOffIcon className='h-5 w-5 text-gray-400' />
-                      ) : (
-                        <EyeIcon className='h-5 w-5 text-gray-400' />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className='flex items-center justify-between'>
-                  <div className='flex items-center'>
-                    <input
-                      id='remember-me'
-                      name='remember-me'
-                      type='checkbox'
-                      className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                    />
-                    <label
-                      htmlFor='remember-me'
-                      className='ml-2 block text-sm text-gray-700'
-                    >
-                      Remember me
-                    </label>
-                  </div>
-                  <div className='text-sm'>
-                    <Link
-                      to='/login/help'
-                      className='font-medium text-blue-600 hover:text-blue-500'
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                </div>
-
-                <Button
-                  type='submit'
-                  variant='primary'
-                  className='w-full'
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Logging in...' : 'Log In'}
-                </Button>
-              </div>
-            </form>
+            <LoginForm
+              email={email}
+              setEmail={setEmail}
+              password={password}
+              setPassword={setPassword}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
+              rememberMe={rememberMe}
+              setRememberMe={setRememberMe}
+              error={error}
+              isLoading={isLoading}
+              onSubmit={handleSubmit}
+            />
 
             <div className='mt-6 text-center'>
               <p className='text-gray-600'>
@@ -389,7 +124,7 @@ export function Login() {
                 to='/login/help'
                 className='mt-3 inline-flex items-center text-sm text-blue-600 hover:text-blue-800'
               >
-                <HelpCircleIcon className='h-4 w-4 mr-1' />
+                <HelpCircle className='h-4 w-4 mr-1' />
                 Having trouble logging in?
               </Link>
             </div>
@@ -397,9 +132,7 @@ export function Login() {
             {/* Tech decoration elements */}
             <div
               className='absolute -top-6 -right-6 w-12 h-12 opacity-10 animate-spin-slow'
-              style={{
-                animationDuration: '15s'
-              }}
+              style={{ animationDuration: '15s' }}
             >
               <svg
                 viewBox='0 0 100 100'
@@ -446,12 +179,7 @@ export function Login() {
         type={toast.type}
         message={toast.message}
         duration={5000}
-        onClose={() =>
-          setToast({
-            ...toast,
-            isVisible: false
-          })
-        }
+        onClose={() => setToast({ ...toast, isVisible: false })}
         isVisible={toast.isVisible}
       />
 
@@ -464,7 +192,6 @@ export function Login() {
             transform: rotate(360deg);
           }
         }
-
         .animate-spin-slow {
           animation: spin-slow linear infinite;
         }
