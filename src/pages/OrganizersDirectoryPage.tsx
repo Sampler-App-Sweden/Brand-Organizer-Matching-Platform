@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Layout } from '../components/layout'
 import { DirectoryFilters } from '../components/directory/DirectoryFilters'
 import { DirectoryGrid } from '../components/directory/DirectoryGrid'

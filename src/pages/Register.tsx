@@ -3,13 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { FormField, Button, Toast } from '../components/ui'
 import { TechLayout } from '../components/layout'
-import {
-  AlertCircleIcon,
-  EyeIcon,
-  EyeOffIcon,
-  CheckCircleIcon,
-  XCircleIcon
-} from 'lucide-react'
+import { EyeIcon, EyeOffIcon, CheckCircleIcon, XCircleIcon } from 'lucide-react'
 import {
   getUserExperimentVariant,
   EXPERIMENTS
@@ -206,7 +200,14 @@ export function Register() {
     try {
       // Log registration attempt for debugging
       console.log(`Attempting to register with: ${email}, type: ${userType}`)
-      const user = await register(email, password, userType)
+      // Community users aren't supported by register yet, default to organizer
+      const actualType = userType === 'community' ? 'organizer' : userType
+      const user = await register(
+        email,
+        password,
+        actualType,
+        email.split('@')[0]
+      )
       console.log('Registration successful:', user)
       // If we have a draft profile, convert it to a full profile
       const draftId = getDraftId()
@@ -235,29 +236,30 @@ export function Register() {
         EXPERIMENTS.LOGIN_REGISTRATION,
         experimentVariant
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Registration error:', error)
+      const err = error as { message?: string; stack?: string }
       let errorMessage = 'Failed to create account'
-      let errorType = ERROR_TYPES.UNKNOWN_ERROR
+      let errorType: string = ERROR_TYPES.UNKNOWN_ERROR
       // Enhanced error handling with more specific messages
-      if (error.message && error.message.includes('already')) {
+      if (err.message && err.message.includes('already')) {
         errorMessage =
           'Email already registered. Please log in or reset your password.'
         errorType = ERROR_TYPES.VALIDATION_ERROR
-      } else if (error.message && error.message.includes('valid email')) {
+      } else if (err.message && err.message.includes('valid email')) {
         errorMessage = 'Please enter a valid email address.'
         errorType = ERROR_TYPES.VALIDATION_ERROR
-      } else if (error.message && error.message.includes('password')) {
+      } else if (err.message && err.message.includes('password')) {
         errorMessage = 'Password is too weak. Please use a stronger password.'
         errorType = ERROR_TYPES.VALIDATION_ERROR
-      } else if (error.message && error.message.includes('network')) {
+      } else if (err.message && err.message.includes('network')) {
         errorMessage = 'Network error. Please check your internet connection.'
         errorType = ERROR_TYPES.NETWORK_ERROR
       }
       // Set detailed debug info for troubleshooting
       setDebugInfo(
-        `Error: ${error.message || 'Unknown error'}\nStack: ${
-          error.stack || 'No stack trace'
+        `Error: ${err.message || 'Unknown error'}\nStack: ${
+          err.stack || 'No stack trace'
         }`
       )
       setToast({
@@ -268,7 +270,7 @@ export function Register() {
       trackError(
         errorType,
         errorMessage,
-        error.stack,
+        err.stack,
         {
           userType,
           email
@@ -414,7 +416,7 @@ export function Register() {
           }
           isVisible={toast.isVisible}
         />
-        <style jsx>{`
+        <style>{`
           @keyframes spin-slow {
             from {
               transform: rotate(0deg);
@@ -430,6 +432,602 @@ export function Register() {
       </TechLayout>
     )
   }
+  // Render variant A - basic form
+  const renderVariantA = () => {
+    return (
+      <form onSubmit={handleSubmit}>
+        <div className='space-y-4'>
+          <FormField
+            label='I am a'
+            id='userType'
+            type='select'
+            options={[
+              {
+                value: 'brand',
+                label: 'Brand / Sponsor'
+              },
+              {
+                value: 'organizer',
+                label: 'Event Organizer'
+              },
+              {
+                value: 'community',
+                label: 'Community Member'
+              }
+            ]}
+            value={userType}
+            onChange={(e) =>
+              setUserType(e.target.value as 'brand' | 'organizer' | 'community')
+            }
+          />
+          <FormField
+            label='Email Address'
+            id='email'
+            type='email'
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder='your@email.com'
+          />
+          <div className='space-y-1'>
+            <label
+              htmlFor='password'
+              className='block text-sm font-medium text-gray-800'
+            >
+              Password <span className='text-red-500'>*</span>
+            </label>
+            <div className='relative'>
+              <input
+                id='password'
+                type={showPassword ? 'text' : 'password'}
+                className='block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOffIcon className='h-5 w-5 text-gray-400' />
+                ) : (
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
+                )}
+              </button>
+            </div>
+          </div>
+          <div className='space-y-1'>
+            <label
+              htmlFor='confirmPassword'
+              className='block text-sm font-medium text-gray-800'
+            >
+              Confirm Password <span className='text-red-500'>*</span>
+            </label>
+            <div className='relative'>
+              <input
+                id='confirmPassword'
+                type={showConfirmPassword ? 'text' : 'password'}
+                className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+                  confirmPassword && password !== confirmPassword
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                    : ''
+                }`}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <EyeOffIcon className='h-5 w-5 text-gray-400' />
+                ) : (
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
+                )}
+              </button>
+            </div>
+            {confirmPassword && password !== confirmPassword && (
+              <p className='mt-1 text-xs text-red-600'>
+                Passwords do not match
+              </p>
+            )}
+          </div>
+          <div className='pt-2'>
+            <Button
+              type='submit'
+              variant='primary'
+              className='w-full'
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating account...' : 'Create Account'}
+            </Button>
+          </div>
+        </div>
+      </form>
+    )
+  }
+
+  // Render variant B - with password strength meter
+  const renderVariantB = () => {
+    return (
+      <form onSubmit={handleSubmit}>
+        <div className='space-y-4'>
+          <FormField
+            label='I am a'
+            id='userType'
+            type='select'
+            options={[
+              {
+                value: 'brand',
+                label: 'Brand / Sponsor'
+              },
+              {
+                value: 'organizer',
+                label: 'Event Organizer'
+              },
+              {
+                value: 'community',
+                label: 'Community Member'
+              }
+            ]}
+            value={userType}
+            onChange={(e) =>
+              setUserType(e.target.value as 'brand' | 'organizer' | 'community')
+            }
+          />
+          <FormField
+            label='Email Address'
+            id='email'
+            type='email'
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder='your@email.com'
+          />
+          <div className='space-y-1'>
+            <label
+              htmlFor='password'
+              className='block text-sm font-medium text-gray-800'
+            >
+              Password <span className='text-red-500'>*</span>
+            </label>
+            <div className='relative'>
+              <input
+                id='password'
+                type={showPassword ? 'text' : 'password'}
+                className='block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <EyeOffIcon className='h-5 w-5 text-gray-400' />
+                ) : (
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
+                )}
+              </button>
+            </div>
+            {/* Password strength meter */}
+            <div className='mt-2'>
+              <div className='flex space-x-1 mb-1'>
+                {[...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full ${
+                      i < passwordStrength
+                        ? passwordStrength === 1
+                          ? 'bg-red-500'
+                          : passwordStrength === 2
+                          ? 'bg-yellow-500'
+                          : passwordStrength === 3
+                          ? 'bg-green-400'
+                          : 'bg-green-600'
+                        : 'bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className='text-xs text-gray-500'>
+                {passwordStrength === 0 && 'Very weak'}
+                {passwordStrength === 1 && 'Weak'}
+                {passwordStrength === 2 && 'Medium'}
+                {passwordStrength === 3 && 'Strong'}
+                {passwordStrength === 4 && 'Very strong'}
+              </p>
+            </div>
+            {/* Password requirements */}
+            <div className='mt-2 space-y-1'>
+              <p className='text-xs text-gray-500 mb-1'>Password must have:</p>
+              <ul className='space-y-1'>
+                <li className='flex items-center text-xs'>
+                  {passwordErrors.length ? (
+                    <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
+                  ) : (
+                    <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
+                  )}
+                  <span
+                    className={
+                      passwordErrors.length ? 'text-red-600' : 'text-green-600'
+                    }
+                  >
+                    At least 8 characters
+                  </span>
+                </li>
+                <li className='flex items-center text-xs'>
+                  {passwordErrors.uppercase ? (
+                    <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
+                  ) : (
+                    <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
+                  )}
+                  <span
+                    className={
+                      passwordErrors.uppercase
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                    }
+                  >
+                    At least one uppercase letter
+                  </span>
+                </li>
+                <li className='flex items-center text-xs'>
+                  {passwordErrors.lowercase ? (
+                    <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
+                  ) : (
+                    <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
+                  )}
+                  <span
+                    className={
+                      passwordErrors.lowercase
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                    }
+                  >
+                    At least one lowercase letter
+                  </span>
+                </li>
+                <li className='flex items-center text-xs'>
+                  {passwordErrors.number ? (
+                    <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
+                  ) : (
+                    <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
+                  )}
+                  <span
+                    className={
+                      passwordErrors.number ? 'text-red-600' : 'text-green-600'
+                    }
+                  >
+                    At least one number
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className='space-y-1'>
+            <label
+              htmlFor='confirmPassword'
+              className='block text-sm font-medium text-gray-800'
+            >
+              Confirm Password <span className='text-red-500'>*</span>
+            </label>
+            <div className='relative'>
+              <input
+                id='confirmPassword'
+                type={showConfirmPassword ? 'text' : 'password'}
+                className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+                  confirmPassword && password !== confirmPassword
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                    : ''
+                }`}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <EyeOffIcon className='h-5 w-5 text-gray-400' />
+                ) : (
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
+                )}
+              </button>
+            </div>
+            {confirmPassword && password !== confirmPassword && (
+              <p className='mt-1 text-xs text-red-600'>
+                Passwords do not match
+              </p>
+            )}
+          </div>
+          <div className='pt-2'>
+            <Button
+              type='submit'
+              variant='primary'
+              className='w-full'
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating account...' : 'Create Account'}
+            </Button>
+          </div>
+        </div>
+      </form>
+    )
+  }
+
+  // Render variant C - with contextual help
+  const renderVariantC = () => {
+    return (
+      <form onSubmit={handleSubmit}>
+        <div className='space-y-4'>
+          <FormField
+            label='I am a'
+            id='userType'
+            type='select'
+            options={[
+              {
+                value: 'brand',
+                label: 'Brand / Sponsor'
+              },
+              {
+                value: 'organizer',
+                label: 'Event Organizer'
+              },
+              {
+                value: 'community',
+                label: 'Community Member'
+              }
+            ]}
+            value={userType}
+            onChange={(e) => {
+              setUserType(e.target.value as 'brand' | 'organizer' | 'community')
+              trackEvent(
+                EVENTS.FORM_SUBMITTED,
+                {
+                  field: 'userType',
+                  value: e.target.value
+                },
+                undefined,
+                EXPERIMENTS.LOGIN_REGISTRATION,
+                experimentVariant
+              )
+            }}
+          />
+          <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2'>
+            <p className='text-sm text-blue-800'>
+              <strong>
+                {userType === 'brand'
+                  ? 'Brand / Sponsor'
+                  : userType === 'organizer'
+                  ? 'Event Organizer'
+                  : 'Community Member'}
+              </strong>
+              :
+              {userType === 'brand'
+                ? ' Perfect for companies looking to promote products or services through events.'
+                : userType === 'organizer'
+                ? ' Ideal for those organizing events and seeking brand partnerships.'
+                : ' Join our community to participate in events and test panels.'}
+            </p>
+          </div>
+          <FormField
+            label='Email Address'
+            id='email'
+            type='email'
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder='your@email.com'
+          />
+          <div className='space-y-1'>
+            <label
+              htmlFor='password'
+              className='block text-sm font-medium text-gray-800'
+            >
+              Password <span className='text-red-500'>*</span>
+            </label>
+            <div className='relative'>
+              <input
+                id='password'
+                type={showPassword ? 'text' : 'password'}
+                className='block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
+                onClick={() => {
+                  setShowPassword(!showPassword)
+                  trackEvent(
+                    EVENTS.FORM_SUBMITTED,
+                    {
+                      field: 'showPassword',
+                      value: !showPassword
+                    },
+                    undefined,
+                    EXPERIMENTS.LOGIN_REGISTRATION,
+                    experimentVariant
+                  )
+                }}
+              >
+                {showPassword ? (
+                  <EyeOffIcon className='h-5 w-5 text-gray-400' />
+                ) : (
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
+                )}
+              </button>
+            </div>
+            {/* Password strength meter */}
+            <div className='mt-2'>
+              <div className='flex space-x-1 mb-1'>
+                {[...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 flex-1 rounded-full ${
+                      i < passwordStrength
+                        ? passwordStrength === 1
+                          ? 'bg-red-500'
+                          : passwordStrength === 2
+                          ? 'bg-yellow-500'
+                          : passwordStrength === 3
+                          ? 'bg-green-400'
+                          : 'bg-green-600'
+                        : 'bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className='text-xs text-gray-500'>
+                {passwordStrength === 0 && 'Very weak'}
+                {passwordStrength === 1 && 'Weak'}
+                {passwordStrength === 2 && 'Medium'}
+                {passwordStrength === 3 && 'Strong'}
+                {passwordStrength === 4 && 'Very strong'}
+              </p>
+            </div>
+            {/* Password requirements */}
+            <div className='mt-2 space-y-1'>
+              <p className='text-xs text-gray-500 mb-1'>Password must have:</p>
+              <ul className='space-y-1'>
+                <li className='flex items-center text-xs'>
+                  {passwordErrors.length ? (
+                    <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
+                  ) : (
+                    <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
+                  )}
+                  <span
+                    className={
+                      passwordErrors.length ? 'text-red-600' : 'text-green-600'
+                    }
+                  >
+                    At least 8 characters
+                  </span>
+                </li>
+                <li className='flex items-center text-xs'>
+                  {passwordErrors.uppercase ? (
+                    <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
+                  ) : (
+                    <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
+                  )}
+                  <span
+                    className={
+                      passwordErrors.uppercase
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                    }
+                  >
+                    At least one uppercase letter
+                  </span>
+                </li>
+                <li className='flex items-center text-xs'>
+                  {passwordErrors.lowercase ? (
+                    <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
+                  ) : (
+                    <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
+                  )}
+                  <span
+                    className={
+                      passwordErrors.lowercase
+                        ? 'text-red-600'
+                        : 'text-green-600'
+                    }
+                  >
+                    At least one lowercase letter
+                  </span>
+                </li>
+                <li className='flex items-center text-xs'>
+                  {passwordErrors.number ? (
+                    <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
+                  ) : (
+                    <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
+                  )}
+                  <span
+                    className={
+                      passwordErrors.number ? 'text-red-600' : 'text-green-600'
+                    }
+                  >
+                    At least one number
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className='space-y-1'>
+            <label
+              htmlFor='confirmPassword'
+              className='block text-sm font-medium text-gray-800'
+            >
+              Confirm Password <span className='text-red-500'>*</span>
+            </label>
+            <div className='relative'>
+              <input
+                id='confirmPassword'
+                type={showConfirmPassword ? 'text' : 'password'}
+                className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+                  confirmPassword && password !== confirmPassword
+                    ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+                    : ''
+                }`}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button
+                type='button'
+                className='absolute inset-y-0 right-0 pr-3 flex items-center'
+                onClick={() => {
+                  setShowConfirmPassword(!showConfirmPassword)
+                  trackEvent(
+                    EVENTS.FORM_SUBMITTED,
+                    {
+                      field: 'showConfirmPassword',
+                      value: !showConfirmPassword
+                    },
+                    undefined,
+                    EXPERIMENTS.LOGIN_REGISTRATION,
+                    experimentVariant
+                  )
+                }}
+              >
+                {showConfirmPassword ? (
+                  <EyeOffIcon className='h-5 w-5 text-gray-400' />
+                ) : (
+                  <EyeIcon className='h-5 w-5 text-gray-400' />
+                )}
+              </button>
+            </div>
+            {confirmPassword && password !== confirmPassword && (
+              <p className='mt-1 text-xs text-red-600'>
+                Passwords do not match
+              </p>
+            )}
+          </div>
+          <div className='pt-2'>
+            <Button
+              type='submit'
+              variant='primary'
+              className='w-full'
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating account...' : 'Create Account'}
+            </Button>
+          </div>
+        </div>
+      </form>
+    )
+  }
+
   // Render current variant
   const renderCurrentVariant = () => {
     // Use the existing variant rendering functions but wrap them in the new tech design
@@ -555,596 +1153,6 @@ export function Register() {
         }
         isVisible={toast.isVisible}
       />
-      <style jsx>{`
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        .animate-spin-slow {
-          animation: spin-slow linear infinite;
-        }
-      `}</style>
     </TechLayout>
-  )
-}
-// Keep the existing variant rendering functions
-function renderVariantA() {
-  return (
-    <form onSubmit={handleSubmit}>
-      <div className='space-y-4'>
-        <FormField
-          label='I am a'
-          id='userType'
-          type='select'
-          options={[
-            {
-              value: 'brand',
-              label: 'Brand / Sponsor'
-            },
-            {
-              value: 'organizer',
-              label: 'Event Organizer'
-            },
-            {
-              value: 'community',
-              label: 'Community Member'
-            }
-          ]}
-          value={userType}
-          onChange={(e) =>
-            setUserType(e.target.value as 'brand' | 'organizer' | 'community')
-          }
-        />
-        <FormField
-          label='Email Address'
-          id='email'
-          type='email'
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder='your@email.com'
-        />
-        <div className='space-y-1'>
-          <label
-            htmlFor='password'
-            className='block text-sm font-medium text-gray-800'
-          >
-            Password <span className='text-red-500'>*</span>
-          </label>
-          <div className='relative'>
-            <input
-              id='password'
-              type={showPassword ? 'text' : 'password'}
-              className='block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button
-              type='button'
-              className='absolute inset-y-0 right-0 pr-3 flex items-center'
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOffIcon className='h-5 w-5 text-gray-400' />
-              ) : (
-                <EyeIcon className='h-5 w-5 text-gray-400' />
-              )}
-            </button>
-          </div>
-        </div>
-        <div className='space-y-1'>
-          <label
-            htmlFor='confirmPassword'
-            className='block text-sm font-medium text-gray-800'
-          >
-            Confirm Password <span className='text-red-500'>*</span>
-          </label>
-          <div className='relative'>
-            <input
-              id='confirmPassword'
-              type={showConfirmPassword ? 'text' : 'password'}
-              className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-                confirmPassword && password !== confirmPassword
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                  : ''
-              }`}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-            <button
-              type='button'
-              className='absolute inset-y-0 right-0 pr-3 flex items-center'
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? (
-                <EyeOffIcon className='h-5 w-5 text-gray-400' />
-              ) : (
-                <EyeIcon className='h-5 w-5 text-gray-400' />
-              )}
-            </button>
-          </div>
-          {confirmPassword && password !== confirmPassword && (
-            <p className='mt-1 text-xs text-red-600'>Passwords do not match</p>
-          )}
-        </div>
-        <div className='pt-2'>
-          <Button
-            type='submit'
-            variant='primary'
-            className='w-full'
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Creating account...' : 'Create Account'}
-          </Button>
-        </div>
-      </div>
-    </form>
-  )
-}
-function renderVariantB() {
-  return (
-    <form onSubmit={handleSubmit}>
-      <div className='space-y-4'>
-        <FormField
-          label='I am a'
-          id='userType'
-          type='select'
-          options={[
-            {
-              value: 'brand',
-              label: 'Brand / Sponsor'
-            },
-            {
-              value: 'organizer',
-              label: 'Event Organizer'
-            },
-            {
-              value: 'community',
-              label: 'Community Member'
-            }
-          ]}
-          value={userType}
-          onChange={(e) =>
-            setUserType(e.target.value as 'brand' | 'organizer' | 'community')
-          }
-        />
-        <FormField
-          label='Email Address'
-          id='email'
-          type='email'
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder='your@email.com'
-        />
-        <div className='space-y-1'>
-          <label
-            htmlFor='password'
-            className='block text-sm font-medium text-gray-800'
-          >
-            Password <span className='text-red-500'>*</span>
-          </label>
-          <div className='relative'>
-            <input
-              id='password'
-              type={showPassword ? 'text' : 'password'}
-              className='block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button
-              type='button'
-              className='absolute inset-y-0 right-0 pr-3 flex items-center'
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? (
-                <EyeOffIcon className='h-5 w-5 text-gray-400' />
-              ) : (
-                <EyeIcon className='h-5 w-5 text-gray-400' />
-              )}
-            </button>
-          </div>
-          {/* Password strength meter */}
-          <div className='mt-2'>
-            <div className='flex space-x-1 mb-1'>
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1.5 flex-1 rounded-full ${
-                    i < passwordStrength
-                      ? passwordStrength === 1
-                        ? 'bg-red-500'
-                        : passwordStrength === 2
-                        ? 'bg-yellow-500'
-                        : passwordStrength === 3
-                        ? 'bg-green-400'
-                        : 'bg-green-600'
-                      : 'bg-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
-            <p className='text-xs text-gray-500'>
-              {passwordStrength === 0 && 'Very weak'}
-              {passwordStrength === 1 && 'Weak'}
-              {passwordStrength === 2 && 'Medium'}
-              {passwordStrength === 3 && 'Strong'}
-              {passwordStrength === 4 && 'Very strong'}
-            </p>
-          </div>
-          {/* Password requirements */}
-          <div className='mt-2 space-y-1'>
-            <p className='text-xs text-gray-500 mb-1'>Password must have:</p>
-            <ul className='space-y-1'>
-              <li className='flex items-center text-xs'>
-                {passwordErrors.length ? (
-                  <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
-                ) : (
-                  <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
-                )}
-                <span
-                  className={
-                    passwordErrors.length ? 'text-red-600' : 'text-green-600'
-                  }
-                >
-                  At least 8 characters
-                </span>
-              </li>
-              <li className='flex items-center text-xs'>
-                {passwordErrors.uppercase ? (
-                  <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
-                ) : (
-                  <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
-                )}
-                <span
-                  className={
-                    passwordErrors.uppercase ? 'text-red-600' : 'text-green-600'
-                  }
-                >
-                  At least one uppercase letter
-                </span>
-              </li>
-              <li className='flex items-center text-xs'>
-                {passwordErrors.lowercase ? (
-                  <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
-                ) : (
-                  <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
-                )}
-                <span
-                  className={
-                    passwordErrors.lowercase ? 'text-red-600' : 'text-green-600'
-                  }
-                >
-                  At least one lowercase letter
-                </span>
-              </li>
-              <li className='flex items-center text-xs'>
-                {passwordErrors.number ? (
-                  <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
-                ) : (
-                  <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
-                )}
-                <span
-                  className={
-                    passwordErrors.number ? 'text-red-600' : 'text-green-600'
-                  }
-                >
-                  At least one number
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className='space-y-1'>
-          <label
-            htmlFor='confirmPassword'
-            className='block text-sm font-medium text-gray-800'
-          >
-            Confirm Password <span className='text-red-500'>*</span>
-          </label>
-          <div className='relative'>
-            <input
-              id='confirmPassword'
-              type={showConfirmPassword ? 'text' : 'password'}
-              className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-                confirmPassword && password !== confirmPassword
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                  : ''
-              }`}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-            <button
-              type='button'
-              className='absolute inset-y-0 right-0 pr-3 flex items-center'
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            >
-              {showConfirmPassword ? (
-                <EyeOffIcon className='h-5 w-5 text-gray-400' />
-              ) : (
-                <EyeIcon className='h-5 w-5 text-gray-400' />
-              )}
-            </button>
-          </div>
-          {confirmPassword && password !== confirmPassword && (
-            <p className='mt-1 text-xs text-red-600'>Passwords do not match</p>
-          )}
-        </div>
-        <div className='pt-2'>
-          <Button
-            type='submit'
-            variant='primary'
-            className='w-full'
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Creating account...' : 'Create Account'}
-          </Button>
-        </div>
-      </div>
-    </form>
-  )
-}
-function renderVariantC() {
-  return (
-    <form onSubmit={handleSubmit}>
-      <div className='space-y-4'>
-        <FormField
-          label='I am a'
-          id='userType'
-          type='select'
-          options={[
-            {
-              value: 'brand',
-              label: 'Brand / Sponsor'
-            },
-            {
-              value: 'organizer',
-              label: 'Event Organizer'
-            },
-            {
-              value: 'community',
-              label: 'Community Member'
-            }
-          ]}
-          value={userType}
-          onChange={(e) => {
-            setUserType(e.target.value as 'brand' | 'organizer' | 'community')
-            trackEvent(
-              EVENTS.FORM_SUBMITTED,
-              {
-                field: 'userType',
-                value: e.target.value
-              },
-              undefined,
-              EXPERIMENTS.LOGIN_REGISTRATION,
-              experimentVariant
-            )
-          }}
-        />
-        <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2'>
-          <p className='text-sm text-blue-800'>
-            <strong>
-              {userType === 'brand'
-                ? 'Brand / Sponsor'
-                : userType === 'organizer'
-                ? 'Event Organizer'
-                : 'Community Member'}
-            </strong>
-            :
-            {userType === 'brand'
-              ? ' Perfect for companies looking to promote products or services through events.'
-              : userType === 'organizer'
-              ? ' Ideal for those organizing events and seeking brand partnerships.'
-              : ' Join our community to participate in events and test panels.'}
-          </p>
-        </div>
-        <FormField
-          label='Email Address'
-          id='email'
-          type='email'
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder='your@email.com'
-        />
-        <div className='space-y-1'>
-          <label
-            htmlFor='password'
-            className='block text-sm font-medium text-gray-800'
-          >
-            Password <span className='text-red-500'>*</span>
-          </label>
-          <div className='relative'>
-            <input
-              id='password'
-              type={showPassword ? 'text' : 'password'}
-              className='block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button
-              type='button'
-              className='absolute inset-y-0 right-0 pr-3 flex items-center'
-              onClick={() => {
-                setShowPassword(!showPassword)
-                trackEvent(
-                  EVENTS.FORM_SUBMITTED,
-                  {
-                    field: 'showPassword',
-                    value: !showPassword
-                  },
-                  undefined,
-                  EXPERIMENTS.LOGIN_REGISTRATION,
-                  experimentVariant
-                )
-              }}
-            >
-              {showPassword ? (
-                <EyeOffIcon className='h-5 w-5 text-gray-400' />
-              ) : (
-                <EyeIcon className='h-5 w-5 text-gray-400' />
-              )}
-            </button>
-          </div>
-          {/* Password strength meter */}
-          <div className='mt-2'>
-            <div className='flex space-x-1 mb-1'>
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1.5 flex-1 rounded-full ${
-                    i < passwordStrength
-                      ? passwordStrength === 1
-                        ? 'bg-red-500'
-                        : passwordStrength === 2
-                        ? 'bg-yellow-500'
-                        : passwordStrength === 3
-                        ? 'bg-green-400'
-                        : 'bg-green-600'
-                      : 'bg-gray-200'
-                  }`}
-                />
-              ))}
-            </div>
-            <p className='text-xs text-gray-500'>
-              {passwordStrength === 0 && 'Very weak'}
-              {passwordStrength === 1 && 'Weak'}
-              {passwordStrength === 2 && 'Medium'}
-              {passwordStrength === 3 && 'Strong'}
-              {passwordStrength === 4 && 'Very strong'}
-            </p>
-          </div>
-          {/* Password requirements */}
-          <div className='mt-2 space-y-1'>
-            <p className='text-xs text-gray-500 mb-1'>Password must have:</p>
-            <ul className='space-y-1'>
-              <li className='flex items-center text-xs'>
-                {passwordErrors.length ? (
-                  <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
-                ) : (
-                  <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
-                )}
-                <span
-                  className={
-                    passwordErrors.length ? 'text-red-600' : 'text-green-600'
-                  }
-                >
-                  At least 8 characters
-                </span>
-              </li>
-              <li className='flex items-center text-xs'>
-                {passwordErrors.uppercase ? (
-                  <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
-                ) : (
-                  <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
-                )}
-                <span
-                  className={
-                    passwordErrors.uppercase ? 'text-red-600' : 'text-green-600'
-                  }
-                >
-                  At least one uppercase letter
-                </span>
-              </li>
-              <li className='flex items-center text-xs'>
-                {passwordErrors.lowercase ? (
-                  <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
-                ) : (
-                  <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
-                )}
-                <span
-                  className={
-                    passwordErrors.lowercase ? 'text-red-600' : 'text-green-600'
-                  }
-                >
-                  At least one lowercase letter
-                </span>
-              </li>
-              <li className='flex items-center text-xs'>
-                {passwordErrors.number ? (
-                  <XCircleIcon className='h-3.5 w-3.5 text-red-500 mr-1.5' />
-                ) : (
-                  <CheckCircleIcon className='h-3.5 w-3.5 text-green-500 mr-1.5' />
-                )}
-                <span
-                  className={
-                    passwordErrors.number ? 'text-red-600' : 'text-green-600'
-                  }
-                >
-                  At least one number
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div className='space-y-1'>
-          <label
-            htmlFor='confirmPassword'
-            className='block text-sm font-medium text-gray-800'
-          >
-            Confirm Password <span className='text-red-500'>*</span>
-          </label>
-          <div className='relative'>
-            <input
-              id='confirmPassword'
-              type={showConfirmPassword ? 'text' : 'password'}
-              className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-                confirmPassword && password !== confirmPassword
-                  ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                  : ''
-              }`}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-            <button
-              type='button'
-              className='absolute inset-y-0 right-0 pr-3 flex items-center'
-              onClick={() => {
-                setShowConfirmPassword(!showConfirmPassword)
-                trackEvent(
-                  EVENTS.FORM_SUBMITTED,
-                  {
-                    field: 'showConfirmPassword',
-                    value: !showConfirmPassword
-                  },
-                  undefined,
-                  EXPERIMENTS.LOGIN_REGISTRATION,
-                  experimentVariant
-                )
-              }}
-            >
-              {showConfirmPassword ? (
-                <EyeOffIcon className='h-5 w-5 text-gray-400' />
-              ) : (
-                <EyeIcon className='h-5 w-5 text-gray-400' />
-              )}
-            </button>
-          </div>
-          {confirmPassword && password !== confirmPassword && (
-            <p className='mt-1 text-xs text-red-600'>Passwords do not match</p>
-          )}
-        </div>
-        <div className='pt-2'>
-          <Button
-            type='submit'
-            variant='primary'
-            className='w-full'
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Creating account...' : 'Create Account'}
-          </Button>
-        </div>
-      </div>
-    </form>
   )
 }

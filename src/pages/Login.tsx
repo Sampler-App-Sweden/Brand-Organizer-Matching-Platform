@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { FormField, Button, Toast } from '../components/ui'
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { getDraftsByEmail } from '../services/draftService'
 import { trackEvent, EVENTS } from '../services/analyticsService'
+
 export function Login() {
   const location = useLocation()
   const [email, setEmail] = useState('')

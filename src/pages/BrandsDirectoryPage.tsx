@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Layout } from '../components/layout'
 import { DirectoryFilters } from '../components/directory/DirectoryFilters'
 import { DirectoryGrid } from '../components/directory/DirectoryGrid'
@@ -7,6 +7,7 @@ import { getAllCommunityMembers } from '../services/communityService'
 import { CommunityMember, CommunityQueryParams } from '../types/community'
 import { SparklesIcon, ArrowRightIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
+
 export function BrandsDirectoryPage() {
   const [members, setMembers] = useState<CommunityMember[]>([])
   const [loading, setLoading] = useState(true)

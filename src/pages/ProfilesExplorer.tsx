@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getProfiles, getProfilesByRole } from '../services/profileService'
 import { Layout } from '../components/layout'
 import { SearchIcon, FilterIcon, UsersIcon, PackageIcon } from 'lucide-react'
