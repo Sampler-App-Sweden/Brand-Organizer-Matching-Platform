@@ -1,32 +1,34 @@
-import React, { useState, useEffect } from 'react'
+import {
+  BriefcaseIcon,
+  BuildingIcon,
+  CalendarIcon,
+  CheckCircleIcon,
+  DollarSignIcon,
+  GlobeIcon,
+  ImageIcon,
+  MapPinIcon,
+  MegaphoneIcon,
+  PhoneIcon,
+  PresentationIcon,
+  TargetIcon,
+  UploadIcon,
+  UserIcon,
+  UsersIcon
+} from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { Layout } from '../components/layout'
 import {
-  FormField,
   Button,
+  FormField,
   SelectionCard,
   StepIndicator,
   Toast
 } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../services/supabaseClient'
-import {
-  BuildingIcon,
-  UserIcon,
-  PhoneIcon,
-  GlobeIcon,
-  CalendarIcon,
-  MapPinIcon,
-  UsersIcon,
-  DollarSignIcon,
-  MegaphoneIcon,
-  TargetIcon,
-  CheckCircleIcon,
-  BriefcaseIcon,
-  ImageIcon,
-  UploadIcon,
-  PresentationIcon
-} from 'lucide-react'
+
 export function OrganizerForm() {
   const navigate = useNavigate()
   const { register, currentUser } = useAuth()
@@ -197,13 +199,12 @@ export function OrganizerForm() {
         newErrors.organizerName = 'Organization name is required'
       if (!formData.contactName.trim())
         newErrors.contactName = 'Contact name is required'
-      if (!formData.email.trim()) newErrors.email = 'Email is required'
-      else if (!/\S+@\S+\.\S+/.test(formData.email))
-        newErrors.email = 'Email is invalid'
-      
+      // Remove email validation
+
       // Only validate password for new registrations (not logged-in users)
       if (!currentUser) {
-        if (!formData.password.trim()) newErrors.password = 'Password is required'
+        if (!formData.password.trim())
+          newErrors.password = 'Password is required'
         else if (formData.password.length < 6)
           newErrors.password = 'Password must be at least 6 characters'
         if (formData.password !== formData.confirmPassword)
@@ -243,6 +244,7 @@ export function OrganizerForm() {
     e.preventDefault()
     if (!validateStep(currentStep)) return
     setIsSubmitting(true)
+
     try {
       let userId: string
 
@@ -253,7 +255,6 @@ export function OrganizerForm() {
         const organizerData = {
           organizer_name: formData.organizerName,
           contact_name: formData.contactName,
-          email: formData.email,
           phone: formData.phone,
           website: formData.website,
           address: formData.address,
@@ -283,32 +284,23 @@ export function OrganizerForm() {
           media_files: []
         }
 
-        // Check if organizer exists
-        const { data: existing } = await supabase
+        // Use upsert to insert or update
+        const { error: organizerError } = await supabase
           .from('organizers')
-          .select('id')
-          .eq('user_id', userId)
-          .single()
+          .upsert(
+            {
+              ...organizerData,
+              user_id: userId
+            },
+            {
+              onConflict: 'user_id' // Ensures update if user_id exists
+            }
+          )
 
-        if (existing) {
-          // Update existing organizer
-          const { error: organizerError } = await supabase
-            .from('organizers')
-            .update(organizerData)
-            .eq('user_id', userId)
-
-          if (organizerError) {
-            throw new Error(`Failed to update organizer profile: ${organizerError.message}`)
-          }
-        } else {
-          // Insert new organizer for existing user
-          const { error: organizerError } = await supabase
-            .from('organizers')
-            .insert([{ ...organizerData, user_id: userId }])
-
-          if (organizerError) {
-            throw new Error(`Failed to create organizer profile: ${organizerError.message}`)
-          }
+        if (organizerError) {
+          throw new Error(
+            `Failed to save organizer profile: ${organizerError.message}`
+          )
         }
 
         setToast({
@@ -321,7 +313,7 @@ export function OrganizerForm() {
           navigate('/dashboard/organizer')
         }, 1500)
       } else {
-        // New registration
+        // New registration - keep existing logic
         const user = await register(
           formData.email,
           formData.password,
@@ -330,40 +322,40 @@ export function OrganizerForm() {
         )
         userId = user.id
 
-        // Insert organizer data into Supabase
         const { error: organizerError } = await supabase
           .from('organizers')
           .insert([
             {
               user_id: userId,
-            organizer_name: formData.organizerName,
-            contact_name: formData.contactName,
-            email: formData.email,
-            phone: formData.phone,
-            website: formData.website,
-            address: formData.address,
-            postal_code: formData.postalCode,
-            city: formData.city,
-            event_name: formData.eventName,
-            event_type: formData.eventType,
-            elevator_pitch: formData.elevatorPitch,
-            event_frequency: formData.eventFrequency,
-            event_date: formData.eventDate,
-            location: formData.location,
-            attendee_count: formData.attendeeCount,
-            audience_description: formData.audienceDescription,
-            audience_demographics: formData.audienceDemographics,
-            sponsorship_needs: formData.sponsorshipNeeds,
-            seeking_financial_sponsorship: formData.seekingFinancialSponsorship,
-            financial_sponsorship_amount: formData.financialSponsorshipAmount,
-            financial_sponsorship_offers: formData.financialSponsorshipOffers,
-            offering_types: formData.offeringTypes,
-            brand_visibility: formData.brandVisibility,
-            content_creation: formData.contentCreation,
-            lead_generation: formData.leadGeneration,
-            product_feedback: formData.productFeedback,
-            bonus_value: formData.bonusValue,
-            bonus_value_details: formData.bonusValueDetails,
+              organizer_name: formData.organizerName,
+              contact_name: formData.contactName,
+              email: formData.email,
+              phone: formData.phone,
+              website: formData.website,
+              address: formData.address,
+              postal_code: formData.postalCode,
+              city: formData.city,
+              event_name: formData.eventName,
+              event_type: formData.eventType,
+              elevator_pitch: formData.elevatorPitch,
+              event_frequency: formData.eventFrequency,
+              event_date: formData.eventDate,
+              location: formData.location,
+              attendee_count: formData.attendeeCount,
+              audience_description: formData.audienceDescription,
+              audience_demographics: formData.audienceDemographics,
+              sponsorship_needs: formData.sponsorshipNeeds,
+              seeking_financial_sponsorship:
+                formData.seekingFinancialSponsorship,
+              financial_sponsorship_amount: formData.financialSponsorshipAmount,
+              financial_sponsorship_offers: formData.financialSponsorshipOffers,
+              offering_types: formData.offeringTypes,
+              brand_visibility: formData.brandVisibility,
+              content_creation: formData.contentCreation,
+              lead_generation: formData.leadGeneration,
+              product_feedback: formData.productFeedback,
+              bonus_value: formData.bonusValue,
+              bonus_value_details: formData.bonusValueDetails,
               additional_info: formData.additionalInfo,
               media_files: []
             }
@@ -401,14 +393,13 @@ export function OrganizerForm() {
         console.warn('Failed to update profile:', profileError)
       }
     } catch (error) {
+      console.error('Submit error:', error)
       setToast({
         isVisible: true,
         type: 'error',
-        message:
-          error instanceof Error
-            ? error.message
-            : 'An error occurred during registration'
+        message: error instanceof Error ? error.message : 'An error occurred'
       })
+    } finally {
       setIsSubmitting(false)
     }
   }
@@ -585,7 +576,9 @@ export function OrganizerForm() {
         <div className='max-w-3xl mx-auto px-4 py-12'>
           <div className='text-center mb-8'>
             <h1 className='text-3xl font-bold text-gray-900 mb-2'>
-              {currentUser ? 'Update Organizer Profile' : 'Organizer Registration'}
+              {currentUser
+                ? 'Update Organizer Profile'
+                : 'Organizer Registration'}
             </h1>
             <p className='text-gray-600'>
               {currentUser
@@ -596,418 +589,440 @@ export function OrganizerForm() {
           {isLoading && (
             <div className='text-center py-12'>
               <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto'></div>
-              <p className='mt-4 text-gray-600'>Loading your organizer information...</p>
+              <p className='mt-4 text-gray-600'>
+                Loading your organizer information...
+              </p>
             </div>
           )}
           {!isLoading && (
-          <>
-          <div className='mb-8'>
-            <StepIndicator
-              currentStep={currentStep}
-              totalSteps={totalSteps}
-              labels={stepLabels}
-            />
-          </div>
-          <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8'>
-            <form onSubmit={handleSubmit}>
-              {currentStep === 1 && (
-                <div className='space-y-6'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-                    <BuildingIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    Organization Information
-                  </h2>
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <FormField
-                      label='Organization Name'
-                      id='organizerName'
-                      required
-                      value={formData.organizerName}
-                      onChange={handleInputChange}
-                      error={errors.organizerName}
-                    />
-                    <FormField
-                      label='Contact Name'
-                      id='contactName'
-                      required
-                      value={formData.contactName}
-                      onChange={handleInputChange}
-                      error={errors.contactName}
-                    />
-                  </div>
-                  <FormField
-                    label='Email Address'
-                    id='email'
-                    type='email'
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    error={errors.email}
-                    disabled={!!currentUser}
-                  />
-                  {!currentUser && (
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                      <FormField
-                        label='Password'
-                        id='password'
-                        type='password'
-                        required
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        error={errors.password}
-                      />
-                      <FormField
-                        label='Confirm Password'
-                        id='confirmPassword'
-                        type='password'
-                        required
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        error={errors.confirmPassword}
-                      />
-                    </div>
-                  )}
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <FormField
-                      label='Phone Number'
-                      id='phone'
-                      type='tel'
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
-                    <FormField
-                      label='Website'
-                      id='website'
-                      type='url'
-                      value={formData.website}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-                    <div className='md:col-span-1'>
-                      <FormField
-                        label='Address'
-                        id='address'
-                        value={formData.address}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <FormField
-                        label='Postal Code'
-                        id='postalCode'
-                        value={formData.postalCode}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <FormField
-                        label='City'
-                        id='city'
-                        value={formData.city}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              {currentStep === 2 && (
-                <div className='space-y-6'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-                    <CalendarIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    Event Information
-                  </h2>
-                  <FormField
-                    label='Event Name'
-                    id='eventName'
-                    required
-                    value={formData.eventName}
-                    onChange={handleInputChange}
-                    error={errors.eventName}
-                  />
-                  <FormField
-                    label='Event Type'
-                    id='eventType'
-                    type='select'
-                    options={eventTypeOptions}
-                    required
-                    value={formData.eventType}
-                    onChange={handleInputChange}
-                    error={errors.eventType}
-                  />
-                  <FormField
-                    label='Elevator Pitch'
-                    id='elevatorPitch'
-                    textarea
-                    placeholder='Briefly describe your event in 1-2 sentences'
-                    value={formData.elevatorPitch}
-                    onChange={handleInputChange}
-                  />
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <FormField
-                      label='Event Frequency'
-                      id='eventFrequency'
-                      type='select'
-                      options={eventFrequencyOptions}
-                      required
-                      value={formData.eventFrequency}
-                      onChange={handleInputChange}
-                      error={errors.eventFrequency}
-                    />
-                    <FormField
-                      label='Event Date'
-                      id='eventDate'
-                      type='date'
-                      value={formData.eventDate}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <FormField
-                    label='Location'
-                    id='location'
-                    placeholder='Venue or location of the event'
-                    value={formData.location}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              )}
-              {currentStep === 3 && (
-                <div className='space-y-6'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-                    <UsersIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    Audience Information
-                  </h2>
-                  <FormField
-                    label='Expected Attendee Count'
-                    id='attendeeCount'
-                    type='select'
-                    options={attendeeCountOptions}
-                    required
-                    value={formData.attendeeCount}
-                    onChange={handleInputChange}
-                    error={errors.attendeeCount}
-                  />
-                  <FormField
-                    label='Audience Description'
-                    id='audienceDescription'
-                    textarea
-                    required
-                    placeholder='Describe your typical attendees, their interests, and demographics'
-                    value={formData.audienceDescription}
-                    onChange={handleInputChange}
-                    error={errors.audienceDescription}
-                  />
-                  <div>
-                    <label className='block text-sm font-medium text-gray-800 mb-2'>
-                      Audience Age Demographics
-                      {errors.audienceDemographics && (
-                        <span className='text-red-500 ml-1 text-xs'>
-                          {errors.audienceDemographics}
-                        </span>
-                      )}
-                    </label>
-                    <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                      {demographicOptions.map((demo) => (
-                        <SelectionCard
-                          key={demo.id}
-                          id={demo.id}
-                          label={demo.label}
-                          icon={demo.icon}
-                          isSelected={formData.audienceDemographics.includes(
-                            demo.id
-                          )}
-                          onClick={() =>
-                            handleMultiSelectChange(
-                              'audienceDemographics',
-                              demo.id
-                            )
-                          }
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <FormField
-                    label='Sponsorship Needs'
-                    id='sponsorshipNeeds'
-                    textarea
-                    placeholder="Describe what kinds of sponsors you're looking for and why"
-                    value={formData.sponsorshipNeeds}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              )}
-              {currentStep === 4 && (
-                <div className='space-y-6'>
-                  <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-                    <BriefcaseIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    Sponsorship Offerings
-                  </h2>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-800 mb-2'>
-                      Are you seeking financial sponsorship?
-                    </label>
-                    <div className='grid grid-cols-2 gap-4'>
-                      <SelectionCard
-                        id='financial-yes'
-                        label='Yes'
-                        isSelected={
-                          formData.seekingFinancialSponsorship === 'yes'
-                        }
-                        onClick={() =>
-                          handleRadioChange(
-                            'seekingFinancialSponsorship',
-                            'yes'
-                          )
-                        }
-                      />
-                      <SelectionCard
-                        id='financial-no'
-                        label='No'
-                        isSelected={
-                          formData.seekingFinancialSponsorship === 'no'
-                        }
-                        onClick={() =>
-                          handleRadioChange('seekingFinancialSponsorship', 'no')
-                        }
-                      />
-                    </div>
-                  </div>
-                  {formData.seekingFinancialSponsorship === 'yes' && (
-                    <>
-                      <FormField
-                        label='Financial Sponsorship Amount'
-                        id='financialSponsorshipAmount'
-                        placeholder='e.g., 50,000 SEK'
-                        value={formData.financialSponsorshipAmount}
-                        onChange={handleInputChange}
-                      />
-                      <FormField
-                        label='What sponsors receive for financial support'
-                        id='financialSponsorshipOffers'
-                        textarea
-                        placeholder='Describe what sponsors will receive in return for financial support'
-                        value={formData.financialSponsorshipOffers}
-                        onChange={handleInputChange}
-                      />
-                    </>
-                  )}
-                  <div>
-                    <label className='block text-sm font-medium text-gray-800 mb-2'>
-                      What can you offer sponsors?
-                      {errors.offeringTypes && (
-                        <span className='text-red-500 ml-1 text-xs'>
-                          {errors.offeringTypes}
-                        </span>
-                      )}
-                    </label>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
-                      {offeringTypes.map((type) => (
-                        <SelectionCard
-                          key={type.id}
-                          id={type.id}
-                          label={type.label}
-                          description={type.description}
-                          icon={type.icon}
-                          isSelected={formData.offeringTypes.includes(type.id)}
-                          onClick={() =>
-                            handleMultiSelectChange('offeringTypes', type.id)
-                          }
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  {formData.offeringTypes.includes('brand_visibility') && (
-                    <FormField
-                      label='Brand Visibility Details'
-                      id='brandVisibility'
-                      textarea
-                      placeholder='Describe how brands will be visible at your event'
-                      value={formData.brandVisibility}
-                      onChange={handleInputChange}
-                    />
-                  )}
-                  {formData.offeringTypes.includes('content_creation') && (
-                    <FormField
-                      label='Content Creation Details'
-                      id='contentCreation'
-                      textarea
-                      placeholder='Describe what kind of content you can create for sponsors'
-                      value={formData.contentCreation}
-                      onChange={handleInputChange}
-                    />
-                  )}
-                  <div>
-                    <label className='block text-sm font-medium text-gray-800 mb-2'>
-                      Bonus Value
-                    </label>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
-                      {bonusValueOptions.map((option) => (
-                        <SelectionCard
-                          key={option.id}
-                          id={option.id}
-                          label={option.label}
-                          description={option.description}
-                          icon={option.icon}
-                          isSelected={formData.bonusValue.includes(option.id)}
-                          onClick={() =>
-                            handleMultiSelectChange('bonusValue', option.id)
-                          }
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  {formData.bonusValue.length > 0 && (
-                    <FormField
-                      label='Bonus Value Details'
-                      id='bonusValueDetails'
-                      textarea
-                      placeholder='Provide more details about the bonus value you offer'
-                      value={formData.bonusValueDetails}
-                      onChange={handleInputChange}
-                    />
-                  )}
-                  <FormField
-                    label='Additional Information'
-                    id='additionalInfo'
-                    textarea
-                    placeholder="Any other details you'd like to share with potential sponsors"
-                    value={formData.additionalInfo}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              )}
-              <div className='mt-8 flex justify-between'>
-                {currentStep > 1 && (
-                  <Button type='button' onClick={prevStep} variant='outline'>
-                    Previous
-                  </Button>
-                )}
-                {currentStep < totalSteps ? (
-                  <Button
-                    type='button'
-                    onClick={nextStep}
-                    variant='primary'
-                    className='ml-auto'
-                  >
-                    Next
-                  </Button>
-                ) : (
-                  <Button
-                    type='submit'
-                    variant='primary'
-                    className='ml-auto'
-                    isLoading={isSubmitting}
-                  >
-                    {isSubmitting 
-                      ? 'Submitting...' 
-                      : currentUser 
-                      ? 'Update Profile' 
-                      : 'Complete Registration'}
-                  </Button>
-                )}
+            <>
+              <div className='mb-8'>
+                <StepIndicator
+                  currentStep={currentStep}
+                  totalSteps={totalSteps}
+                  labels={stepLabels}
+                />
               </div>
-            </form>
-          </div>
-          </>
+              <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8'>
+                <form onSubmit={handleSubmit}>
+                  {currentStep === 1 && (
+                    <div className='space-y-6'>
+                      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
+                        <BuildingIcon className='h-5 w-5 text-indigo-500 mr-2' />
+                        Organization Information
+                      </h2>
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                        <FormField
+                          label='Organization Name'
+                          id='organizerName'
+                          required
+                          value={formData.organizerName}
+                          onChange={handleInputChange}
+                          error={errors.organizerName}
+                        />
+                        <FormField
+                          label='Contact Name'
+                          id='contactName'
+                          required
+                          value={formData.contactName}
+                          onChange={handleInputChange}
+                          error={errors.contactName}
+                        />
+                      </div>
+                      {/* Email field - Display only */}
+                      <div>
+                        <label className='block text-sm font-medium text-gray-700 mb-2'>
+                          Email Address
+                        </label>
+                        <input
+                          type='email'
+                          value={currentUser?.email || ''}
+                          disabled
+                          className='mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
+                        />
+                        <p className='mt-1 text-xs text-gray-500'>
+                          Your email is linked to your account and cannot be
+                          changed here.
+                        </p>
+                      </div>
+                      {!currentUser && (
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                          <FormField
+                            label='Password'
+                            id='password'
+                            type='password'
+                            required
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            error={errors.password}
+                          />
+                          <FormField
+                            label='Confirm Password'
+                            id='confirmPassword'
+                            type='password'
+                            required
+                            value={formData.confirmPassword}
+                            onChange={handleInputChange}
+                            error={errors.confirmPassword}
+                          />
+                        </div>
+                      )}
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                        <FormField
+                          label='Phone Number'
+                          id='phone'
+                          type='tel'
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                        />
+                        <FormField
+                          label='Website'
+                          id='website'
+                          type='url'
+                          value={formData.website}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+                        <div className='md:col-span-1'>
+                          <FormField
+                            label='Address'
+                            id='address'
+                            value={formData.address}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div>
+                          <FormField
+                            label='Postal Code'
+                            id='postalCode'
+                            value={formData.postalCode}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                        <div>
+                          <FormField
+                            label='City'
+                            id='city'
+                            value={formData.city}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {currentStep === 2 && (
+                    <div className='space-y-6'>
+                      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
+                        <CalendarIcon className='h-5 w-5 text-indigo-500 mr-2' />
+                        Event Information
+                      </h2>
+                      <FormField
+                        label='Event Name'
+                        id='eventName'
+                        required
+                        value={formData.eventName}
+                        onChange={handleInputChange}
+                        error={errors.eventName}
+                      />
+                      <FormField
+                        label='Event Type'
+                        id='eventType'
+                        type='select'
+                        options={eventTypeOptions}
+                        required
+                        value={formData.eventType}
+                        onChange={handleInputChange}
+                        error={errors.eventType}
+                      />
+                      <FormField
+                        label='Elevator Pitch'
+                        id='elevatorPitch'
+                        textarea
+                        placeholder='Briefly describe your event in 1-2 sentences'
+                        value={formData.elevatorPitch}
+                        onChange={handleInputChange}
+                      />
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                        <FormField
+                          label='Event Frequency'
+                          id='eventFrequency'
+                          type='select'
+                          options={eventFrequencyOptions}
+                          required
+                          value={formData.eventFrequency}
+                          onChange={handleInputChange}
+                          error={errors.eventFrequency}
+                        />
+                        <FormField
+                          label='Event Date'
+                          id='eventDate'
+                          type='date'
+                          value={formData.eventDate}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <FormField
+                        label='Location'
+                        id='location'
+                        placeholder='Venue or location of the event'
+                        value={formData.location}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+                  {currentStep === 3 && (
+                    <div className='space-y-6'>
+                      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
+                        <UsersIcon className='h-5 w-5 text-indigo-500 mr-2' />
+                        Audience Information
+                      </h2>
+                      <FormField
+                        label='Expected Attendee Count'
+                        id='attendeeCount'
+                        type='select'
+                        options={attendeeCountOptions}
+                        required
+                        value={formData.attendeeCount}
+                        onChange={handleInputChange}
+                        error={errors.attendeeCount}
+                      />
+                      <FormField
+                        label='Audience Description'
+                        id='audienceDescription'
+                        textarea
+                        required
+                        placeholder='Describe your typical attendees, their interests, and demographics'
+                        value={formData.audienceDescription}
+                        onChange={handleInputChange}
+                        error={errors.audienceDescription}
+                      />
+                      <div>
+                        <label className='block text-sm font-medium text-gray-800 mb-2'>
+                          Audience Age Demographics
+                          {errors.audienceDemographics && (
+                            <span className='text-red-500 ml-1 text-xs'>
+                              {errors.audienceDemographics}
+                            </span>
+                          )}
+                        </label>
+                        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                          {demographicOptions.map((demo) => (
+                            <SelectionCard
+                              key={demo.id}
+                              id={demo.id}
+                              label={demo.label}
+                              icon={demo.icon}
+                              isSelected={formData.audienceDemographics.includes(
+                                demo.id
+                              )}
+                              onClick={() =>
+                                handleMultiSelectChange(
+                                  'audienceDemographics',
+                                  demo.id
+                                )
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <FormField
+                        label='Sponsorship Needs'
+                        id='sponsorshipNeeds'
+                        textarea
+                        placeholder="Describe what kinds of sponsors you're looking for and why"
+                        value={formData.sponsorshipNeeds}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+                  {currentStep === 4 && (
+                    <div className='space-y-6'>
+                      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
+                        <BriefcaseIcon className='h-5 w-5 text-indigo-500 mr-2' />
+                        Sponsorship Offerings
+                      </h2>
+                      <div>
+                        <label className='block text-sm font-medium text-gray-800 mb-2'>
+                          Are you seeking financial sponsorship?
+                        </label>
+                        <div className='grid grid-cols-2 gap-4'>
+                          <SelectionCard
+                            id='financial-yes'
+                            label='Yes'
+                            isSelected={
+                              formData.seekingFinancialSponsorship === 'yes'
+                            }
+                            onClick={() =>
+                              handleRadioChange(
+                                'seekingFinancialSponsorship',
+                                'yes'
+                              )
+                            }
+                          />
+                          <SelectionCard
+                            id='financial-no'
+                            label='No'
+                            isSelected={
+                              formData.seekingFinancialSponsorship === 'no'
+                            }
+                            onClick={() =>
+                              handleRadioChange(
+                                'seekingFinancialSponsorship',
+                                'no'
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                      {formData.seekingFinancialSponsorship === 'yes' && (
+                        <>
+                          <FormField
+                            label='Financial Sponsorship Amount'
+                            id='financialSponsorshipAmount'
+                            placeholder='e.g., 50,000 SEK'
+                            value={formData.financialSponsorshipAmount}
+                            onChange={handleInputChange}
+                          />
+                          <FormField
+                            label='What sponsors receive for financial support'
+                            id='financialSponsorshipOffers'
+                            textarea
+                            placeholder='Describe what sponsors will receive in return for financial support'
+                            value={formData.financialSponsorshipOffers}
+                            onChange={handleInputChange}
+                          />
+                        </>
+                      )}
+                      <div>
+                        <label className='block text-sm font-medium text-gray-800 mb-2'>
+                          What can you offer sponsors?
+                          {errors.offeringTypes && (
+                            <span className='text-red-500 ml-1 text-xs'>
+                              {errors.offeringTypes}
+                            </span>
+                          )}
+                        </label>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
+                          {offeringTypes.map((type) => (
+                            <SelectionCard
+                              key={type.id}
+                              id={type.id}
+                              label={type.label}
+                              description={type.description}
+                              icon={type.icon}
+                              isSelected={formData.offeringTypes.includes(
+                                type.id
+                              )}
+                              onClick={() =>
+                                handleMultiSelectChange(
+                                  'offeringTypes',
+                                  type.id
+                                )
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {formData.offeringTypes.includes('brand_visibility') && (
+                        <FormField
+                          label='Brand Visibility Details'
+                          id='brandVisibility'
+                          textarea
+                          placeholder='Describe how brands will be visible at your event'
+                          value={formData.brandVisibility}
+                          onChange={handleInputChange}
+                        />
+                      )}
+                      {formData.offeringTypes.includes('content_creation') && (
+                        <FormField
+                          label='Content Creation Details'
+                          id='contentCreation'
+                          textarea
+                          placeholder='Describe what kind of content you can create for sponsors'
+                          value={formData.contentCreation}
+                          onChange={handleInputChange}
+                        />
+                      )}
+                      <div>
+                        <label className='block text-sm font-medium text-gray-800 mb-2'>
+                          Bonus Value
+                        </label>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
+                          {bonusValueOptions.map((option) => (
+                            <SelectionCard
+                              key={option.id}
+                              id={option.id}
+                              label={option.label}
+                              description={option.description}
+                              icon={option.icon}
+                              isSelected={formData.bonusValue.includes(
+                                option.id
+                              )}
+                              onClick={() =>
+                                handleMultiSelectChange('bonusValue', option.id)
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {formData.bonusValue.length > 0 && (
+                        <FormField
+                          label='Bonus Value Details'
+                          id='bonusValueDetails'
+                          textarea
+                          placeholder='Provide more details about the bonus value you offer'
+                          value={formData.bonusValueDetails}
+                          onChange={handleInputChange}
+                        />
+                      )}
+                      <FormField
+                        label='Additional Information'
+                        id='additionalInfo'
+                        textarea
+                        placeholder="Any other details you'd like to share with potential sponsors"
+                        value={formData.additionalInfo}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+                  <div className='mt-8 flex justify-between'>
+                    {currentStep > 1 && (
+                      <Button
+                        type='button'
+                        onClick={prevStep}
+                        variant='outline'
+                      >
+                        Previous
+                      </Button>
+                    )}
+                    {currentStep < totalSteps ? (
+                      <Button
+                        type='button'
+                        onClick={nextStep}
+                        variant='primary'
+                        className='ml-auto'
+                      >
+                        Next
+                      </Button>
+                    ) : (
+                      <Button
+                        type='submit'
+                        variant='primary'
+                        className='ml-auto'
+                        isLoading={isSubmitting}
+                      >
+                        {isSubmitting
+                          ? 'Submitting...'
+                          : currentUser
+                          ? 'Update Profile'
+                          : 'Complete Registration'}
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              </div>
+            </>
           )}
         </div>
       </div>
