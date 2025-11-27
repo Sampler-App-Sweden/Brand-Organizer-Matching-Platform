@@ -53,7 +53,7 @@ export function Button({
             {rightIcon}
           </span>}
       </span>
-      <style jsx>{`
+      <style>{`
         .tech-button::after {
           content: '';
           position: absolute;
