@@ -106,6 +106,7 @@ export function DirectoryCard({ member, matches = [] }: DirectoryCardProps) {
           </div>
         </div>
       </div>
+
       {/* Match preview section */}
       <div
         className={`px-6 py-3 text-xs border-t ${
