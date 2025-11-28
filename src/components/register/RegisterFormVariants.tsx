@@ -27,9 +27,9 @@ interface VariantFormProps {
     number: boolean
   }
   experimentVariant?: string
-  trackEvent?: (...args: any[]) => void
-  EVENTS?: any
-  EXPERIMENTS?: any
+  trackEvent?: (event: string, data?: Record<string, unknown>, userId?: string, experimentId?: string, variant?: string) => void
+  EVENTS?: Record<string, string>
+  EXPERIMENTS?: Record<string, string>
 }
 
 export function BasicRegistrationForm(props: VariantFormProps) {

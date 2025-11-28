@@ -3,15 +3,30 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { TechLayout } from '../components/layout'
-import { BasicRegistrationForm, EnhancedRegistrationForm, PasswordStrengthRegistrationForm } from '../components/register/RegisterFormVariants'
-import { calculatePasswordErrors, calculatePasswordStrength } from '../components/register/registerUtils'
+import {
+  BasicRegistrationForm,
+  EnhancedRegistrationForm,
+  PasswordStrengthRegistrationForm
+} from '../components/register/RegisterFormVariants'
+import {
+  calculatePasswordErrors,
+  calculatePasswordStrength
+} from '../components/register/registerUtils'
 import { RegistrationSuccess } from '../components/register/RegistrationSuccess'
 import { Button, Toast } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { useDraftProfile } from '../context/DraftProfileContext'
-import { ERROR_TYPES, EVENTS, trackError, trackEvent } from '../services/analyticsService'
+import {
+  ERROR_TYPES,
+  EVENTS,
+  trackError,
+  trackEvent
+} from '../services/analyticsService'
 import { convertDraftToProfile } from '../services/draftService'
-import { EXPERIMENTS, getUserExperimentVariant } from '../services/experimentService'
+import {
+  EXPERIMENTS,
+  getUserExperimentVariant
+} from '../services/experimentService'
 
 export function Register() {
   const location = useLocation()
@@ -34,8 +49,9 @@ export function Register() {
    *   'B' = PasswordStrengthRegistrationForm
    *   'C' = EnhancedRegistrationForm
    */
-  type RegistrationExperimentVariant = 'A' | 'B' | 'C';
-  const [experimentVariant, setExperimentVariant] = useState<RegistrationExperimentVariant>('A');
+  type RegistrationExperimentVariant = 'A' | 'B' | 'C'
+  const [experimentVariant, setExperimentVariant] =
+    useState<RegistrationExperimentVariant>('A')
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
   const [toast, setToast] = useState({
     isVisible: false,
@@ -440,6 +456,14 @@ export function Register() {
   }
   // Render current variant using modular components
   const renderCurrentVariant = () => {
+    type AnalyticsEventData = Record<string, unknown>
+    type TrackEventFn = (
+      event: string,
+      data?: AnalyticsEventData,
+      userId?: string,
+      experimentId?: string,
+      variant?: string
+    ) => void
     const sharedProps = {
       userType,
       setUserType,
@@ -458,9 +482,9 @@ export function Register() {
       passwordStrength,
       passwordErrors,
       experimentVariant,
-      trackEvent,
-      EVENTS,
-      EXPERIMENTS
+      trackEvent: trackEvent as TrackEventFn,
+      EVENTS: EVENTS as Record<string, string>,
+      EXPERIMENTS: EXPERIMENTS as Record<string, string>
     }
     if (experimentVariant === 'A') {
       return <BasicRegistrationForm {...sharedProps} />
