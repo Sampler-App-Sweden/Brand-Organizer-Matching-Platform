@@ -3,22 +3,10 @@ import { useState } from 'react'
 
 import { Button } from '../ui'
 
+import type { Contract } from '../../types'
+
 interface ContractDetailsProps {
-  contract: {
-    brandApproved?: boolean
-    organizerApproved?: boolean
-    brandName: string
-    organizerName: string
-    eventName: string
-    sponsorshipAmount: number
-    sponsorshipType: 'financial' | 'product' | 'service' | 'mixed'
-    deliverables: string
-    startDate: string
-    endDate: string
-    paymentTerms: 'full_upfront' | 'installments' | 'post_event' | 'custom'
-    cancellationPolicy: string
-    additionalTerms?: string
-  }
+  contract: Contract
 }
 
 export function ContractDetails({ contract }: ContractDetailsProps) {

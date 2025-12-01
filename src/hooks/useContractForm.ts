@@ -1,12 +1,14 @@
 import { useState } from 'react'
 
+import type { PaymentTerms, SponsorshipType } from '../types'
+
 export interface ContractFormData {
   sponsorshipAmount: string
-  sponsorshipType: string
+  sponsorshipType: SponsorshipType | ''
   deliverables: string
   startDate: string
   endDate: string
-  paymentTerms: string
+  paymentTerms: PaymentTerms | ''
   cancellationPolicy: string
   additionalTerms: string
 }
@@ -26,7 +28,9 @@ export function useContractForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))

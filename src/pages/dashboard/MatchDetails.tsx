@@ -8,11 +8,12 @@ import {
   updateMatchStatus
 } from '../../services/dataService'
 import {
+  Conversation,
+  Message,
   getOrCreateConversation,
   sendMessage
 } from '../../services/chatService'
 import { Match } from '../../services/matchingService'
-import { Message } from '../../services/chatService'
 import { Button } from '../../components/ui'
 import {
   CheckIcon,
@@ -23,6 +24,21 @@ import {
   CheckCircleIcon
 } from 'lucide-react'
 import { ContractDetails, ContractForm } from '../../components/contract'
+import type { Brand, Contract, Organizer } from '../../types'
+
+type StoredBrand = Brand & {
+  address?: string
+  postalCode?: string
+  city?: string
+  hasTestPanels?: string
+  testPanelDetails?: string
+}
+
+type StoredOrganizer = Organizer & {
+  address?: string
+  postalCode?: string
+  city?: string
+}
 export function MatchDetails() {
   const { matchId } = useParams<{
     matchId: string
@@ -30,15 +46,15 @@ export function MatchDetails() {
   const { currentUser } = useAuth()
   const navigate = useNavigate()
   const [match, setMatch] = useState<Match | null>(null)
-  const [brand, setBrand] = useState<any | null>(null)
-  const [organizer, setOrganizer] = useState<any | null>(null)
+  const [brand, setBrand] = useState<StoredBrand | null>(null)
+  const [organizer, setOrganizer] = useState<StoredOrganizer | null>(null)
   const [loading, setLoading] = useState(true)
   const [userType, setUserType] = useState<'brand' | 'organizer'>('brand')
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
-  const [conversation, setConversation] = useState<any | null>(null)
+  const [conversation, setConversation] = useState<Conversation | null>(null)
   const [showContractForm, setShowContractForm] = useState(false)
-  const [contract, setContract] = useState<any | null>(null)
+  const [contract, setContract] = useState<Contract | null>(null)
   useEffect(() => {
     const loadData = async () => {
       if (!matchId || !currentUser) return
@@ -53,8 +69,10 @@ export function MatchDetails() {
       }
       setMatch(foundMatch)
       // Get brand and organizer data
-      const brandData = getBrandById(foundMatch.brandId)
-      const organizerData = getOrganizerById(foundMatch.organizerId)
+      const brandData = getBrandById(foundMatch.brandId) as StoredBrand | null
+      const organizerData = getOrganizerById(
+        foundMatch.organizerId
+      ) as StoredOrganizer | null
       setBrand(brandData)
       setOrganizer(organizerData)
       // Determine user type
@@ -70,8 +88,10 @@ export function MatchDetails() {
         setMessages(conv.messages)
       }
       // Check if there's an existing contract
-      const contracts = JSON.parse(localStorage.getItem('contracts') || '[]')
-      const existingContract = contracts.find((c: any) => c.matchId === matchId)
+      const contracts = JSON.parse(
+        localStorage.getItem('contracts') || '[]'
+      ) as Contract[]
+      const existingContract = contracts.find((c) => c.matchId === matchId)
       if (existingContract) {
         setContract(existingContract)
       }
@@ -90,14 +110,15 @@ export function MatchDetails() {
     sendMessage(conversation.id, currentUser.id, userType, newMessage)
     setNewMessage('')
     // Refresh messages
-    const conv = JSON.parse(localStorage.getItem('conversations') || '[]').find(
-      (c: any) => c.id === conversation.id
-    )
+    const storedConversations = JSON.parse(
+      localStorage.getItem('conversations') || '[]'
+    ) as Conversation[]
+    const conv = storedConversations.find((c) => c.id === conversation.id)
     if (conv) {
       setMessages(conv.messages)
     }
   }
-  const handleContractCreated = (contractData: any) => {
+  const handleContractCreated = (contractData: Contract) => {
     setContract(contractData)
     setShowContractForm(false)
   }
