@@ -2,7 +2,12 @@ import { FilterIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { FilterSelect } from './FilterSelect'
 import { SearchBar } from './SearchBar'
-import { getCategoryOptions, locationOptions, eventTypeOptions, audienceSizeOptions } from './directoryFilterOptions'
+import {
+  getCategoryOptions,
+  locationOptions,
+  eventTypeOptions,
+  audienceSizeOptions
+} from './directoryFilterOptions'
 import { clearAllFilters } from './directoryFilterUtils'
 import { DirectoryFilterParams } from './directoryFilterTypes'
 
@@ -11,6 +16,7 @@ interface DirectoryFiltersProps {
   currentFilters: DirectoryFilterParams
   memberType: 'brand' | 'organizer'
 }
+
 export function DirectoryFilters({
   onFilterChange,
   currentFilters,
@@ -99,7 +105,7 @@ export function DirectoryFilters({
               onClick={handleClearFilters}
               className='text-sm text-indigo-600 hover:text-indigo-800 mt-2'
             >
-              Clear all filters
+              Clear All Filters
             </button>
           )}
         </div>
