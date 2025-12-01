@@ -7,6 +7,7 @@ import {
   SponsorshipProduct,
   ProductSponsorshipManagerProps
 } from './sponsorshipTypes'
+
 export function ProductSponsorshipManager({
   initialProducts = [],
   onSave
