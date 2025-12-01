@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
-import {
-  Organizer,
-  getOrganizerByUserId,
-  getMatchesForOrganizer
-} from '../../services/dataService'
+import { getBrandById } from '../../services/dataService'
+import { Brand } from '../../types'
 import { Match } from '../../services/matchingService'
 import {
   TrendingUpIcon,
@@ -16,31 +13,13 @@ import {
 } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { OrganizerSponsorshipPanel } from '../../components/sponsorship/OrganizerSponsorshipPanel'
+import { useOrganizerDashboard } from '../../hooks/useOrganizerDashboard'
+
 export function OrganizerDashboard() {
   const { currentUser } = useAuth()
-  const [organizer, setOrganizer] = useState<Organizer | null>(null)
-  const [matches, setMatches] = useState<Match[]>([])
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    const loadData = async () => {
-      if (currentUser) {
-        try {
-          const organizerData = await getOrganizerByUserId(currentUser.id)
-          setOrganizer(organizerData)
-          if (organizerData) {
-            const matchData = await getMatchesForOrganizer(organizerData.id)
-            setMatches(matchData)
-          } else {
-            setMatches([])
-          }
-        } catch (error) {
-          console.error('Failed to load organizer dashboard data:', error)
-        }
-      }
-      setLoading(false)
-    }
-    loadData()
-  }, [currentUser])
+  const { organizer, matches, pendingMatches, acceptedMatches, loading } =
+    useOrganizerDashboard(currentUser?.id)
+
   if (loading) {
     return (
       <DashboardLayout userType='organizer'>
@@ -73,8 +52,7 @@ export function OrganizerDashboard() {
       </DashboardLayout>
     )
   }
-  const pendingMatches = matches.filter((m) => m.status === 'pending')
-  const acceptedMatches = matches.filter((m) => m.status === 'accepted')
+
   return (
     <DashboardLayout userType='organizer'>
       <div className='mb-6 flex justify-between items-start'>
@@ -265,14 +243,32 @@ export function OrganizerDashboard() {
     </DashboardLayout>
   )
 }
+
+// Component to display a single match row
 function MatchRow({ match }: { match: Match }) {
-  const [brand, setBrand] = useState<any>(null)
+  const [brand, setBrand] = useState<Brand | null>(null)
+
   useEffect(() => {
-    // In a real app, this would be an API call
-    const brandData = JSON.parse(localStorage.getItem('brands') || '[]')
-    const found = brandData.find((b: any) => b.id === match.brandId)
-    setBrand(found || null)
-  }, [match])
+    let isMounted = true
+    const loadBrand = async () => {
+      try {
+        const brandData = await getBrandById(match.brandId)
+        if (isMounted) {
+          setBrand(brandData || null)
+        }
+      } catch (error) {
+        console.error('Failed to load brand for match', match.id, error)
+        if (isMounted) {
+          setBrand(null)
+        }
+      }
+    }
+    loadBrand()
+    return () => {
+      isMounted = false
+    }
+  }, [match.brandId, match.id])
+
   if (!brand) return null
   return (
     <tr>

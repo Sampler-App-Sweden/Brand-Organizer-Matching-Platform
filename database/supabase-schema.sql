@@ -197,30 +197,47 @@ CREATE POLICY "Allow users to update own profile"
   USING (auth.uid() = id);
 
 -- Brands policies
-CREATE POLICY "Allow users to read all brands"
+CREATE POLICY "Allow public to read all brands"
   ON public.brands FOR SELECT
+  TO public
   USING (true);
 
 CREATE POLICY "Allow brands to insert own data"
   ON public.brands FOR INSERT
+  TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Allow brands to update own data"
   ON public.brands FOR UPDATE
-  USING (auth.uid() = user_id);
-
--- Organizers policies
-CREATE POLICY "Allow users to read all organizers"
-  ON public.organizers FOR SELECT
-  USING (true);
-
-CREATE POLICY "Allow organizers to insert own data"
-  ON public.organizers FOR INSERT
+  TO authenticated
+  USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Allow organizers to update own data"
-  ON public.organizers FOR UPDATE
+-- Organizers policies
+CREATE POLICY "Users can insert their own organizer profile"
+  ON public.organizers
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own organizer profile"
+  ON public.organizers
+  FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own organizer profile"
+  ON public.organizers
+  FOR SELECT
+  TO authenticated
   USING (auth.uid() = user_id);
+
+CREATE POLICY "Anyone can view organizer profiles"
+  ON public.organizers
+  FOR SELECT
+  TO public
+  USING (true);
 
 -- Matches policies
 CREATE POLICY "Allow users to read matches"

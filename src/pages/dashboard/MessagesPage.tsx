@@ -3,10 +3,11 @@ import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import {
   getBrandConversations,
+  getConversationMessages,
   getOrganizerConversations,
-  getOrCreateConversation,
   sendMessage,
-  getConversationMessages
+  type Conversation,
+  type Message
 } from '../../services/chatService'
 import {
   getBrandById,
@@ -25,6 +26,8 @@ import {
   FileTextIcon
 } from 'lucide-react'
 import { Button } from '../../components/ui'
+import type { Brand } from '../../types/brand'
+import type { Organizer } from '../../types/organizer'
 // Conversation phase types
 type ConversationPhase =
   | 'inquiry'
@@ -53,14 +56,21 @@ export function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
   >(null)
-  const [messages, setMessages] = useState<any[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [phaseFilter, setPhaseFilter] = useState<ConversationPhase | 'all'>(
     'all'
   )
   const [sortBy, setSortBy] = useState<'recent' | 'unread'>('recent')
-  const [partnerInfo, setPartnerInfo] = useState<any>(null)
+  const [partnerInfo, setPartnerInfo] = useState<Brand | Organizer | null>(null)
   const [userType, setUserType] = useState<'brand' | 'organizer'>('brand')
+
+  const partnerDisplayName = partnerInfo
+    ? userType === 'brand'
+      ? (partnerInfo as Organizer).organizerName || 'Unknown Organizer'
+      : (partnerInfo as Brand).companyName || 'Unknown Brand'
+    : 'Unknown Partner'
+  const partnerInitial = partnerDisplayName.charAt(0) || 'U'
   useEffect(() => {
     const loadConversations = async () => {
       if (!currentUser) return
@@ -69,7 +79,7 @@ export function MessagesPage() {
       const userType = currentUser.type as 'brand' | 'organizer'
       setUserType(userType)
       // Get conversations based on user type
-      let rawConversations = []
+      let rawConversations: Conversation[] = []
       if (userType === 'brand') {
         const brandData = await getBrandByUserId(currentUser.id)
         if (brandData) {
@@ -439,10 +449,7 @@ export function MessagesPage() {
                                 (c) => c.id === selectedConversation
                               )?.organizerLogo
                             }
-                            alt={
-                              partnerInfo.organizerName ||
-                              partnerInfo.companyName
-                            }
+                            alt={partnerDisplayName}
                             className='h-full w-full object-cover'
                           />
                         ) : userType === 'organizer' &&
@@ -455,27 +462,18 @@ export function MessagesPage() {
                                 (c) => c.id === selectedConversation
                               )?.brandLogo
                             }
-                            alt={
-                              partnerInfo.companyName ||
-                              partnerInfo.organizerName
-                            }
+                            alt={partnerDisplayName}
                             className='h-full w-full object-cover'
                           />
                         ) : (
                           <div className='h-full w-full flex items-center justify-center bg-indigo-100 text-indigo-800 font-bold'>
-                            {(
-                              partnerInfo.organizerName ||
-                              partnerInfo.companyName ||
-                              'U'
-                            ).charAt(0)}
+                            {partnerInitial}
                           </div>
                         )}
                       </div>
                       <div>
                         <h3 className='font-medium text-gray-900'>
-                          {userType === 'brand'
-                            ? partnerInfo.organizerName
-                            : partnerInfo.companyName}
+                          {partnerDisplayName}
                         </h3>
                         <p className='text-sm text-gray-600'>
                           {
