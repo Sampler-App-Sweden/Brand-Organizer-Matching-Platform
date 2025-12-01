@@ -114,11 +114,9 @@ export function useBrandForm() {
             eventMarketingBudget: brand.eventMarketingBudget || '',
             interestedInFinancialSponsorship:
               brand.interestedInFinancialSponsorship || 'no',
-            financialSponsorshipAmount:
-              brand.financialSponsorshipAmount || '',
+            financialSponsorshipAmount: brand.financialSponsorshipAmount || '',
             successMetrics: brand.successMetrics || '',
-            interestedInSamplingTools:
-              brand.interestedInSamplingTools || 'no',
+            interestedInSamplingTools: brand.interestedInSamplingTools || 'no',
             hasTestPanels: brand.hasTestPanels || 'no',
             testPanelDetails: brand.testPanelDetails || '',
             additionalInfo: brand.additionalInfo || ''

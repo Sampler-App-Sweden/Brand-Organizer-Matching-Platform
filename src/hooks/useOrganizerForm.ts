@@ -149,7 +149,9 @@ export function useOrganizerForm() {
   }, [currentUser])
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -183,24 +185,35 @@ export function useOrganizerForm() {
     const newErrors: Record<string, string> = {}
 
     if (step === 1) {
-      if (!formData.organizerName.trim()) newErrors.organizerName = 'Organization name is required'
-      if (!formData.contactName.trim()) newErrors.contactName = 'Contact name is required'
+      if (!formData.organizerName.trim())
+        newErrors.organizerName = 'Organization name is required'
+      if (!formData.contactName.trim())
+        newErrors.contactName = 'Contact name is required'
 
       if (!currentUser) {
-        if (!formData.password.trim()) newErrors.password = 'Password is required'
-        else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters'
-        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match'
+        if (!formData.password.trim())
+          newErrors.password = 'Password is required'
+        else if (formData.password.length < 6)
+          newErrors.password = 'Password must be at least 6 characters'
+        if (formData.password !== formData.confirmPassword)
+          newErrors.confirmPassword = 'Passwords do not match'
       }
     } else if (step === 2) {
-      if (!formData.eventName.trim()) newErrors.eventName = 'Event name is required'
+      if (!formData.eventName.trim())
+        newErrors.eventName = 'Event name is required'
       if (!formData.eventType) newErrors.eventType = 'Event type is required'
-      if (!formData.eventFrequency) newErrors.eventFrequency = 'Event frequency is required'
+      if (!formData.eventFrequency)
+        newErrors.eventFrequency = 'Event frequency is required'
     } else if (step === 3) {
-      if (!formData.attendeeCount) newErrors.attendeeCount = 'Attendee count is required'
-      if (!formData.audienceDescription.trim()) newErrors.audienceDescription = 'Audience description is required'
-      if (formData.audienceDemographics.length === 0) newErrors.audienceDemographics = 'Select at least one demographic'
+      if (!formData.attendeeCount)
+        newErrors.attendeeCount = 'Attendee count is required'
+      if (!formData.audienceDescription.trim())
+        newErrors.audienceDescription = 'Audience description is required'
+      if (formData.audienceDemographics.length === 0)
+        newErrors.audienceDemographics = 'Select at least one demographic'
     } else if (step === 4) {
-      if (formData.offeringTypes.length === 0) newErrors.offeringTypes = 'Select at least one offering type'
+      if (formData.offeringTypes.length === 0)
+        newErrors.offeringTypes = 'Select at least one offering type'
     }
 
     setErrors(newErrors)

@@ -127,9 +127,7 @@ const mapBrandRowToBrand = (row: BrandRow): Brand => ({
   ),
   financialSponsorshipAmount: row.financial_sponsorship_amount ?? '',
   successMetrics: row.success_metrics ?? '',
-  interestedInSamplingTools: booleanToYesNo(
-    row.interested_in_sampling_tools
-  ),
+  interestedInSamplingTools: booleanToYesNo(row.interested_in_sampling_tools),
   hasTestPanels: booleanToYesNo(row.has_test_panels),
   testPanelDetails: row.test_panel_details ?? '',
   additionalInfo: row.additional_info ?? '',
@@ -184,9 +182,7 @@ const mapMatchRowToMatch = (row: MatchRow): Match => ({
   status: row.status
 })
 
-const buildBrandPayload = (
-  brandData: Omit<Brand, 'id' | 'createdAt'>
-) => ({
+const buildBrandPayload = (brandData: Omit<Brand, 'id' | 'createdAt'>) => ({
   user_id: brandData.userId,
   company_name: brandData.companyName,
   contact_name: brandData.contactName,
