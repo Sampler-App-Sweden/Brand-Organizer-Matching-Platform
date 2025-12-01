@@ -1,10 +1,10 @@
-import { ContractFormStep1 } from './contract/ContractFormStep1'
-import { ContractFormStep2 } from './contract/ContractFormStep2'
-import { useContractForm } from '../hooks/useContractForm'
+import { ContractFormStep1 } from './ContractFormStep1'
+import { ContractFormStep2 } from './ContractFormStep2'
+import { useContractForm } from '../../hooks/useContractForm'
 import {
   generateContractId,
   saveContractToLocalStorage
-} from '../utils/contractUtils'
+} from '../../utils/contractUtils'
 
 interface ContractFormProps {
   brandName: string

@@ -1,7 +1,7 @@
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
 import React from 'react'
 
-import { Button, FormField } from '../components/ui'
+import { Button, FormField } from '../../components/ui'
 import { UserType } from './registerTypes'
 
 interface VariantAFormProps {

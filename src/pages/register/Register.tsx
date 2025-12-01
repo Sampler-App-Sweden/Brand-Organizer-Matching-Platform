@@ -1,17 +1,37 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { TechLayout } from '../components/layout'
-import { BasicRegistrationForm, EnhancedRegistrationForm, PasswordStrengthRegistrationForm } from '../components/register/RegisterFormVariants'
-import { calculatePasswordErrors, calculatePasswordStrength } from '../components/register/registerUtils'
-import { DraftProfileNotice, LoginPrompt, RegistrationDebugPanel, RegistrationHeader } from '../components/register/RegistrationPageSections'
-import { RegistrationSuccess } from '../components/register/RegistrationSuccess'
-import { Toast } from '../components/ui'
-import { useAuth } from '../context/AuthContext'
-import { useDraftProfile } from '../context/DraftProfileContext'
-import { ERROR_TYPES, EVENTS, trackError, trackEvent } from '../services/analyticsService'
-import { convertDraftToProfile } from '../services/draftService'
-import { EXPERIMENTS, getUserExperimentVariant } from '../services/experimentService'
+import { TechLayout } from '../../components/layout'
+import {
+  BasicRegistrationForm,
+  EnhancedRegistrationForm,
+  PasswordStrengthRegistrationForm
+} from '../../components/register/RegisterFormVariants'
+import {
+  calculatePasswordErrors,
+  calculatePasswordStrength
+} from '../../components/register/registerUtils'
+import {
+  DraftProfileNotice,
+  LoginPrompt,
+  RegistrationDebugPanel,
+  RegistrationHeader
+} from '../../components/register/RegistrationPageSections'
+import { RegistrationSuccess } from '../../components/register/RegistrationSuccess'
+import { Toast } from '../../components/ui'
+import { useAuth } from '../../context/AuthContext'
+import { useDraftProfile } from '../../context/DraftProfileContext'
+import {
+  ERROR_TYPES,
+  EVENTS,
+  trackError,
+  trackEvent
+} from '../../services/analyticsService'
+import { convertDraftToProfile } from '../../services/draftService'
+import {
+  EXPERIMENTS,
+  getUserExperimentVariant
+} from '../../services/experimentService'
 
 type RegistrationExperimentVariant = 'A' | 'B' | 'C'
 type AnalyticsEventData = Record<string, unknown>

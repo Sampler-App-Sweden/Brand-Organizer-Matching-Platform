@@ -22,7 +22,7 @@ import {
   FileTextIcon,
   CheckCircleIcon
 } from 'lucide-react'
-import { ContractForm, ContractDetails } from '../../components/ContractForm'
+import { ContractDetails, ContractForm } from '../../components/contract'
 export function MatchDetails() {
   const { matchId } = useParams<{
     matchId: string
@@ -191,7 +191,7 @@ export function MatchDetails() {
                       Acceptera match
                     </Button>
                     <Button
-                      variant='secondary'
+                      variant='danger'
                       onClick={() => handleStatusChange('rejected')}
                       className='flex items-center'
                     >
