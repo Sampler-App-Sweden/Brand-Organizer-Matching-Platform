@@ -154,7 +154,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
           <div className='container mx-auto px-4 py-2 space-y-1'>
             <Link
               to='/community'
-              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors flex items-center'
+              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors items-center'
               onClick={() => setIsMenuOpen(false)}
             >
               <UsersIcon className='h-4 w-4 mr-2' />
@@ -162,7 +162,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
             </Link>
             <Link
               to='/brands'
-              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors flex items-center'
+              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors items-center'
               onClick={() => setIsMenuOpen(false)}
             >
               <PackageIcon className='h-4 w-4 mr-2' />
@@ -170,7 +170,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
             </Link>
             <Link
               to='/organizers'
-              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors flex items-center'
+              className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors items-center'
               onClick={() => setIsMenuOpen(false)}
             >
               <CalendarIcon className='h-4 w-4 mr-2' />
@@ -179,7 +179,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
             {currentUser && (
               <Link
                 to='/dashboard/saved'
-                className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors flex items-center'
+                className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors items-center'
                 onClick={() => setIsMenuOpen(false)}
               >
                 <StarIcon className='h-4 w-4 mr-2' />
@@ -189,7 +189,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
             {currentUser && (
               <Link
                 to='/dashboard/inspiration'
-                className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors flex items-center'
+                className='block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-colors items-center'
                 onClick={() => setIsMenuOpen(false)}
               >
                 <SparklesIcon className='h-4 w-4 mr-2' />
@@ -198,7 +198,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
             )}
             <Link
               to={getDashboardLink()}
-              className='block px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center'
+              className='block px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors items-center'
               onClick={() => setIsMenuOpen(false)}
             >
               {currentUser ? (
