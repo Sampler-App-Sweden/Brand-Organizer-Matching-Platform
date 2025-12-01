@@ -11,7 +11,7 @@ import { TrendingUpIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
 import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
-import { Brand } from '../../types'
+import { Brand, Organizer } from '../../types'
 
 export function BrandDashboard() {
   const { currentUser } = useAuth()
