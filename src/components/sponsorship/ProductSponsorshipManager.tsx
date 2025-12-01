@@ -66,6 +66,7 @@ export function ProductSponsorshipManager({
   const handleDragStart = (productId: string) => {
     setDraggedProduct(productId)
   }
+
   const handleDragOver = (e: React.DragEvent, productId: string) => {
     e.preventDefault()
     if (!draggedProduct || draggedProduct === productId) return
@@ -81,6 +82,7 @@ export function ProductSponsorshipManager({
     }))
     setProducts(reorderedProducts)
   }
+
   const handleDragEnd = () => {
     if (draggedProduct && onSave) {
       onSave(products)
@@ -118,6 +120,7 @@ export function ProductSponsorshipManager({
             Add New Product
           </Button>
         </div>
+
         {/* Product Form */}
         {isFormOpen && (
           <ProductForm
@@ -142,6 +145,7 @@ export function ProductSponsorshipManager({
             editing={!!editingProduct}
           />
         )}
+
         {/* Products List */}
         {products.length === 0 ? (
           <div className='text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
