@@ -9,8 +9,7 @@ import {
   SearchIcon,
   UsersIcon
 } from 'lucide-react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 import { DashboardLayout } from '../../components/layout'
 import { Button } from '../../components/ui'
