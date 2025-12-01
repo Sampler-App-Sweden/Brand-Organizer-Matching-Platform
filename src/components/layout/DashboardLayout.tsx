@@ -26,6 +26,11 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
         path: '/dashboard/brand'
       },
       {
+        label: 'Sponsorships',
+        icon: <HandshakeIcon className='h-5 w-5' />,
+        path: '/dashboard/sponsorships'
+      },
+      {
         label: 'Matches',
         icon: <UsersIcon className='h-5 w-5' />,
         path: '/dashboard/matches'
@@ -41,6 +46,11 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
         label: 'Dashboard',
         icon: <HomeIcon className='h-5 w-5' />,
         path: '/dashboard/organizer'
+      },
+      {
+        label: 'Sponsorships',
+        icon: <HandshakeIcon className='h-5 w-5' />,
+        path: '/dashboard/sponsorships'
       },
       {
         label: 'Matches',
@@ -114,6 +124,7 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
                     <span className='ml-3'>{item.label}</span>
                   </Link>
                 ))}
+                {/*Log out*/}
               </nav>
             </div>
           </div>

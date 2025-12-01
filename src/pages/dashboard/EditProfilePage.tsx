@@ -5,6 +5,11 @@ import { useAuth } from '../../context/AuthContext'
 import { FormField } from '../../components/ui'
 import { Button } from '../../components/ui'
 import { supabase } from '../../services/supabaseClient'
+import {
+  getBrandByUserId,
+  getOrganizerByUserId
+} from '../../services/dataService'
+import type { Brand, Organizer } from '../../types'
 
 export function EditProfilePage() {
   const { currentUser, refreshUser } = useAuth()
@@ -24,27 +29,74 @@ export function EditProfilePage() {
     type: 'success' as 'success' | 'error'
   })
 
+  const buildProfileFromBrand = (
+    brand: Brand,
+    fallbackEmail: string | undefined
+  ) => ({
+    name: brand.companyName || brand.contactName || '',
+    email: brand.email || fallbackEmail || '',
+    phone: brand.phone || '',
+    description:
+      brand.additionalInfo ||
+      brand.productDescription ||
+      brand.marketingGoals ||
+      '',
+    logo_url: ''
+  })
+
+  const buildProfileFromOrganizer = (
+    organizer: Organizer,
+    fallbackEmail: string | undefined
+  ) => ({
+    name: organizer.organizerName || organizer.contactName || '',
+    email: organizer.email || fallbackEmail || '',
+    phone: organizer.phone || '',
+    description:
+      organizer.elevatorPitch ||
+      organizer.additionalInfo ||
+      organizer.sponsorshipNeeds ||
+      '',
+    logo_url: ''
+  })
+
   const loadProfile = async () => {
-    if (!currentUser) return
+    if (!currentUser) {
+      setLoading(false)
+      return
+    }
 
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', currentUser.id)
-        .single()
+        .maybeSingle()
 
-      if (error) throw error
+      if (error && error.code !== 'PGRST116') throw error
 
-      if (data) {
-        setProfile({
-          name: data.name || '',
-          email: data.email || '',
-          phone: data.phone || '',
-          description: data.description || '',
-          logo_url: data.logo_url || ''
-        })
+      let fallbackProfile: typeof profile | null = null
+      if (currentUser.type === 'brand') {
+        const brand = await getBrandByUserId(currentUser.id)
+        if (brand) {
+          fallbackProfile = buildProfileFromBrand(brand, currentUser.email)
+        }
+      } else if (currentUser.type === 'organizer') {
+        const organizer = await getOrganizerByUserId(currentUser.id)
+        if (organizer) {
+          fallbackProfile = buildProfileFromOrganizer(
+            organizer,
+            currentUser.email
+          )
+        }
       }
+
+      setProfile({
+        name: data?.name || fallbackProfile?.name || currentUser.name || '',
+        email: data?.email || fallbackProfile?.email || currentUser.email || '',
+        phone: data?.phone || fallbackProfile?.phone || '',
+        description: data?.description || fallbackProfile?.description || '',
+        logo_url: data?.logo_url || fallbackProfile?.logo_url || ''
+      })
     } catch (error) {
       console.error('Error loading profile:', error)
       showToast('Failed to load profile', 'error')
@@ -65,16 +117,21 @@ export function EditProfilePage() {
     try {
       console.log('Updating profile with name:', profile.name)
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          name: profile.name,
-          phone: profile.phone,
-          description: profile.description,
-          logo_url: profile.logo_url,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', currentUser?.id)
+      const { error } = await supabase.from('profiles').upsert({
+        id: currentUser?.id,
+        role:
+          currentUser?.type === 'organizer'
+            ? 'Organizer'
+            : currentUser?.type === 'admin'
+            ? 'Admin'
+            : 'Brand',
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        description: profile.description,
+        logo_url: profile.logo_url,
+        updated_at: new Date().toISOString()
+      })
 
       if (error) throw error
 
