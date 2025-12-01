@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import {
   getBrandConversations,
   getConversationMessages,
+  getConversationsBySenderId,
   getOrganizerConversations,
   sendMessage,
   type Conversation,
@@ -48,6 +49,7 @@ interface EnhancedConversation {
   unreadCount: number
   phase: ConversationPhase
   reference: string // Product or event title
+  awaitingReply: boolean
 }
 export function MessagesPage() {
   const { currentUser } = useAuth()
@@ -91,6 +93,19 @@ export function MessagesPage() {
           rawConversations = await getOrganizerConversations(organizerData.id)
         }
       }
+      if (currentUser) {
+        const sentConversations = getConversationsBySenderId(currentUser.id)
+        if (sentConversations.length) {
+          const mergedMap = new Map<string, Conversation>()
+          const mergedItems = [...rawConversations, ...sentConversations]
+          mergedItems.forEach((conv) => {
+            if (!mergedMap.has(conv.id)) {
+              mergedMap.set(conv.id, conv)
+            }
+          })
+          rawConversations = Array.from(mergedMap.values())
+        }
+      }
       // Enhance conversations with metadata
       const enhancedConversations = await Promise.all(
         rawConversations.map(async (conv) => {
@@ -101,6 +116,15 @@ export function MessagesPage() {
             conv.messages.length > 0
               ? conv.messages[conv.messages.length - 1]
               : null
+          const lastMessageTime = lastMessage?.timestamp
+            ? new Date(lastMessage.timestamp)
+            : conv.lastActivity || conv.createdAt
+          const awaitingReply = Boolean(
+            lastMessage &&
+              currentUser &&
+              lastMessage.senderId === currentUser.id &&
+              lastMessage.senderType === userType
+          )
           // Mock unread count (in a real app, this would be stored in the database)
           const unreadCount = Math.floor(Math.random() * 3)
           // Mock phase (in a real app, this would be stored in the database)
@@ -127,10 +151,11 @@ export function MessagesPage() {
             organizerLogo:
               'https://images.unsplash.com/photo-1561489404-42f5a5c8e0eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=250&q=80',
             lastMessage: lastMessage?.content || 'No messages yet',
-            lastMessageTime: lastMessage?.timestamp || conv.createdAt,
+            lastMessageTime,
             unreadCount,
             phase,
-            reference
+            reference,
+            awaitingReply
           }
         })
       )
@@ -169,8 +194,30 @@ export function MessagesPage() {
       newMessage
     )
     setNewMessage('')
-    // Reload messages
-    loadMessages(selectedConversation)
+    const updatedMessages = await getConversationMessages(selectedConversation)
+    setMessages(updatedMessages)
+    const lastMessage =
+      updatedMessages.length > 0
+        ? updatedMessages[updatedMessages.length - 1]
+        : null
+    setConversations((prev) =>
+      prev.map((conversation) =>
+        conversation.id === selectedConversation
+          ? {
+              ...conversation,
+              lastMessage: lastMessage?.content || conversation.lastMessage,
+              lastMessageTime: lastMessage
+                ? new Date(lastMessage.timestamp)
+                : conversation.lastMessageTime,
+              awaitingReply: Boolean(
+                lastMessage &&
+                  lastMessage.senderId === currentUser.id &&
+                  lastMessage.senderType === userType
+              )
+            }
+          : conversation
+      )
+    )
   }
   const handleSelectConversation = async (conversationId: string) => {
     setSelectedConversation(conversationId)
@@ -255,6 +302,10 @@ export function MessagesPage() {
     if (phase === 'all') return 'All Phases'
     return phase.charAt(0).toUpperCase() + phase.slice(1).replace('_', ' ')
   }
+  const activeConversation = conversations.find(
+    (c) => c.id === selectedConversation
+  )
+
   return (
     <DashboardLayout userType={userType}>
       <div className='flex flex-col h-[calc(100vh-9rem)]'>
@@ -421,6 +472,13 @@ export function MessagesPage() {
                                   ).toLocaleDateString()}
                               </span>
                             </div>
+                            {conversation.awaitingReply && (
+                              <div className='mt-2'>
+                                <span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-amber-700 bg-amber-100'>
+                                  Awaiting reply
+                                </span>
+                              </div>
+                            )}
                             <p className='mt-2 text-sm text-gray-600 truncate'>
                               {conversation.lastMessage}
                             </p>
@@ -441,27 +499,16 @@ export function MessagesPage() {
                     <div className='flex items-center'>
                       <div className='h-10 w-10 rounded-full overflow-hidden mr-3 bg-gray-200'>
                         {userType === 'brand' &&
-                        conversations.find((c) => c.id === selectedConversation)
-                          ?.organizerLogo ? (
+                        activeConversation?.organizerLogo ? (
                           <img
-                            src={
-                              conversations.find(
-                                (c) => c.id === selectedConversation
-                              )?.organizerLogo
-                            }
+                            src={activeConversation.organizerLogo}
                             alt={partnerDisplayName}
                             className='h-full w-full object-cover'
                           />
                         ) : userType === 'organizer' &&
-                          conversations.find(
-                            (c) => c.id === selectedConversation
-                          )?.brandLogo ? (
+                          activeConversation?.brandLogo ? (
                           <img
-                            src={
-                              conversations.find(
-                                (c) => c.id === selectedConversation
-                              )?.brandLogo
-                            }
+                            src={activeConversation.brandLogo}
                             alt={partnerDisplayName}
                             className='h-full w-full object-cover'
                           />
@@ -476,23 +523,20 @@ export function MessagesPage() {
                           {partnerDisplayName}
                         </h3>
                         <p className='text-sm text-gray-600'>
-                          {
-                            conversations.find(
-                              (c) => c.id === selectedConversation
-                            )?.reference
-                          }
+                          {activeConversation?.reference}
                         </p>
                       </div>
+                      {activeConversation?.awaitingReply && (
+                        <span className='ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold text-amber-700 bg-amber-100'>
+                          Awaiting reply
+                        </span>
+                      )}
                     </div>
                     <div className='flex items-center space-x-2'>
                       <div className='relative'>
                         <select
                           className='appearance-none bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500'
-                          value={
-                            conversations.find(
-                              (c) => c.id === selectedConversation
-                            )?.phase
-                          }
+                          value={activeConversation?.phase}
                           onChange={(e) => {
                             // In a real app, this would update the phase in the database
                             const updatedConversations = conversations.map(
@@ -516,8 +560,7 @@ export function MessagesPage() {
                           <ChevronDownIcon className='h-4 w-4 text-gray-400' />
                         </div>
                       </div>
-                      {conversations.find((c) => c.id === selectedConversation)
-                        ?.phase === 'contract_draft' && (
+                      {activeConversation?.phase === 'contract_draft' && (
                         <Button variant='outline' className='flex items-center'>
                           <FileTextIcon className='h-4 w-4 mr-1' />
                           View Contract
@@ -525,9 +568,7 @@ export function MessagesPage() {
                       )}
                       <Button variant='primary'>
                         {getContextualCTA(
-                          conversations.find(
-                            (c) => c.id === selectedConversation
-                          )?.phase || 'inquiry'
+                          activeConversation?.phase || 'inquiry'
                         )}
                       </Button>
                     </div>

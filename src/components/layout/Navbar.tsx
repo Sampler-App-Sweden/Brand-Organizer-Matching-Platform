@@ -45,6 +45,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
+
   // Determine dashboard link based on user type
   const getDashboardLink = () => {
     if (!currentUser) return '/login'
