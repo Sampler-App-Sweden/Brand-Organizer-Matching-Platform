@@ -1,3 +1,5 @@
 export * from './profile'
 export * from './community'
 export * from './collaboration'
+export * from './brand'
+export * from './organizer'

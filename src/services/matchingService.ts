@@ -1,4 +1,4 @@
-import type { Brand, Organizer } from './dataService'
+import type { Brand, Organizer } from '../types'
 
 // This service handles the AI matching logic between brands and organizers
 type MatchScore = {
