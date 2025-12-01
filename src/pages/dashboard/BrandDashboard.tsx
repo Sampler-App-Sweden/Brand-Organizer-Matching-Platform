@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import {
-  Brand,
   getBrandByUserId,
   getMatchesForBrand
 } from '../../services/dataService'
@@ -12,6 +11,8 @@ import { TrendingUpIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
 import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
+import { Brand } from '../../types'
+
 export function BrandDashboard() {
   const { currentUser } = useAuth()
   const [brand, setBrand] = useState<Brand | null>(null)
@@ -20,11 +21,17 @@ export function BrandDashboard() {
   useEffect(() => {
     const loadData = async () => {
       if (currentUser) {
-        const brandData = getBrandByUserId(currentUser.id)
-        setBrand(brandData)
-        if (brandData) {
-          const matchData = getMatchesForBrand(brandData.id)
-          setMatches(matchData)
+        try {
+          const brandData = await getBrandByUserId(currentUser.id)
+          setBrand(brandData)
+          if (brandData) {
+            const matchData = await getMatchesForBrand(brandData.id)
+            setMatches(matchData)
+          } else {
+            setMatches([])
+          }
+        } catch (error) {
+          console.error('Failed to load brand dashboard data:', error)
         }
       }
       setLoading(false)

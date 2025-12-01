@@ -7,6 +7,9 @@ export interface Brand {
   email: string
   phone: string
   website: string
+  address: string
+  postalCode: string
+  city: string
   industry: string
   productName: string
   productDescription: string
@@ -17,7 +20,12 @@ export interface Brand {
   marketingGoals: string
   budget: string
   eventMarketingBudget: string
-  interestedInSamplingTools: string
+  interestedInFinancialSponsorship: 'yes' | 'no' | ''
+  financialSponsorshipAmount: string
+  successMetrics: string
+  interestedInSamplingTools: 'yes' | 'no' | ''
+  hasTestPanels: 'yes' | 'no' | ''
+  testPanelDetails: string
   additionalInfo: string
   createdAt: Date
 }

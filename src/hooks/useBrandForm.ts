@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../services/supabaseClient'
+import {
+  getBrandByUserId,
+  saveBrand,
+  updateBrand
+} from '../services/dataService'
 
 export interface BrandFormData {
   companyName: string
@@ -72,6 +76,7 @@ export function useBrandForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [existingBrandId, setExistingBrandId] = useState<string | null>(null)
 
   // Fetch existing brand data if user is logged in
   useEffect(() => {
@@ -82,53 +87,41 @@ export function useBrandForm() {
       }
 
       try {
-        const { data: brandData, error } = await supabase
-          .from('brands')
-          .select('*')
-          .eq('user_id', currentUser.id)
-          .single()
-
-        if (error) {
-          if (error.code !== 'PGRST116') {
-            console.error('Error fetching brand data:', error)
-          }
-          setIsLoading(false)
-          return
-        }
-
-        if (brandData) {
+        const brand = await getBrandByUserId(currentUser.id)
+        if (brand) {
+          setExistingBrandId(brand.id)
           setFormData({
-            companyName: brandData.company_name || '',
-            contactName: brandData.contact_name || '',
-            contactTitle: brandData.contact_title || '',
-            email: brandData.email || currentUser.email,
+            companyName: brand.companyName || '',
+            contactName: brand.contactName || '',
+            contactTitle: brand.contactTitle || '',
+            email: brand.email || currentUser.email,
             password: '',
             confirmPassword: '',
-            phone: brandData.phone || '',
-            website: brandData.website || '',
-            address: brandData.address || '',
-            postalCode: brandData.postal_code || '',
-            city: brandData.city || '',
-            industry: brandData.industry || '',
-            productName: brandData.product_name || '',
-            productDescription: brandData.product_description || '',
-            productQuantity: brandData.product_quantity || '',
-            targetAudience: brandData.target_audience || '',
-            ageRange: brandData.age_range || '',
-            sponsorshipType: brandData.sponsorship_type || [],
-            marketingGoals: brandData.marketing_goals || '',
-            budget: brandData.budget || '',
-            eventMarketingBudget: brandData.event_marketing_budget || '',
+            phone: brand.phone || '',
+            website: brand.website || '',
+            address: brand.address || '',
+            postalCode: brand.postalCode || '',
+            city: brand.city || '',
+            industry: brand.industry || '',
+            productName: brand.productName || '',
+            productDescription: brand.productDescription || '',
+            productQuantity: brand.productQuantity || '',
+            targetAudience: brand.targetAudience || '',
+            ageRange: brand.ageRange || '',
+            sponsorshipType: brand.sponsorshipType || [],
+            marketingGoals: brand.marketingGoals || '',
+            budget: brand.budget || '',
+            eventMarketingBudget: brand.eventMarketingBudget || '',
             interestedInFinancialSponsorship:
-              brandData.interested_in_financial_sponsorship || 'no',
+              brand.interestedInFinancialSponsorship || 'no',
             financialSponsorshipAmount:
-              brandData.financial_sponsorship_amount || '',
-            successMetrics: brandData.success_metrics || '',
+              brand.financialSponsorshipAmount || '',
+            successMetrics: brand.successMetrics || '',
             interestedInSamplingTools:
-              brandData.interested_in_sampling_tools || 'no',
-            hasTestPanels: brandData.has_test_panels || 'no',
-            testPanelDetails: brandData.test_panel_details || '',
-            additionalInfo: brandData.additional_info || ''
+              brand.interestedInSamplingTools || 'no',
+            hasTestPanels: brand.hasTestPanels || 'no',
+            testPanelDetails: brand.testPanelDetails || '',
+            additionalInfo: brand.additionalInfo || ''
           })
         }
       } catch (error) {
@@ -217,73 +210,9 @@ export function useBrandForm() {
     setIsSubmitting(true)
 
     try {
-      let userId: string
+      let userId = currentUser?.id ?? ''
 
-      if (currentUser) {
-        userId = currentUser.id
-
-        const brandData = {
-          company_name: formData.companyName,
-          contact_name: formData.contactName,
-          contact_title: formData.contactTitle,
-          email: formData.email,
-          phone: formData.phone,
-          website: formData.website,
-          address: formData.address,
-          postal_code: formData.postalCode,
-          city: formData.city,
-          industry: formData.industry,
-          product_name: formData.productName,
-          product_description: formData.productDescription,
-          product_quantity: formData.productQuantity,
-          target_audience: formData.targetAudience,
-          age_range: formData.ageRange,
-          sponsorship_type: formData.sponsorshipType,
-          marketing_goals: formData.marketingGoals,
-          budget: formData.budget,
-          event_marketing_budget: formData.eventMarketingBudget,
-          interested_in_financial_sponsorship:
-            formData.interestedInFinancialSponsorship,
-          financial_sponsorship_amount: formData.financialSponsorshipAmount,
-          success_metrics: formData.successMetrics,
-          interested_in_sampling_tools: formData.interestedInSamplingTools,
-          has_test_panels: formData.hasTestPanels,
-          test_panel_details: formData.testPanelDetails,
-          additional_info: formData.additionalInfo
-        }
-
-        const { data: existing } = await supabase
-          .from('brands')
-          .select('id')
-          .eq('user_id', userId)
-          .single()
-
-        if (existing) {
-          const { error: brandError } = await supabase
-            .from('brands')
-            .update(brandData)
-            .eq('user_id', userId)
-
-          if (brandError) {
-            throw new Error(
-              `Failed to update brand profile: ${brandError.message}`
-            )
-          }
-        } else {
-          const { error: brandError } = await supabase
-            .from('brands')
-            .insert([{ ...brandData, user_id: userId }])
-
-          if (brandError) {
-            throw new Error(
-              `Failed to create brand profile: ${brandError.message}`
-            )
-          }
-        }
-
-        navigate('/dashboard/brand')
-        return { success: true, message: 'Brand profile updated successfully!' }
-      } else {
+      if (!currentUser) {
         const user = await register(
           formData.email,
           formData.password,
@@ -291,51 +220,63 @@ export function useBrandForm() {
           formData.companyName
         )
         userId = user.id
+      }
 
-        const { error: brandError } = await supabase.from('brands').insert([
-          {
-            user_id: userId,
-            company_name: formData.companyName,
-            contact_name: formData.contactName,
-            contact_title: formData.contactTitle,
-            email: formData.email,
-            phone: formData.phone,
-            website: formData.website,
-            address: formData.address,
-            postal_code: formData.postalCode,
-            city: formData.city,
-            industry: formData.industry,
-            product_name: formData.productName,
-            product_description: formData.productDescription,
-            product_quantity: formData.productQuantity,
-            target_audience: formData.targetAudience,
-            age_range: formData.ageRange,
-            sponsorship_type: formData.sponsorshipType,
-            marketing_goals: formData.marketingGoals,
-            budget: formData.budget,
-            event_marketing_budget: formData.eventMarketingBudget,
-            interested_in_financial_sponsorship:
-              formData.interestedInFinancialSponsorship,
-            financial_sponsorship_amount: formData.financialSponsorshipAmount,
-            success_metrics: formData.successMetrics,
-            interested_in_sampling_tools: formData.interestedInSamplingTools,
-            has_test_panels: formData.hasTestPanels,
-            test_panel_details: formData.testPanelDetails,
-            additional_info: formData.additionalInfo
+      const brandPayload = {
+        userId,
+        companyName: formData.companyName,
+        contactName: formData.contactName,
+        contactTitle: formData.contactTitle,
+        email: formData.email,
+        phone: formData.phone,
+        website: formData.website,
+        address: formData.address,
+        postalCode: formData.postalCode,
+        city: formData.city,
+        industry: formData.industry,
+        productName: formData.productName,
+        productDescription: formData.productDescription,
+        productQuantity: formData.productQuantity,
+        targetAudience: formData.targetAudience,
+        ageRange: formData.ageRange,
+        sponsorshipType: formData.sponsorshipType,
+        marketingGoals: formData.marketingGoals,
+        budget: formData.budget,
+        eventMarketingBudget: formData.eventMarketingBudget,
+        interestedInFinancialSponsorship:
+          formData.interestedInFinancialSponsorship,
+        financialSponsorshipAmount: formData.financialSponsorshipAmount,
+        successMetrics: formData.successMetrics,
+        interestedInSamplingTools: formData.interestedInSamplingTools,
+        hasTestPanels: formData.hasTestPanels,
+        testPanelDetails: formData.testPanelDetails,
+        additionalInfo: formData.additionalInfo
+      }
+
+      if (currentUser) {
+        if (existingBrandId) {
+          await updateBrand(existingBrandId, brandPayload)
+          navigate('/dashboard/brand')
+          return {
+            success: true,
+            message: 'Brand profile updated successfully!'
           }
-        ])
-
-        if (brandError) {
-          throw new Error(
-            `Failed to create brand profile: ${brandError.message}`
-          )
         }
 
+        const createdBrand = await saveBrand(brandPayload)
+        setExistingBrandId(createdBrand.id)
         navigate('/dashboard/brand')
         return {
           success: true,
-          message: 'Registration successful! Redirecting to dashboard...'
+          message: 'Brand profile created successfully!'
         }
+      }
+
+      await saveBrand(brandPayload)
+      navigate('/dashboard/brand')
+      return {
+        success: true,
+        message: 'Registration successful! Redirecting to dashboard...'
       }
     } catch (error) {
       console.error('Submit error:', error)

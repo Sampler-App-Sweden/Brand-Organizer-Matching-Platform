@@ -24,11 +24,17 @@ export function OrganizerDashboard() {
   useEffect(() => {
     const loadData = async () => {
       if (currentUser) {
-        const organizerData = getOrganizerByUserId(currentUser.id)
-        setOrganizer(organizerData)
-        if (organizerData) {
-          const matchData = getMatchesForOrganizer(organizerData.id)
-          setMatches(matchData)
+        try {
+          const organizerData = await getOrganizerByUserId(currentUser.id)
+          setOrganizer(organizerData)
+          if (organizerData) {
+            const matchData = await getMatchesForOrganizer(organizerData.id)
+            setMatches(matchData)
+          } else {
+            setMatches([])
+          }
+        } catch (error) {
+          console.error('Failed to load organizer dashboard data:', error)
         }
       }
       setLoading(false)

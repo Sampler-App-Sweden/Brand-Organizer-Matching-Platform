@@ -6,6 +6,9 @@ export interface Organizer {
   email: string
   phone: string
   website: string
+  address: string
+  postalCode: string
+  city: string
   eventName: string
   eventType: string
   elevatorPitch: string
@@ -16,6 +19,9 @@ export interface Organizer {
   audienceDescription: string
   audienceDemographics: string[]
   sponsorshipNeeds: string
+  seekingFinancialSponsorship: 'yes' | 'no' | ''
+  financialSponsorshipAmount: string
+  financialSponsorshipOffers: string
   offeringTypes: string[]
   brandVisibility: string
   contentCreation: string

@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import {
   getBrandById,
   getOrganizerById,
+  getMatchById,
   updateMatchStatus
 } from '../../services/dataService'
 import {
@@ -39,6 +40,7 @@ type StoredOrganizer = Organizer & {
   postalCode?: string
   city?: string
 }
+
 export function MatchDetails() {
   const { matchId } = useParams<{
     matchId: string
@@ -58,51 +60,57 @@ export function MatchDetails() {
   useEffect(() => {
     const loadData = async () => {
       if (!matchId || !currentUser) return
-      // Get match data
-      const matches = JSON.parse(
-        localStorage.getItem('matches') || '[]'
-      ) as Match[]
-      const foundMatch = matches.find((m) => m.id === matchId)
-      if (!foundMatch) {
-        navigate('/dashboard')
-        return
+      try {
+        const foundMatch = await getMatchById(matchId)
+        if (!foundMatch) {
+          navigate('/dashboard')
+          return
+        }
+        setMatch(foundMatch)
+
+        const [brandData, organizerData] = await Promise.all([
+          getBrandById(foundMatch.brandId),
+          getOrganizerById(foundMatch.organizerId)
+        ])
+
+        setBrand(brandData as StoredBrand | null)
+        setOrganizer(organizerData as StoredOrganizer | null)
+        // Determine user type
+        if (brandData && brandData.userId === currentUser.id) {
+          setUserType('brand')
+        } else if (organizerData && organizerData.userId === currentUser.id) {
+          setUserType('organizer')
+        }
+        // Get conversation
+        if (brandData && organizerData) {
+          const conv = getOrCreateConversation(brandData.id, organizerData.id)
+          setConversation(conv)
+          setMessages(conv.messages)
+        }
+        // Check if there's an existing contract
+        const contracts = JSON.parse(
+          localStorage.getItem('contracts') || '[]'
+        ) as Contract[]
+        const existingContract = contracts.find((c) => c.matchId === matchId)
+        if (existingContract) {
+          setContract(existingContract)
+        }
+      } catch (error) {
+        console.error('Failed to load match details:', error)
+      } finally {
+        setLoading(false)
       }
-      setMatch(foundMatch)
-      // Get brand and organizer data
-      const brandData = getBrandById(foundMatch.brandId) as StoredBrand | null
-      const organizerData = getOrganizerById(
-        foundMatch.organizerId
-      ) as StoredOrganizer | null
-      setBrand(brandData)
-      setOrganizer(organizerData)
-      // Determine user type
-      if (brandData && brandData.userId === currentUser.id) {
-        setUserType('brand')
-      } else if (organizerData && organizerData.userId === currentUser.id) {
-        setUserType('organizer')
-      }
-      // Get conversation
-      if (brandData && organizerData) {
-        const conv = getOrCreateConversation(brandData.id, organizerData.id)
-        setConversation(conv)
-        setMessages(conv.messages)
-      }
-      // Check if there's an existing contract
-      const contracts = JSON.parse(
-        localStorage.getItem('contracts') || '[]'
-      ) as Contract[]
-      const existingContract = contracts.find((c) => c.matchId === matchId)
-      if (existingContract) {
-        setContract(existingContract)
-      }
-      setLoading(false)
     }
     loadData()
   }, [matchId, currentUser, navigate])
-  const handleStatusChange = (status: 'accepted' | 'rejected') => {
+  const handleStatusChange = async (status: 'accepted' | 'rejected') => {
     if (!match) return
-    const updatedMatch = updateMatchStatus(match.id, status)
-    setMatch(updatedMatch)
+    try {
+      const updatedMatch = await updateMatchStatus(match.id, status)
+      setMatch(updatedMatch)
+    } catch (error) {
+      console.error('Failed to update match status:', error)
+    }
   }
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault()
@@ -353,7 +361,7 @@ export function MatchDetails() {
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Kontaktinformation
+                    Contact information
                   </h3>
                   <p className='text-gray-900'>
                     {organizer.contactName}

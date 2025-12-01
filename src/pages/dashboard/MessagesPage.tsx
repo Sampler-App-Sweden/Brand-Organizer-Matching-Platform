@@ -8,7 +8,12 @@ import {
   sendMessage,
   getConversationMessages
 } from '../../services/chatService'
-import { getBrandById, getOrganizerById } from '../../services/dataService'
+import {
+  getBrandById,
+  getBrandByUserId,
+  getOrganizerById,
+  getOrganizerByUserId
+} from '../../services/dataService'
 import {
   MessageSquareIcon,
   SendIcon,
@@ -622,16 +627,4 @@ export function MessagesPage() {
       </div>
     </DashboardLayout>
   )
-}
-// Helper function to get brand by user ID (already exists in dataService, but added here for completeness)
-const getBrandByUserId = async (userId: string) => {
-  // In a real app, this would be an API call
-  const brands = JSON.parse(localStorage.getItem('brands') || '[]')
-  return brands.find((b: any) => b.userId === userId) || null
-}
-// Helper function to get organizer by user ID (already exists in dataService, but added here for completeness)
-const getOrganizerByUserId = async (userId: string) => {
-  // In a real app, this would be an API call
-  const organizers = JSON.parse(localStorage.getItem('organizers') || '[]')
-  return organizers.find((o: any) => o.userId === userId) || null
 }

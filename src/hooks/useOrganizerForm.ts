@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../services/supabaseClient'
+import {
+  getOrganizerByUserId,
+  saveOrganizer,
+  updateOrganizer
+} from '../services/dataService'
 
 export interface OrganizerFormData {
   organizerName: string
@@ -80,6 +84,9 @@ export function useOrganizerForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [existingOrganizerId, setExistingOrganizerId] = useState<string | null>(
+    null
+  )
 
   // Fetch existing organizer data
   useEffect(() => {
@@ -90,55 +97,44 @@ export function useOrganizerForm() {
       }
 
       try {
-        const { data: organizerData, error: organizerError } = await supabase
-          .from('organizers')
-          .select('*')
-          .eq('user_id', currentUser.id)
-          .single()
-
-        if (organizerError) {
-          if (organizerError.code === 'PGRST116') {
-            console.log('No existing organizer profile found')
-          } else {
-            console.error('Error fetching organizer data:', organizerError)
-          }
-          setIsLoading(false)
-          return
-        }
-
-        if (organizerData) {
+        const organizer = await getOrganizerByUserId(currentUser.id)
+        if (organizer) {
+          setExistingOrganizerId(organizer.id)
           setFormData({
-            organizerName: organizerData.organizer_name || '',
-            contactName: organizerData.contact_name || '',
+            organizerName: organizer.organizerName || '',
+            contactName: organizer.contactName || '',
             email: currentUser.email || '',
             password: '',
             confirmPassword: '',
-            phone: organizerData.phone || '',
-            website: organizerData.website || '',
-            address: organizerData.address || '',
-            postalCode: organizerData.postal_code || '',
-            city: organizerData.city || '',
-            eventName: organizerData.event_name || '',
-            eventType: organizerData.event_type || '',
-            elevatorPitch: organizerData.elevator_pitch || '',
-            eventFrequency: organizerData.event_frequency || '',
-            eventDate: organizerData.event_date || '',
-            location: organizerData.location || '',
-            attendeeCount: organizerData.attendee_count || '',
-            audienceDescription: organizerData.audience_description || '',
-            audienceDemographics: organizerData.audience_demographics || [],
-            sponsorshipNeeds: organizerData.sponsorship_needs || '',
-            seekingFinancialSponsorship: organizerData.seeking_financial_sponsorship || 'no',
-            financialSponsorshipAmount: organizerData.financial_sponsorship_amount || '',
-            financialSponsorshipOffers: organizerData.financial_sponsorship_offers || '',
-            offeringTypes: organizerData.offering_types || [],
-            brandVisibility: organizerData.brand_visibility || '',
-            contentCreation: organizerData.content_creation || '',
-            leadGeneration: organizerData.lead_generation || '',
-            productFeedback: organizerData.product_feedback || '',
-            bonusValue: organizerData.bonus_value || [],
-            bonusValueDetails: organizerData.bonus_value_details || '',
-            additionalInfo: organizerData.additional_info || '',
+            phone: organizer.phone || '',
+            website: organizer.website || '',
+            address: organizer.address || '',
+            postalCode: organizer.postalCode || '',
+            city: organizer.city || '',
+            eventName: organizer.eventName || '',
+            eventType: organizer.eventType || '',
+            elevatorPitch: organizer.elevatorPitch || '',
+            eventFrequency: organizer.eventFrequency || '',
+            eventDate: organizer.eventDate || '',
+            location: organizer.location || '',
+            attendeeCount: organizer.attendeeCount || '',
+            audienceDescription: organizer.audienceDescription || '',
+            audienceDemographics: organizer.audienceDemographics || [],
+            sponsorshipNeeds: organizer.sponsorshipNeeds || '',
+            seekingFinancialSponsorship:
+              organizer.seekingFinancialSponsorship || 'no',
+            financialSponsorshipAmount:
+              organizer.financialSponsorshipAmount || '',
+            financialSponsorshipOffers:
+              organizer.financialSponsorshipOffers || '',
+            offeringTypes: organizer.offeringTypes || [],
+            brandVisibility: organizer.brandVisibility || '',
+            contentCreation: organizer.contentCreation || '',
+            leadGeneration: organizer.leadGeneration || '',
+            productFeedback: organizer.productFeedback || '',
+            bonusValue: organizer.bonusValue || [],
+            bonusValueDetails: organizer.bonusValueDetails || '',
+            additionalInfo: organizer.additionalInfo || '',
             mediaFiles: []
           })
         }
@@ -215,99 +211,76 @@ export function useOrganizerForm() {
     setIsSubmitting(true)
 
     try {
-      let userId: string
+      let userId = currentUser?.id ?? ''
+
+      if (!currentUser) {
+        const user = await register(
+          formData.email,
+          formData.password,
+          'organizer',
+          formData.organizerName
+        )
+        userId = user.id
+      }
+
+      const organizerPayload = {
+        userId,
+        organizerName: formData.organizerName,
+        contactName: formData.contactName,
+        email: formData.email,
+        phone: formData.phone,
+        website: formData.website,
+        address: formData.address,
+        postalCode: formData.postalCode,
+        city: formData.city,
+        eventName: formData.eventName,
+        eventType: formData.eventType,
+        elevatorPitch: formData.elevatorPitch,
+        eventFrequency: formData.eventFrequency,
+        eventDate: formData.eventDate,
+        location: formData.location,
+        attendeeCount: formData.attendeeCount,
+        audienceDescription: formData.audienceDescription,
+        audienceDemographics: formData.audienceDemographics,
+        sponsorshipNeeds: formData.sponsorshipNeeds,
+        seekingFinancialSponsorship: formData.seekingFinancialSponsorship,
+        financialSponsorshipAmount: formData.financialSponsorshipAmount,
+        financialSponsorshipOffers: formData.financialSponsorshipOffers,
+        offeringTypes: formData.offeringTypes,
+        brandVisibility: formData.brandVisibility,
+        contentCreation: formData.contentCreation,
+        leadGeneration: formData.leadGeneration,
+        productFeedback: formData.productFeedback,
+        bonusValue: formData.bonusValue,
+        bonusValueDetails: formData.bonusValueDetails,
+        additionalInfo: formData.additionalInfo,
+        mediaFiles: []
+      }
 
       if (currentUser) {
-        userId = currentUser.id
-
-        const organizerData = {
-          organizer_name: formData.organizerName,
-          contact_name: formData.contactName,
-          phone: formData.phone,
-          website: formData.website,
-          address: formData.address,
-          postal_code: formData.postalCode,
-          city: formData.city,
-          event_name: formData.eventName,
-          event_type: formData.eventType,
-          elevator_pitch: formData.elevatorPitch,
-          event_frequency: formData.eventFrequency,
-          event_date: formData.eventDate,
-          location: formData.location,
-          attendee_count: formData.attendeeCount,
-          audience_description: formData.audienceDescription,
-          audience_demographics: formData.audienceDemographics,
-          sponsorship_needs: formData.sponsorshipNeeds,
-          seeking_financial_sponsorship: formData.seekingFinancialSponsorship,
-          financial_sponsorship_amount: formData.financialSponsorshipAmount,
-          financial_sponsorship_offers: formData.financialSponsorshipOffers,
-          offering_types: formData.offeringTypes,
-          brand_visibility: formData.brandVisibility,
-          content_creation: formData.contentCreation,
-          lead_generation: formData.leadGeneration,
-          product_feedback: formData.productFeedback,
-          bonus_value: formData.bonusValue,
-          bonus_value_details: formData.bonusValueDetails,
-          additional_info: formData.additionalInfo,
-          media_files: []
-        }
-
-        const { error: organizerError } = await supabase
-          .from('organizers')
-          .upsert({ ...organizerData, user_id: userId }, { onConflict: 'user_id' })
-
-        if (organizerError) {
-          throw new Error(`Failed to save organizer profile: ${organizerError.message}`)
-        }
-
-        navigate('/dashboard/organizer')
-        return { success: true, message: 'Organizer profile updated successfully!' }
-      } else {
-        const user = await register(formData.email, formData.password, 'organizer', formData.organizerName)
-        userId = user.id
-
-        const { error: organizerError } = await supabase.from('organizers').insert([
-          {
-            user_id: userId,
-            organizer_name: formData.organizerName,
-            contact_name: formData.contactName,
-            email: formData.email,
-            phone: formData.phone,
-            website: formData.website,
-            address: formData.address,
-            postal_code: formData.postalCode,
-            city: formData.city,
-            event_name: formData.eventName,
-            event_type: formData.eventType,
-            elevator_pitch: formData.elevatorPitch,
-            event_frequency: formData.eventFrequency,
-            event_date: formData.eventDate,
-            location: formData.location,
-            attendee_count: formData.attendeeCount,
-            audience_description: formData.audienceDescription,
-            audience_demographics: formData.audienceDemographics,
-            sponsorship_needs: formData.sponsorshipNeeds,
-            seeking_financial_sponsorship: formData.seekingFinancialSponsorship,
-            financial_sponsorship_amount: formData.financialSponsorshipAmount,
-            financial_sponsorship_offers: formData.financialSponsorshipOffers,
-            offering_types: formData.offeringTypes,
-            brand_visibility: formData.brandVisibility,
-            content_creation: formData.contentCreation,
-            lead_generation: formData.leadGeneration,
-            product_feedback: formData.productFeedback,
-            bonus_value: formData.bonusValue,
-            bonus_value_details: formData.bonusValueDetails,
-            additional_info: formData.additionalInfo,
-            media_files: []
+        if (existingOrganizerId) {
+          await updateOrganizer(existingOrganizerId, organizerPayload)
+          navigate('/dashboard/organizer')
+          return {
+            success: true,
+            message: 'Organizer profile updated successfully!'
           }
-        ])
-
-        if (organizerError) {
-          throw new Error(`Failed to create organizer profile: ${organizerError.message}`)
         }
 
+        const createdOrganizer = await saveOrganizer(organizerPayload)
+        setExistingOrganizerId(createdOrganizer.id)
         navigate('/dashboard/organizer')
-        return { success: true, message: 'Registration successful! Redirecting to dashboard...' }
+        return {
+          success: true,
+          message: 'Organizer profile created successfully!'
+        }
+      }
+
+      await saveOrganizer(organizerPayload)
+      navigate('/dashboard/organizer')
+      return {
+        success: true,
+        message: 'Registration successful! Redirecting to dashboard...'
       }
     } catch (error) {
       console.error('Submit error:', error)
