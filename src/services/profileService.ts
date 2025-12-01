@@ -1,45 +1,49 @@
-import { supabase } from './supabaseClient';
+import { supabase } from './supabaseClient'
+
 export interface ProfileData {
-  role: 'Brand' | 'Organizer';
-  name: string;
-  logoURL?: string;
-  description: string;
+  role: 'Brand' | 'Organizer'
+  name: string
+  logoURL?: string
+  description: string
   whatTheySeek: {
-    sponsorshipTypes: string[];
-    budgetRange: string;
-    quantity?: number;
-    eventTypes?: string[];
-    audienceTags?: string[];
-    notes?: string;
-  };
+    sponsorshipTypes: string[]
+    budgetRange: string
+    quantity?: number
+    eventTypes?: string[]
+    audienceTags?: string[]
+    notes?: string
+  }
 }
+
 // Create a new profile
 export async function createProfile(profileData: ProfileData) {
   // First, get the current user
   const {
-    data: {
-      user
-    }
-  } = await supabase.auth.getUser();
+    data: { user }
+  } = await supabase.auth.getUser()
   if (!user) {
-    throw new Error('User not authenticated');
+    throw new Error('User not authenticated')
   }
+
   // Insert into profiles table
-  const {
-    data,
-    error
-  } = await supabase.from('profiles').insert([{
-    id: user.id,
-    role: profileData.role,
-    name: profileData.name,
-    email: user.email,
-    logo_url: profileData.logoURL,
-    description: profileData.description
-  }]).select();
+  const { data, error } = await supabase
+    .from('profiles')
+    .insert([
+      {
+        id: user.id,
+        role: profileData.role,
+        name: profileData.name,
+        email: user.email,
+        logo_url: profileData.logoURL,
+        description: profileData.description
+      }
+    ])
+    .select()
   if (error) {
-    console.error('Error creating profile:', error);
-    throw new Error(`Error creating profile: ${error.message}`);
+    console.error('Error creating profile:', error)
+    throw new Error(`Error creating profile: ${error.message}`)
   }
+
   // If it's a brand, insert into brands table
   if (profileData.role === 'Brand') {
     const brandData = {
@@ -56,15 +60,16 @@ export async function createProfile(profileData: ProfileData) {
       sponsorship_type: profileData.whatTheySeek.sponsorshipTypes,
       budget: profileData.whatTheySeek.budgetRange,
       marketing_goals: profileData.whatTheySeek.notes || ''
-    };
-    const {
-      error: brandError
-    } = await supabase.from('brands').insert([brandData]);
+    }
+    const { error: brandError } = await supabase
+      .from('brands')
+      .insert([brandData])
     if (brandError) {
-      console.error('Error creating brand:', brandError);
-      throw new Error(`Error creating brand: ${brandError.message}`);
+      console.error('Error creating brand:', brandError)
+      throw new Error(`Error creating brand: ${brandError.message}`)
     }
   }
+
   // If it's an organizer, insert into organizers table
   if (profileData.role === 'Organizer') {
     const organizerData = {
@@ -83,67 +88,70 @@ export async function createProfile(profileData: ProfileData) {
       // Default value
       audience_description: profileData.description,
       sponsorship_needs: profileData.whatTheySeek.notes || ''
-    };
-    const {
-      error: organizerError
-    } = await supabase.from('organizers').insert([organizerData]);
+    }
+    const { error: organizerError } = await supabase
+      .from('organizers')
+      .insert([organizerData])
     if (organizerError) {
-      console.error('Error creating organizer:', organizerError);
-      throw new Error(`Error creating organizer: ${organizerError.message}`);
+      console.error('Error creating organizer:', organizerError)
+      throw new Error(`Error creating organizer: ${organizerError.message}`)
     }
   }
-  return data?.[0];
+  return data?.[0]
 }
+
 // Get all profiles
 export async function getProfiles() {
-  const {
-    data,
-    error
-  } = await supabase.from('profiles').select('*');
+  const { data, error } = await supabase.from('profiles').select('*')
   if (error) {
-    console.error('Error fetching profiles:', error);
-    throw new Error(`Error fetching profiles: ${error.message}`);
+    console.error('Error fetching profiles:', error)
+    throw new Error(`Error fetching profiles: ${error.message}`)
   }
-  return data || [];
+  return data || []
 }
+
 // Get profile by ID
 export async function getProfileById(id: string) {
-  const {
-    data,
-    error
-  } = await supabase.from('profiles').select('*').eq('id', id).single();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', id)
+    .single()
   if (error) {
-    console.error('Error fetching profile:', error);
-    throw new Error(`Error fetching profile: ${error.message}`);
+    console.error('Error fetching profile:', error)
+    throw new Error(`Error fetching profile: ${error.message}`)
   }
-  return data;
+  return data
 }
+
 // Get profiles by role
 export async function getProfilesByRole(role: 'Brand' | 'Organizer') {
-  const {
-    data,
-    error
-  } = await supabase.from('profiles').select('*').eq('role', role);
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('role', role)
   if (error) {
-    console.error('Error fetching profiles by role:', error);
-    throw new Error(`Error fetching profiles by role: ${error.message}`);
+    console.error('Error fetching profiles by role:', error)
+    throw new Error(`Error fetching profiles by role: ${error.message}`)
   }
-  return data || [];
+  return data || []
 }
+
 // Update a profile
 export async function updateProfile(id: string, updates: Partial<ProfileData>) {
-  const {
-    data,
-    error
-  } = await supabase.from('profiles').update({
-    name: updates.name,
-    logo_url: updates.logoURL,
-    description: updates.description,
-    updated_at: new Date()
-  }).eq('id', id).select();
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      name: updates.name,
+      logo_url: updates.logoURL,
+      description: updates.description,
+      updated_at: new Date()
+    })
+    .eq('id', id)
+    .select()
   if (error) {
-    console.error('Error updating profile:', error);
-    throw new Error(`Error updating profile: ${error.message}`);
+    console.error('Error updating profile:', error)
+    throw new Error(`Error updating profile: ${error.message}`)
   }
-  return data?.[0];
+  return data?.[0]
 }

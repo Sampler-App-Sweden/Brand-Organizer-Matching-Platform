@@ -1,32 +1,29 @@
-import { CheckCircleIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { TechLayout } from '../components/layout'
-import {
-  BasicRegistrationForm,
-  EnhancedRegistrationForm,
-  PasswordStrengthRegistrationForm
-} from '../components/register/RegisterFormVariants'
-import {
-  calculatePasswordErrors,
-  calculatePasswordStrength
-} from '../components/register/registerUtils'
+import { BasicRegistrationForm, EnhancedRegistrationForm, PasswordStrengthRegistrationForm } from '../components/register/RegisterFormVariants'
+import { calculatePasswordErrors, calculatePasswordStrength } from '../components/register/registerUtils'
+import { DraftProfileNotice, LoginPrompt, RegistrationDebugPanel, RegistrationHeader } from '../components/register/RegistrationPageSections'
 import { RegistrationSuccess } from '../components/register/RegistrationSuccess'
-import { Button, Toast } from '../components/ui'
+import { Toast } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { useDraftProfile } from '../context/DraftProfileContext'
-import {
-  ERROR_TYPES,
-  EVENTS,
-  trackError,
-  trackEvent
-} from '../services/analyticsService'
+import { ERROR_TYPES, EVENTS, trackError, trackEvent } from '../services/analyticsService'
 import { convertDraftToProfile } from '../services/draftService'
-import {
-  EXPERIMENTS,
-  getUserExperimentVariant
-} from '../services/experimentService'
+import { EXPERIMENTS, getUserExperimentVariant } from '../services/experimentService'
+
+type RegistrationExperimentVariant = 'A' | 'B' | 'C'
+type AnalyticsEventData = Record<string, unknown>
+type TrackEventFn = (
+  event: string,
+  data?: AnalyticsEventData,
+  userId?: string,
+  experimentId?: string,
+  variant?: string
+) => void
+
+const REGISTRATION_EXPERIMENT = EXPERIMENTS.LOGIN_REGISTRATION
 
 export function Register() {
   const location = useLocation()
@@ -49,7 +46,6 @@ export function Register() {
    *   'B' = PasswordStrengthRegistrationForm
    *   'C' = EnhancedRegistrationForm
    */
-  type RegistrationExperimentVariant = 'A' | 'B' | 'C'
   const [experimentVariant, setExperimentVariant] =
     useState<RegistrationExperimentVariant>('A')
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
@@ -66,8 +62,12 @@ export function Register() {
     lowercase: true,
     number: true
   })
-  // Get redirect path from location state if available
-  const redirectPath = location.state?.from || '/'
+  const emitEvent = useCallback<TrackEventFn>(
+    (event, data, userId, experimentId = REGISTRATION_EXPERIMENT, variant) => {
+      trackEvent(event, data, userId, experimentId, variant)
+    },
+    []
+  )
   // Get role from query params if available
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -86,22 +86,20 @@ export function Register() {
     }
   }, [location.search, draftProfile])
   useEffect(() => {
-    // Load experiment variant
+    let isMounted = true
     const loadExperiment = async () => {
       try {
         const variant = await getUserExperimentVariant(
           currentUser?.id || '',
-          EXPERIMENTS.LOGIN_REGISTRATION
+          REGISTRATION_EXPERIMENT
         )
+        if (!isMounted) return
         setExperimentVariant(variant)
-        // Track page view
-        trackEvent(
+        emitEvent(
           EVENTS.PAGE_VIEW,
-          {
-            page: 'register'
-          },
+          { page: 'register' },
           currentUser?.id,
-          EXPERIMENTS.LOGIN_REGISTRATION,
+          REGISTRATION_EXPERIMENT,
           variant
         )
       } catch (error) {
@@ -109,49 +107,54 @@ export function Register() {
       }
     }
     loadExperiment()
-    // Check password strength
-    const hasLength = password.length >= 8
-    const hasUppercase = /[A-Z]/.test(password)
-    const hasLowercase = /[a-z]/.test(password)
-    const hasNumber = /[0-9]/.test(password)
-    setPasswordErrors({
-      length: !hasLength,
-      uppercase: !hasUppercase,
-      lowercase: !hasLowercase,
-      number: !hasNumber
-    })
-    // Calculate strength (0-4)
-    let strength = 0
-    if (hasLength) strength++
-    if (hasUppercase) strength++
-    if (hasLowercase) strength++
-    if (hasNumber) strength++
-    setPasswordStrength(strength)
-    // Cleanup function
     return () => {
-      trackEvent(
+      isMounted = false
+    }
+  }, [currentUser?.id, emitEvent])
+
+  useEffect(() => {
+    setPasswordErrors(calculatePasswordErrors(password))
+    setPasswordStrength(calculatePasswordStrength(password))
+  }, [password])
+
+  useEffect(() => {
+    const startTime = performance.now()
+    return () => {
+      emitEvent(
         EVENTS.PAGE_EXIT,
         {
           page: 'register',
-          timeSpent: Date.now() - performance.now()
+          timeSpentMs: performance.now() - startTime
         },
         currentUser?.id,
-        EXPERIMENTS.LOGIN_REGISTRATION,
+        REGISTRATION_EXPERIMENT,
         experimentVariant
       )
     }
-  }, [currentUser, navigate, redirectPath, password, experimentVariant])
+  }, [currentUser?.id, experimentVariant, emitEvent])
+
+  const handleLoginNavigate = () => {
+    emitEvent(
+      EVENTS.PAGE_EXIT,
+      {
+        action: 'go_to_login',
+        source: 'register_page'
+      },
+      undefined,
+      REGISTRATION_EXPERIMENT,
+      experimentVariant
+    )
+  }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     // Clear any previous debug info
     setDebugInfo(null)
-    trackEvent(
+    emitEvent(
       EVENTS.REGISTRATION_STARTED,
       {
         userType
       },
       undefined,
-      EXPERIMENTS.LOGIN_REGISTRATION,
       experimentVariant
     )
     // Validate inputs - make validation less strict for testing
@@ -169,7 +172,7 @@ export function Register() {
           userType
         },
         undefined,
-        EXPERIMENTS.LOGIN_REGISTRATION,
+        REGISTRATION_EXPERIMENT,
         experimentVariant
       )
       return
@@ -190,7 +193,7 @@ export function Register() {
           passwordStrength
         },
         undefined,
-        EXPERIMENTS.LOGIN_REGISTRATION,
+        REGISTRATION_EXPERIMENT,
         experimentVariant
       )
       return
@@ -210,15 +213,13 @@ export function Register() {
           userType
         },
         undefined,
-        EXPERIMENTS.LOGIN_REGISTRATION,
+        REGISTRATION_EXPERIMENT,
         experimentVariant
       )
       return
     }
     setIsSubmitting(true)
     try {
-      // Log registration attempt for debugging
-      console.log(`Attempting to register with: ${email}, type: ${userType}`)
       // Map userType to the correct type for register function
       const actualType =
         userType === 'community'
@@ -230,7 +231,6 @@ export function Register() {
         actualType,
         email.split('@')[0]
       )
-      console.log('Registration successful:', user)
       // If we have a draft profile, convert it to a full profile
       const draftId = getDraftId()
       if (draftId) {
@@ -248,14 +248,13 @@ export function Register() {
         message:
           'Account created successfully! Please check your email to verify your account.'
       })
-      trackEvent(
+      emitEvent(
         EVENTS.REGISTRATION_COMPLETED,
         {
           userType,
           emailVerificationSent: true
         },
         undefined,
-        EXPERIMENTS.LOGIN_REGISTRATION,
         experimentVariant
       )
     } catch (error: unknown) {
@@ -298,7 +297,7 @@ export function Register() {
           email
         },
         undefined,
-        EXPERIMENTS.LOGIN_REGISTRATION,
+        REGISTRATION_EXPERIMENT,
         experimentVariant
       )
     } finally {
@@ -308,162 +307,21 @@ export function Register() {
   // Render success state after verification sent
   if (verificationSent) {
     return (
-      <TechLayout>
-        <div className='max-w-md mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-100 relative'>
-          <div className='text-center'>
-            <div className='inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4'>
-              <CheckCircleIcon className='h-8 w-8 text-green-600' />
-            </div>
-            <h1 className='text-2xl font-bold text-gray-900 mb-2'>
-              Verify Your Email
-            </h1>
-            <p className='text-gray-600 mb-6'>
-              We've sent a verification link to <strong>{email}</strong>. Please
-              check your inbox and click the link to verify your account.
-            </p>
-            <div className='bg-blue-50 border border-blue-200 rounded-md p-4 mb-6 text-left'>
-              <p className='text-sm text-blue-800'>
-                <strong>Next steps:</strong>
-                <ol className='list-decimal pl-5 mt-2 space-y-1'>
-                  <li>Check your email (including spam folder)</li>
-                  <li>Click the verification link</li>
-                  <li>
-                    Once verified, you can log in and complete your profile
-                  </li>
-                </ol>
-              </p>
-            </div>
-            <div className='space-y-3'>
-              <Button
-                variant='primary'
-                className='w-full'
-                techEffect={true}
-                onClick={() => {
-                  navigate('/login')
-                  trackEvent(
-                    EVENTS.PAGE_VIEW,
-                    {
-                      source: 'registration_success',
-                      action: 'go_to_login'
-                    },
-                    undefined,
-                    EXPERIMENTS.LOGIN_REGISTRATION,
-                    experimentVariant
-                  )
-                }}
-              >
-                Go to Login
-              </Button>
-              <Button
-                variant='outline'
-                className='w-full'
-                onClick={() => {
-                  // In a real app, this would resend the verification email
-                  setToast({
-                    isVisible: true,
-                    type: 'info',
-                    message:
-                      'Verification email resent. Please check your inbox.'
-                  })
-                  trackEvent(
-                    EVENTS.REGISTRATION_COMPLETED,
-                    {
-                      action: 'resend_verification',
-                      userType
-                    },
-                    undefined,
-                    EXPERIMENTS.LOGIN_REGISTRATION,
-                    experimentVariant
-                  )
-                }}
-              >
-                Resend Verification Email
-              </Button>
-            </div>
-          </div>
-          {/* Tech decoration elements */}
-          <div
-            className='absolute -top-6 -right-6 w-12 h-12 opacity-10 animate-spin-slow'
-            style={{
-              animationDuration: '15s'
-            }}
-          >
-            <svg
-              viewBox='0 0 100 100'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <circle
-                cx='50'
-                cy='50'
-                r='45'
-                stroke='currentColor'
-                strokeWidth='2'
-                strokeDasharray='10 5'
-              />
-            </svg>
-          </div>
-          <div
-            className='absolute -bottom-6 -left-6 w-12 h-12 opacity-10 animate-spin-slow'
-            style={{
-              animationDuration: '20s',
-              animationDirection: 'reverse'
-            }}
-          >
-            <svg
-              viewBox='0 0 100 100'
-              fill='none'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <circle
-                cx='50'
-                cy='50'
-                r='45'
-                stroke='currentColor'
-                strokeWidth='2'
-                strokeDasharray='8 4'
-              />
-            </svg>
-          </div>
-        </div>
-        <Toast
-          type={toast.type}
-          message={toast.message}
-          duration={5000}
-          onClose={() =>
-            setToast({
-              ...toast,
-              isVisible: false
-            })
-          }
-          isVisible={toast.isVisible}
-        />
-        <style>{`
-          @keyframes spin-slow {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-          .animate-spin-slow {
-            animation: spin-slow linear infinite;
-          }
-        `}</style>
-      </TechLayout>
+      <RegistrationSuccess
+        email={email}
+        experimentVariant={experimentVariant}
+        userType={userType}
+        toast={toast}
+        setToast={setToast}
+        navigate={navigate}
+        trackEvent={emitEvent}
+        EVENTS={EVENTS}
+        EXPERIMENTS={EXPERIMENTS}
+      />
     )
   }
   // Render current variant using modular components
   const renderCurrentVariant = () => {
-    type AnalyticsEventData = Record<string, unknown>
-    type TrackEventFn = (
-      event: string,
-      data?: AnalyticsEventData,
-      userId?: string,
-      experimentId?: string,
-      variant?: string
-    ) => void
     const sharedProps = {
       userType,
       setUserType,
@@ -482,9 +340,9 @@ export function Register() {
       passwordStrength,
       passwordErrors,
       experimentVariant,
-      trackEvent: trackEvent as TrackEventFn,
-      EVENTS: EVENTS as Record<string, string>,
-      EXPERIMENTS: EXPERIMENTS as Record<string, string>
+      trackEvent: emitEvent,
+      EVENTS,
+      EXPERIMENTS
     }
     if (experimentVariant === 'A') {
       return <BasicRegistrationForm {...sharedProps} />
@@ -497,60 +355,17 @@ export function Register() {
   return (
     <TechLayout>
       <div className='max-w-md mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-100 relative'>
-        <h1 className='text-2xl font-bold text-gray-900 mb-2'>
-          Create Account
-        </h1>
-        <p className='text-gray-600 mb-6'>
-          Join SponsrAI to connect brands with event organizers
-        </p>
+        <RegistrationHeader
+          title='Create Account'
+          subtitle='Join SponsrAI to connect brands with event organizers'
+        />
         {/* Render the appropriate variant */}
         {renderCurrentVariant()}
-        {/* Debug information section */}
-        {debugInfo && (
-          <div className='mt-6 p-3 bg-gray-100 rounded-md border border-gray-300'>
-            <h3 className='text-sm font-medium text-gray-700 mb-1'>
-              Debug Information:
-            </h3>
-            <pre className='text-xs text-gray-600 whitespace-pre-wrap overflow-auto max-h-40'>
-              {debugInfo}
-            </pre>
-          </div>
-        )}
-        {/* Draft profile information if available */}
-        {Object.keys(draftProfile).length > 0 && !verificationSent && (
-          <div className='mt-6 p-3 bg-blue-50 rounded-md border border-blue-200'>
-            <h3 className='text-sm font-medium text-blue-700 mb-1'>
-              Using information from your draft profile
-            </h3>
-            <p className='text-xs text-blue-600'>
-              We've pre-filled some information based on what you shared
-              earlier. Your profile will be completed after registration.
-            </p>
-          </div>
-        )}
-        <div className='mt-6 text-center'>
-          <p className='text-gray-600'>
-            Already have an account?{' '}
-            <Link
-              to='/login'
-              className='text-blue-600 hover:text-blue-800 font-medium'
-              onClick={() => {
-                trackEvent(
-                  EVENTS.PAGE_EXIT,
-                  {
-                    action: 'go_to_login',
-                    source: 'register_page'
-                  },
-                  undefined,
-                  EXPERIMENTS.LOGIN_REGISTRATION,
-                  experimentVariant
-                )
-              }}
-            >
-              Log In
-            </Link>
-          </p>
-        </div>
+        <RegistrationDebugPanel debugInfo={debugInfo} />
+        <DraftProfileNotice
+          isVisible={Object.keys(draftProfile).length > 0 && !verificationSent}
+        />
+        <LoginPrompt onNavigate={handleLoginNavigate} />
         {/* Tech decoration elements */}
         <div
           className='absolute -top-6 -right-6 w-12 h-12 opacity-10 animate-spin-slow'

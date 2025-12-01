@@ -1,7 +1,9 @@
+import { FilterIcon, PackageIcon, SearchIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { getProfiles, getProfilesByRole } from '../services/profileService'
+
 import { Layout } from '../components/layout'
-import { SearchIcon, FilterIcon, UsersIcon, PackageIcon } from 'lucide-react'
+import { getProfiles } from '../services/profileService'
+
 interface Profile {
   id: string
   role: 'Brand' | 'Organizer'
@@ -75,14 +77,16 @@ export function ProfilesExplorer() {
     }
     setFilteredProfiles(result)
   }, [profiles, roleFilter, sponsorshipFilter, searchTerm])
-  const handleRoleFilterChange = async (
-    role: 'all' | 'Brand' | 'Organizer'
-  ) => {
+
+  // Handlers
+  const handleRoleFilterChange = (role: 'all' | 'Brand' | 'Organizer') => {
     setRoleFilter(role)
   }
+
   const handleSponsorshipFilterChange = (type: string | null) => {
     setSponsorshipFilter(type)
   }
+
   return (
     <Layout>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
