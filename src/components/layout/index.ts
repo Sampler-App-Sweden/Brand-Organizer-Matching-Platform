@@ -1,5 +1,7 @@
 export { Layout } from './Layout'
 export { Navbar } from './Navbar'
 export { DashboardLayout } from './DashboardLayout'
-export { TechLayout } from './TechLayout'
+export { Footer as TechLayout } from './Footer'
 export { DashboardListingsBar } from './DashboardListingsBar'
+export { DashboardNavbar } from './DashboardNavbar'
+export { TechNavbar } from './TechNavbar'

@@ -1,7 +1,7 @@
 import {
   CalendarIcon,
   HandshakeIcon,
-  LogInIcon,
+  LogIn,
   Menu,
   PackageIcon,
   SparklesIcon,
@@ -14,11 +14,12 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/AuthContext'
-import { CommunityDropdown } from '../community/CommunityDropdown'
+import { CommunityDropdown } from '../community'
 
 interface NavbarProps {
   transparent?: boolean
 }
+
 export function Navbar({ transparent = false }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCommunityOpen, setIsCommunityOpen] = useState(false)
@@ -124,7 +125,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
                   </>
                 ) : (
                   <>
-                    <LogInIcon className='h-4 w-4 mr-1' />
+                    <LogIn className='h-4 w-4 mr-1' />
                     Login
                   </>
                 )}
@@ -146,6 +147,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
           </div>
         </div>
       </div>
+
       {/* Mobile menu */}
       {isMenuOpen && (
         <div className='md:hidden bg-white bg-opacity-95 backdrop-blur-sm border-b border-gray-200'>
@@ -206,7 +208,7 @@ export function Navbar({ transparent = false }: NavbarProps) {
                 </>
               ) : (
                 <>
-                  <LogInIcon className='h-4 w-4 mr-2' />
+                  <LogIn className='h-4 w-4 mr-2' />
                   Login
                 </>
               )}
