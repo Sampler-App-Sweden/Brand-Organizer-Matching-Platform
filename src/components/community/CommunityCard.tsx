@@ -18,7 +18,7 @@ export function CommunityCard({ member, onFeatureToggle }: CommunityCardProps) {
   }
   return (
     <div
-      className='bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all group relative cursor-pointer'
+      className='bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all group relative cursor-pointer flex flex-col h-full'
       onClick={handleCardClick}
     >
       {/* Admin toggle for featuring */}
@@ -83,7 +83,7 @@ export function CommunityCard({ member, onFeatureToggle }: CommunityCardProps) {
         </div>
       </div>
       <div
-        className={`px-6 py-3 text-xs text-gray-500 border-t ${
+        className={`px-6 py-3 text-xs text-gray-500 border-t mt-auto ${
           member.type === 'brand'
             ? 'border-blue-50 bg-blue-50'
             : 'border-purple-50 bg-purple-50'

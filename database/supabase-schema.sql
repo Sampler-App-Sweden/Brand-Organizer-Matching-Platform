@@ -1,5 +1,5 @@
 -- Users table (extending Supabase Auth)
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE,
   role TEXT NOT NULL CHECK (role IN ('Brand', 'Organizer', 'Admin')),
   name TEXT NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE public.profiles (
 -- Enable RLS (Row Level Security)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 -- Brands table
-CREATE TABLE public.brands (
+CREATE TABLE IF NOT EXISTS public.brands (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users ON DELETE CASCADE,
   company_name TEXT NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE public.brands (
 -- Enable RLS
 ALTER TABLE public.brands ENABLE ROW LEVEL SECURITY;
 -- Organizers table
-CREATE TABLE public.organizers (
+CREATE TABLE IF NOT EXISTS public.organizers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users ON DELETE CASCADE,
   organizer_name TEXT NOT NULL,
@@ -60,16 +60,25 @@ CREATE TABLE public.organizers (
   address TEXT,
   postal_code TEXT,
   city TEXT,
-  event_name TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+-- Enable RLS
+ALTER TABLE public.organizers ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organizer_id UUID REFERENCES public.organizers ON DELETE CASCADE,
+  name TEXT NOT NULL,
   event_type TEXT NOT NULL,
   elevator_pitch TEXT,
-  event_frequency TEXT,
-  event_date DATE NOT NULL,
-  location TEXT NOT NULL,
-  attendee_count TEXT NOT NULL,
-  audience_description TEXT NOT NULL,
+  frequency TEXT,
+  start_date DATE,
+  location TEXT,
+  attendee_count TEXT,
+  audience_description TEXT,
   audience_demographics TEXT[],
-  sponsorship_needs TEXT NOT NULL,
+  sponsorship_needs TEXT,
   seeking_financial_sponsorship BOOLEAN DEFAULT false,
   financial_sponsorship_amount TEXT,
   financial_sponsorship_offers TEXT,
@@ -85,10 +94,99 @@ CREATE TABLE public.organizers (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
--- Enable RLS
-ALTER TABLE public.organizers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+      FROM information_schema.columns
+     WHERE table_schema = 'public'
+       AND table_name = 'organizers'
+       AND column_name = 'event_name'
+  ) THEN
+    INSERT INTO public.events (
+      organizer_id,
+      name,
+      event_type,
+      elevator_pitch,
+      frequency,
+      start_date,
+      location,
+      attendee_count,
+      audience_description,
+      audience_demographics,
+      sponsorship_needs,
+      seeking_financial_sponsorship,
+      financial_sponsorship_amount,
+      financial_sponsorship_offers,
+      offering_types,
+      brand_visibility,
+      content_creation,
+      lead_generation,
+      product_feedback,
+      bonus_value,
+      bonus_value_details,
+      additional_info,
+      media_files,
+      created_at,
+      updated_at
+    )
+    SELECT
+      id,
+      event_name,
+      event_type,
+      elevator_pitch,
+      event_frequency,
+      event_date,
+      location,
+      attendee_count,
+      audience_description,
+      audience_demographics,
+      sponsorship_needs,
+      seeking_financial_sponsorship,
+      financial_sponsorship_amount,
+      financial_sponsorship_offers,
+      offering_types,
+      brand_visibility,
+      content_creation,
+      lead_generation,
+      product_feedback,
+      bonus_value,
+      bonus_value_details,
+      additional_info,
+      media_files,
+      created_at,
+      updated_at
+    FROM public.organizers;
+
+    ALTER TABLE public.organizers
+      DROP COLUMN IF EXISTS event_name,
+      DROP COLUMN IF EXISTS event_type,
+      DROP COLUMN IF EXISTS elevator_pitch,
+      DROP COLUMN IF EXISTS event_frequency,
+      DROP COLUMN IF EXISTS event_date,
+      DROP COLUMN IF EXISTS location,
+      DROP COLUMN IF EXISTS attendee_count,
+      DROP COLUMN IF EXISTS audience_description,
+      DROP COLUMN IF EXISTS audience_demographics,
+      DROP COLUMN IF EXISTS sponsorship_needs,
+      DROP COLUMN IF EXISTS seeking_financial_sponsorship,
+      DROP COLUMN IF EXISTS financial_sponsorship_amount,
+      DROP COLUMN IF EXISTS financial_sponsorship_offers,
+      DROP COLUMN IF EXISTS offering_types,
+      DROP COLUMN IF EXISTS brand_visibility,
+      DROP COLUMN IF EXISTS content_creation,
+      DROP COLUMN IF EXISTS lead_generation,
+      DROP COLUMN IF EXISTS product_feedback,
+      DROP COLUMN IF EXISTS bonus_value,
+      DROP COLUMN IF EXISTS bonus_value_details,
+      DROP COLUMN IF EXISTS additional_info,
+      DROP COLUMN IF EXISTS media_files;
+  END IF;
+END $$;
 -- Matches table
-CREATE TABLE public.matches (
+CREATE TABLE IF NOT EXISTS public.matches (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   brand_id UUID REFERENCES public.brands ON DELETE CASCADE,
   organizer_id UUID REFERENCES public.organizers ON DELETE CASCADE,
@@ -101,7 +199,7 @@ CREATE TABLE public.matches (
 -- Enable RLS
 ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
 -- Contracts table
-CREATE TABLE public.contracts (
+CREATE TABLE IF NOT EXISTS public.contracts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   match_id UUID REFERENCES public.matches ON DELETE CASCADE,
   brand_id UUID REFERENCES public.brands ON DELETE CASCADE,
@@ -124,7 +222,7 @@ CREATE TABLE public.contracts (
 ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
 
 -- Sponsorship products table
-CREATE TABLE public.sponsorship_products (
+CREATE TABLE IF NOT EXISTS public.sponsorship_products (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   brand_id UUID REFERENCES public.brands ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -142,7 +240,7 @@ CREATE TABLE public.sponsorship_products (
 ALTER TABLE public.sponsorship_products ENABLE ROW LEVEL SECURITY;
 
 -- Sponsorship offers table
-CREATE TABLE public.sponsorship_offers (
+CREATE TABLE IF NOT EXISTS public.sponsorship_offers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   brand_id UUID REFERENCES public.brands ON DELETE CASCADE,
   selected_types TEXT[] NOT NULL DEFAULT '{}',
@@ -155,12 +253,22 @@ CREATE TABLE public.sponsorship_offers (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
-ALTER TABLE public.sponsorship_offers
-  ADD CONSTRAINT sponsorship_offers_brand_unique UNIQUE (brand_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+      FROM pg_constraint
+     WHERE conname = 'sponsorship_offers_brand_unique'
+       AND conrelid = 'public.sponsorship_offers'::regclass
+  ) THEN
+    ALTER TABLE public.sponsorship_offers
+      ADD CONSTRAINT sponsorship_offers_brand_unique UNIQUE (brand_id);
+  END IF;
+END $$;
 
 ALTER TABLE public.sponsorship_offers ENABLE ROW LEVEL SECURITY;
 -- Community members table
-CREATE TABLE public.community_members (
+CREATE TABLE IF NOT EXISTS public.community_members (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES auth.users ON DELETE CASCADE,
   type TEXT NOT NULL CHECK (type IN ('brand', 'organizer')),
@@ -178,7 +286,7 @@ CREATE TABLE public.community_members (
 -- Enable RLS
 ALTER TABLE public.community_members ENABLE ROW LEVEL SECURITY;
 -- Conversations table
-CREATE TABLE public.conversations (
+CREATE TABLE IF NOT EXISTS public.conversations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   brand_id UUID REFERENCES public.brands ON DELETE CASCADE,
   organizer_id UUID REFERENCES public.organizers ON DELETE CASCADE,
@@ -188,7 +296,7 @@ CREATE TABLE public.conversations (
 -- Enable RLS
 ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
 -- Messages table
-CREATE TABLE public.messages (
+CREATE TABLE IF NOT EXISTS public.messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   conversation_id UUID REFERENCES public.conversations ON DELETE CASCADE,
   sender_id UUID REFERENCES auth.users ON DELETE CASCADE,
@@ -213,37 +321,89 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger on auth.users to auto-create profile
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+CREATE OR REPLACE FUNCTION public.sync_profile_to_related()
+RETURNS trigger AS $$
+BEGIN
+  -- Update organizer contact info
+  UPDATE public.organizers
+     SET contact_name = NEW.name,
+         email = NEW.email
+   WHERE user_id = NEW.id;
+
+  -- Update brand contact info
+  UPDATE public.brands
+     SET contact_name = NEW.name,
+         email = NEW.email
+   WHERE user_id = NEW.id;
+
+  -- Update community directory entries
+  UPDATE public.community_members
+     SET name = NEW.name,
+         email = NEW.email,
+         logo_url = COALESCE(NEW.logo_url, logo_url),
+         description = COALESCE(NEW.description, description)
+   WHERE user_id = NEW.id;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'on_auth_user_created'
+  ) THEN
+    CREATE TRIGGER on_auth_user_created
+      AFTER INSERT ON auth.users
+      FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_trigger WHERE tgname = 'sync_profile_updates'
+  ) THEN
+    CREATE TRIGGER sync_profile_updates
+      AFTER UPDATE OF name, email, logo_url, description ON public.profiles
+      FOR EACH ROW
+      WHEN (OLD IS DISTINCT FROM NEW)
+      EXECUTE FUNCTION public.sync_profile_to_related();
+  END IF;
+END $$;
 
 -- Create RLS policies
 -- These are basic policies that you should customize based on your security needs
 -- Profiles policy - users can read all profiles but only update their own
+DROP POLICY IF EXISTS "Allow users to read all profiles" ON public.profiles;
 CREATE POLICY "Allow users to read all profiles"
   ON public.profiles FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Allow users to insert own profile" ON public.profiles;
 CREATE POLICY "Allow users to insert own profile"
   ON public.profiles FOR INSERT
   WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Allow users to update own profile" ON public.profiles;
 CREATE POLICY "Allow users to update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
 -- Brands policies
+DROP POLICY IF EXISTS "Allow public to read all brands" ON public.brands;
 CREATE POLICY "Allow public to read all brands"
   ON public.brands FOR SELECT
   TO public
   USING (true);
 
+DROP POLICY IF EXISTS "Allow brands to insert own data" ON public.brands;
 CREATE POLICY "Allow brands to insert own data"
   ON public.brands FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Allow brands to update own data" ON public.brands;
 CREATE POLICY "Allow brands to update own data"
   ON public.brands FOR UPDATE
   TO authenticated
@@ -251,12 +411,14 @@ CREATE POLICY "Allow brands to update own data"
   WITH CHECK (auth.uid() = user_id);
 
 -- Organizers policies
+DROP POLICY IF EXISTS "Users can insert their own organizer profile" ON public.organizers;
 CREATE POLICY "Users can insert their own organizer profile"
   ON public.organizers
   FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own organizer profile" ON public.organizers;
 CREATE POLICY "Users can update their own organizer profile"
   ON public.organizers
   FOR UPDATE
@@ -264,40 +426,99 @@ CREATE POLICY "Users can update their own organizer profile"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view their own organizer profile" ON public.organizers;
 CREATE POLICY "Users can view their own organizer profile"
   ON public.organizers
   FOR SELECT
   TO authenticated
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Anyone can view organizer profiles" ON public.organizers;
 CREATE POLICY "Anyone can view organizer profiles"
   ON public.organizers
   FOR SELECT
   TO public
   USING (true);
 
+DROP POLICY IF EXISTS "Allow public to view events" ON public.events;
+CREATE POLICY "Allow public to view events"
+  ON public.events
+  FOR SELECT
+  USING (true);
+
+DROP POLICY IF EXISTS "Allow organizers to insert their events" ON public.events;
+CREATE POLICY "Allow organizers to insert their events"
+  ON public.events
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.organizers
+      WHERE id = organizer_id AND user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow organizers to update their events" ON public.events;
+CREATE POLICY "Allow organizers to update their events"
+  ON public.events
+  FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.organizers
+      WHERE id = organizer_id AND user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.organizers
+      WHERE id = organizer_id AND user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow organizers to delete their events" ON public.events;
+CREATE POLICY "Allow organizers to delete their events"
+  ON public.events
+  FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.organizers
+      WHERE id = organizer_id AND user_id = auth.uid()
+    )
+  );
+
 -- Matches policies
+DROP POLICY IF EXISTS "Allow participants to view their matches" ON public.matches;
+CREATE POLICY "Allow participants to view their matches"
+  ON public.matches FOR SELECT
+  USING (
     auth.uid() IN (
       SELECT user_id FROM public.brands WHERE id = brand_id
       UNION
       SELECT user_id FROM public.organizers WHERE id = organizer_id
-    );
+    )
+  );
 
 -- Contracts policies
+DROP POLICY IF EXISTS "Allow users to read their contracts" ON public.contracts;
 CREATE POLICY "Allow users to read their contracts"
   ON public.contracts FOR SELECT
   USING (
     auth.uid() IN (
+      SELECT user_id FROM public.brands WHERE id = brand_id
       UNION
       SELECT user_id FROM public.organizers WHERE id = organizer_id
     )
   );
 
 -- Sponsorship products policies
+DROP POLICY IF EXISTS "Allow public to view sponsorship products" ON public.sponsorship_products;
 CREATE POLICY "Allow public to view sponsorship products"
   ON public.sponsorship_products FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Allow brands to insert sponsorship products" ON public.sponsorship_products;
 CREATE POLICY "Allow brands to insert sponsorship products"
   ON public.sponsorship_products FOR INSERT
   TO authenticated
@@ -307,6 +528,7 @@ CREATE POLICY "Allow brands to insert sponsorship products"
     )
   );
 
+DROP POLICY IF EXISTS "Allow brands to view own sponsorship products" ON public.sponsorship_products;
 CREATE POLICY "Allow brands to view own sponsorship products"
   ON public.sponsorship_products FOR SELECT
   TO authenticated
@@ -316,6 +538,7 @@ CREATE POLICY "Allow brands to view own sponsorship products"
       WHERE id = brand_id AND user_id = auth.uid()
     )
   );
+DROP POLICY IF EXISTS "Allow brands to update sponsorship products" ON public.sponsorship_products;
 CREATE POLICY "Allow brands to update sponsorship products"
   ON public.sponsorship_products FOR UPDATE
   TO authenticated
@@ -332,6 +555,7 @@ CREATE POLICY "Allow brands to update sponsorship products"
     )
   );
 
+DROP POLICY IF EXISTS "Allow brands to delete sponsorship products" ON public.sponsorship_products;
 CREATE POLICY "Allow brands to delete sponsorship products"
   ON public.sponsorship_products FOR DELETE
   TO authenticated
@@ -343,10 +567,12 @@ CREATE POLICY "Allow brands to delete sponsorship products"
   );
 
 -- Sponsorship offers policies
+DROP POLICY IF EXISTS "Allow public to view sponsorship offers" ON public.sponsorship_offers;
 CREATE POLICY "Allow public to view sponsorship offers"
   ON public.sponsorship_offers FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Allow brands to insert sponsorship offers" ON public.sponsorship_offers;
 CREATE POLICY "Allow brands to insert sponsorship offers"
   ON public.sponsorship_offers FOR INSERT
   TO authenticated
@@ -355,6 +581,7 @@ CREATE POLICY "Allow brands to insert sponsorship offers"
       SELECT 1 FROM public.brands
     )
   );
+DROP POLICY IF EXISTS "Allow brands to view own sponsorship offers" ON public.sponsorship_offers;
 CREATE POLICY "Allow brands to view own sponsorship offers"
   ON public.sponsorship_offers FOR SELECT
   TO authenticated
@@ -364,6 +591,7 @@ CREATE POLICY "Allow brands to view own sponsorship offers"
       WHERE id = brand_id AND user_id = auth.uid()
     )
   );
+DROP POLICY IF EXISTS "Allow brands to update sponsorship offers" ON public.sponsorship_offers;
 CREATE POLICY "Allow brands to update sponsorship offers"
   ON public.sponsorship_offers FOR UPDATE
   TO authenticated
@@ -381,15 +609,18 @@ CREATE POLICY "Allow brands to update sponsorship offers"
   );
 
 -- Community members policies
+DROP POLICY IF EXISTS "Allow users to read community members" ON public.community_members;
 CREATE POLICY "Allow users to read community members"
   ON public.community_members FOR SELECT
   USING (true);
 
+DROP POLICY IF EXISTS "Allow users to insert own community profile" ON public.community_members;
 CREATE POLICY "Allow users to insert own community profile"
   ON public.community_members FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Conversations policies
+DROP POLICY IF EXISTS "Allow users to read their conversations" ON public.conversations;
 CREATE POLICY "Allow users to read their conversations"
   ON public.conversations FOR SELECT
   USING (
@@ -401,6 +632,7 @@ CREATE POLICY "Allow users to read their conversations"
   );
 
 -- Messages policies
+DROP POLICY IF EXISTS "Allow users to read their messages" ON public.messages;
 CREATE POLICY "Allow users to read their messages"
   ON public.messages FOR SELECT
   USING (
@@ -411,6 +643,7 @@ CREATE POLICY "Allow users to read their messages"
     )
   );
 
+DROP POLICY IF EXISTS "Allow users to insert messages in their conversations" ON public.messages;
 CREATE POLICY "Allow users to insert messages in their conversations"
   ON public.messages FOR INSERT
   WITH CHECK (
