@@ -72,7 +72,7 @@ export function VariantAForm({
             <input
               id='password'
               type={showPassword ? 'text' : 'password'}
-              className='block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50'
+              className='block w-full h-11 rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -101,7 +101,7 @@ export function VariantAForm({
             <input
               id='confirmPassword'
               type={showConfirmPassword ? 'text' : 'password'}
-              className={`block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
+              className={`block w-full h-11 rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 ${
                 confirmPassword && password !== confirmPassword
                   ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
                   : ''
