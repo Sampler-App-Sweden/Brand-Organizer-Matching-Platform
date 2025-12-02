@@ -1,5 +1,7 @@
 import type { Preview } from '@storybook/react-vite'
 
+import '../src/index.css'
+
 const preview: Preview = {
   parameters: {
     controls: {
@@ -14,7 +16,16 @@ const preview: Preview = {
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
       test: 'todo'
-    }
+    },
+    backgrounds: {
+      default: 'surface',
+      values: [
+        { name: 'surface', value: '#f8fafc' },
+        { name: 'base', value: '#ffffff' },
+        { name: 'dark', value: '#0f172a' }
+      ]
+    },
+    layout: 'fullscreen'
   },
 };
 

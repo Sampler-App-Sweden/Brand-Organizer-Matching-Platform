@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 
 import { TechBackground } from '../effects'
 import { DashboardNavbar } from './DashboardNavbar'
-import { sidebarItems } from './SideBarItems'
+import { sidebarItems } from './sidebarItems'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
