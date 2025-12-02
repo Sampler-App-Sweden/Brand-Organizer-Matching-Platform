@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { Footer } from '../../components/layout'
+import { TechLayout } from '../../components/layout'
 import {
   BasicRegistrationForm,
   EnhancedRegistrationForm,
@@ -373,7 +373,7 @@ export function Register() {
     }
   }
   return (
-    <Footer>
+    <TechLayout>
       <div className='max-w-md mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-100 relative'>
         <RegistrationHeader
           title='Create Account'
@@ -443,6 +443,6 @@ export function Register() {
         }
         isVisible={toast.isVisible}
       />
-    </Footer>
+    </TechLayout>
   )
 }

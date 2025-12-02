@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Toast } from '../components/ui'
-import { Footer } from '../components/layout'
+import { TechLayout } from '../components/layout'
 import { HelpCircle, AlertCircle } from 'lucide-react'
 import { useLogin } from '../hooks/useLogin'
 import { useCopyToClipboard } from '../utils/clipboard'
@@ -27,7 +27,7 @@ export function Login() {
 
   const { copiedId, handleCopy } = useCopyToClipboard()
   return (
-    <Footer>
+    <TechLayout>
       <div className='max-w-6xl mx-auto px-4 py-8'>
         <div className='grid lg:grid-cols-2 gap-8'>
           {/* Demo Accounts Section */}
@@ -196,6 +196,6 @@ export function Login() {
           animation: spin-slow linear infinite;
         }
       `}</style>
-    </Footer>
+    </TechLayout>
   )
 }
