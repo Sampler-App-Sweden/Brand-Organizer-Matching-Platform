@@ -47,7 +47,7 @@ export function DirectoryCard({ member, matches = [] }: DirectoryCardProps) {
     return () => {
       isMounted = false
     }
-  }, [currentUser?.id, member.id])
+  }, [currentUser, member.id])
 
   const handleSaveToggle = async (e: React.MouseEvent) => {
     e.stopPropagation()
