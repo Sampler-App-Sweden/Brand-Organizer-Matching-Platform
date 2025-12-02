@@ -1,5 +1,5 @@
 import { CalendarIcon, Star, StarIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/AuthContext'
@@ -20,11 +20,36 @@ interface DirectoryCardProps {
 export function DirectoryCard({ member, matches = [] }: DirectoryCardProps) {
   const { currentUser } = useAuth()
   const navigate = useNavigate()
-  const [saved, setSaved] = useState<boolean>(
-    currentUser ? isMemberSaved(currentUser.id, member.id) : false
-  )
+  const [saved, setSaved] = useState<boolean>(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [showMatches, setShowMatches] = useState(false)
-  const handleSaveToggle = (e: React.MouseEvent) => {
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchSavedState = async () => {
+      if (!currentUser) {
+        setSaved(false)
+        return
+      }
+
+      try {
+        const result = await isMemberSaved(currentUser.id, member.id)
+        if (isMounted) {
+          setSaved(result)
+        }
+      } catch (error) {
+        console.error('Failed to check saved state:', error)
+      }
+    }
+
+    fetchSavedState()
+
+    return () => {
+      isMounted = false
+    }
+  }, [currentUser?.id, member.id])
+
+  const handleSaveToggle = async (e: React.MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
     if (!currentUser) {
@@ -35,8 +60,15 @@ export function DirectoryCard({ member, matches = [] }: DirectoryCardProps) {
       })
       return
     }
-    toggleSavedMember(currentUser.id, member.id)
-    setSaved(!saved)
+    try {
+      setIsSaving(true)
+      const nextState = await toggleSavedMember(currentUser.id, member.id)
+      setSaved(nextState)
+    } catch (error) {
+      console.error('Failed to toggle saved member:', error)
+    } finally {
+      setIsSaving(false)
+    }
   }
   const handleCardClick = () => {
     navigate(`/community/${member.id}`)
@@ -50,6 +82,7 @@ export function DirectoryCard({ member, matches = [] }: DirectoryCardProps) {
       <button
         className='absolute top-2 right-2 z-10 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition-all'
         onClick={handleSaveToggle}
+        disabled={isSaving}
         title={saved ? 'Remove from saved' : 'Save for later'}
       >
         {saved ? (

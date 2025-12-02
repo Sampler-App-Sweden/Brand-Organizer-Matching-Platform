@@ -18,6 +18,13 @@ type CommunityMemberRow = {
 }
 
 const COMMUNITY_TABLE = 'community_members'
+const COMMUNITY_SAVED_TABLE = 'community_saved_members'
+
+type CommunitySavedMemberRow = {
+  user_id: string
+  member_id: string
+  created_at: string
+}
 
 const mapRowToMember = (row: CommunityMemberRow): CommunityMember => ({
   id: row.id,
@@ -159,69 +166,96 @@ export const registerCommunityMember = async (
   return mapRowToMember(data)
 }
 
-// Saved items still live locally for now
-export const toggleSavedMember = (userId: string, memberId: string): void => {
-  let savedMembers = JSON.parse(
-    localStorage.getItem(`user_${userId}_savedMembers`) || '[]'
-  ) as string[]
-  if (savedMembers.includes(memberId)) {
-    savedMembers = savedMembers.filter((id) => id !== memberId)
-  } else {
-    savedMembers.push(memberId)
+export const toggleSavedMember = async (
+  userId: string,
+  memberId: string
+): Promise<boolean> => {
+  const { data: existing, error: lookupError } = await supabase
+    .from(COMMUNITY_SAVED_TABLE)
+    .select('member_id')
+    .eq('user_id', userId)
+    .eq('member_id', memberId)
+    .maybeSingle<Pick<CommunitySavedMemberRow, 'member_id'>>()
+
+  if (lookupError) {
+    throw new Error(`Failed to check saved member: ${lookupError.message}`)
   }
-  localStorage.setItem(
-    `user_${userId}_savedMembers`,
-    JSON.stringify(savedMembers)
-  )
+
+  if (existing) {
+    const { error: deleteError } = await supabase
+      .from(COMMUNITY_SAVED_TABLE)
+      .delete()
+      .eq('user_id', userId)
+      .eq('member_id', memberId)
+
+    if (deleteError) {
+      throw new Error(`Failed to remove saved member: ${deleteError.message}`)
+    }
+
+    return false
+  }
+
+  const { error: insertError } = await supabase
+    .from(COMMUNITY_SAVED_TABLE)
+    .insert({ user_id: userId, member_id: memberId })
+
+  if (insertError) {
+    throw new Error(`Failed to save member: ${insertError.message}`)
+  }
+
+  return true
 }
 
-export const isMemberSaved = (userId: string, memberId: string): boolean => {
-  const savedMembers = JSON.parse(
-    localStorage.getItem(`user_${userId}_savedMembers`) || '[]'
-  ) as string[]
-  return savedMembers.includes(memberId)
+export const isMemberSaved = async (
+  userId: string,
+  memberId: string
+): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from(COMMUNITY_SAVED_TABLE)
+    .select('member_id')
+    .eq('user_id', userId)
+    .eq('member_id', memberId)
+    .maybeSingle<Pick<CommunitySavedMemberRow, 'member_id'>>()
+
+  if (error) {
+    throw new Error(`Failed to check saved member: ${error.message}`)
+  }
+
+  return Boolean(data)
 }
 
 export const getSavedMembers = async (
   userId: string
 ): Promise<CommunityMember[]> => {
-  const savedMemberIds = JSON.parse(
-    localStorage.getItem(`user_${userId}_savedMembers`) || '[]'
-  ) as string[]
+  const { data: savedRows, error: savedError } = await supabase
+    .from(COMMUNITY_SAVED_TABLE)
+    .select('member_id, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
 
-  if (!savedMemberIds.length) return []
-
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  const validIds = savedMemberIds.filter((id) => uuidRegex.test(id))
-  const legacyIds = savedMemberIds.filter((id) => !uuidRegex.test(id))
-
-  if (legacyIds.length) {
-    console.warn(
-      'Removing legacy saved member ids that are not valid UUIDs:',
-      legacyIds
-    )
-    localStorage.setItem(
-      `user_${userId}_savedMembers`,
-      JSON.stringify(validIds)
-    )
+  if (savedError) {
+    throw new Error(`Failed to load saved members: ${savedError.message}`)
   }
 
-  if (!validIds.length) {
+  const memberIds = (savedRows as CommunitySavedMemberRow[]).map(
+    (row) => row.member_id
+  )
+
+  if (!memberIds.length) {
     return []
   }
 
   const { data, error } = await supabase
     .from(COMMUNITY_TABLE)
     .select('*')
-    .in('id', validIds)
+    .in('id', memberIds)
 
   if (error) {
     throw new Error(`Failed to load saved members: ${error.message}`)
   }
 
   const orderMap = new Map<string, number>()
-  validIds.forEach((id, index) => orderMap.set(id, index))
+  memberIds.forEach((id, index) => orderMap.set(id, index))
 
   return (data as CommunityMemberRow[])
     .map(mapRowToMember)
