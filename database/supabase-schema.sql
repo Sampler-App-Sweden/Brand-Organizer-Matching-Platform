@@ -277,9 +277,6 @@ CREATE POLICY "Anyone can view organizer profiles"
   USING (true);
 
 -- Matches policies
-CREATE POLICY "Allow users to read matches"
-  ON public.matches FOR SELECT
-  USING (
     auth.uid() IN (
       SELECT user_id FROM public.brands WHERE id = brand_id
       UNION
@@ -292,7 +289,6 @@ CREATE POLICY "Allow users to read their contracts"
   ON public.contracts FOR SELECT
   USING (
     auth.uid() IN (
-      SELECT user_id FROM public.brands WHERE id = brand_id
       UNION
       SELECT user_id FROM public.organizers WHERE id = organizer_id
     )
@@ -309,10 +305,15 @@ CREATE POLICY "Allow brands to insert sponsorship products"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.brands
+CREATE POLICY "Allow brands to view own sponsorship products"
+  ON public.sponsorship_products FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.brands
       WHERE id = brand_id AND user_id = auth.uid()
     )
   );
-
 CREATE POLICY "Allow brands to update sponsorship products"
   ON public.sponsorship_products FOR UPDATE
   TO authenticated
@@ -350,10 +351,15 @@ CREATE POLICY "Allow brands to insert sponsorship offers"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.brands
+CREATE POLICY "Allow brands to view own sponsorship offers"
+  ON public.sponsorship_offers FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.brands
       WHERE id = brand_id AND user_id = auth.uid()
     )
   );
-
 CREATE POLICY "Allow brands to update sponsorship offers"
   ON public.sponsorship_offers FOR UPDATE
   TO authenticated
