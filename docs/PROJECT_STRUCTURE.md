@@ -62,7 +62,7 @@ Brand-Organizer-Matching-Platform/
     │   │   ├── Layout.tsx
     │   │   ├── Navbar.tsx
     │   │   ├── DashboardLayout.tsx
-    │   │   ├── TechLayout.tsx
+    │   │   ├── Footer.tsx
     │   │   └── DashboardListingsBar.tsx
     │   │
     │   ├── landing/          # Landing page specific components

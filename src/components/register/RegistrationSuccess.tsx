@@ -1,6 +1,6 @@
 import { CheckCircleIcon } from 'lucide-react'
 
-import { TechLayout } from '../layout'
+import { Footer } from '../layout'
 import { Button, Toast } from '../ui'
 
 interface RegistrationSuccessProps {
@@ -41,7 +41,7 @@ export function RegistrationSuccess({
   EXPERIMENTS
 }: RegistrationSuccessProps) {
   return (
-    <TechLayout>
+    <Footer>
       <div className='max-w-md mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-100 relative'>
         <div className='text-center'>
           <div className='inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4'>
@@ -158,6 +158,6 @@ export function RegistrationSuccess({
         }
         .animate-spin-slow { animation: spin-slow linear infinite; }
       `}</style>
-    </TechLayout>
+    </Footer>
   )
 }

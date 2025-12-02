@@ -1,13 +1,8 @@
-import {
-  HandshakeIcon,
-  HomeIcon,
-  MessageSquareIcon,
-  UsersIcon
-} from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 
 import { TechBackground } from '../effects'
 import { DashboardNavbar } from './DashboardNavbar'
+import { sidebarItems } from './SideBarItems'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -16,78 +11,8 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
   const location = useLocation()
-
-  // Dashboard sidebar items
-  const sidebarItems = {
-    brand: [
-      {
-        label: 'Dashboard',
-        icon: <HomeIcon className='h-5 w-5' />,
-        path: '/dashboard/brand'
-      },
-      {
-        label: 'Sponsorships',
-        icon: <HandshakeIcon className='h-5 w-5' />,
-        path: '/dashboard/sponsorships'
-      },
-      {
-        label: 'Matches',
-        icon: <UsersIcon className='h-5 w-5' />,
-        path: '/dashboard/matches'
-      },
-      {
-        label: 'Messages',
-        icon: <MessageSquareIcon className='h-5 w-5' />,
-        path: '/dashboard/messages'
-      }
-    ],
-    organizer: [
-      {
-        label: 'Dashboard',
-        icon: <HomeIcon className='h-5 w-5' />,
-        path: '/dashboard/organizer'
-      },
-      {
-        label: 'Sponsorships',
-        icon: <HandshakeIcon className='h-5 w-5' />,
-        path: '/dashboard/sponsorships'
-      },
-      {
-        label: 'Matches',
-        icon: <UsersIcon className='h-5 w-5' />,
-        path: '/dashboard/matches'
-      },
-      {
-        label: 'Messages',
-        icon: <MessageSquareIcon className='h-5 w-5' />,
-        path: '/dashboard/messages'
-      }
-    ],
-    admin: [
-      {
-        label: 'Dashboard',
-        icon: <HomeIcon className='h-5 w-5' />,
-        path: '/admin'
-      },
-      {
-        label: 'Brands',
-        icon: <UsersIcon className='h-5 w-5' />,
-        path: '/admin/brands'
-      },
-      {
-        label: 'Organizers',
-        icon: <UsersIcon className='h-5 w-5' />,
-        path: '/admin/organizers'
-      },
-      {
-        label: 'Matches',
-        icon: <HandshakeIcon className='h-5 w-5' />,
-        path: '/admin/matches'
-      }
-    ]
-  }
-
   const currentSidebarItems = sidebarItems[userType]
+  const commonItems = sidebarItems.common
 
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col relative overflow-hidden'>
@@ -101,8 +26,8 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
       {/* Dashboard Content Area with Sidebar */}
       <div className='flex-1 flex relative z-10'>
         {/* Sidebar */}
-        <div className='bg-white bg-opacity-95 backdrop-blur-sm w-64 border-r hidden md:block'>
-          <div className='p-4'>
+        <div className='hidden md:flex flex-col bg-white bg-opacity-95 backdrop-blur-sm w-64 border-r fixed top-0 left-0 h-screen z-20'>
+          <div className='p-4 pt-20 flex flex-col h-full overflow-y-auto'>
             <div className='mb-6'>
               <div className='text-sm font-medium text-gray-400 mb-2'>
                 DASHBOARD MENU
@@ -124,14 +49,30 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
                     <span className='ml-3'>{item.label}</span>
                   </Link>
                 ))}
-                {/*Log out*/}
               </nav>
+            </div>
+
+            <div className='mt-auto pt-4 border-t border-gray-100 space-y-1'>
+              {commonItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors ${
+                    location.pathname === item.path
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 pl-3'
+                      : ''
+                  }`}
+                >
+                  {item.icon}
+                  <span className='ml-3'>{item.label}</span>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <main className='flex-1 overflow-auto p-6 relative'>
+        <main className='flex-1 overflow-auto p-6 relative md:ml-64'>
           <div className='bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 p-6'>
             {children}
           </div>

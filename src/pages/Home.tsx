@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { TechLayout } from '../components/layout'
+import { Footer } from '../components/layout'
 import { TechHero, TechFeatureSection, TechCard } from '../components/landing'
 import {
   PackageIcon,
@@ -64,7 +64,7 @@ export function Home() {
     }
   ]
   return (
-    <TechLayout>
+    <Footer>
       <TechHero
         title='Connect Brands with Event Organizers Effortlessly'
         subtitle='SponsrAI is the perfect platform for brands to find sampling opportunities and for event organizers to secure valuable sponsorships.'
@@ -236,6 +236,6 @@ export function Home() {
           </div>
         </div>
       </div>
-    </TechLayout>
+    </Footer>
   )
 }
