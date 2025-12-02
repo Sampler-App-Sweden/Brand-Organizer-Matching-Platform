@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   PackageIcon,
   PercentIcon,
@@ -8,8 +8,22 @@ import {
   SendIcon
 } from 'lucide-react'
 import { Button } from '../ui'
+import {
+  OfferCustomMix,
+  OfferDiscountDetails,
+  OfferFinancialDetails,
+  OfferProductDetails,
+  SponsorshipTypeId
+} from './sponsorshipTypes'
+import {
+  fetchSponsorshipOffer,
+  saveSponsorshipOffer
+} from '../../services/sponsorshipService'
 
-type SponsorshipTypeId = 'product' | 'discount' | 'financial' | 'custom'
+interface BrandSponsorshipPanelProps {
+  brandId?: string
+}
+
 interface SponsorshipType {
   id: SponsorshipTypeId
   name: string
@@ -17,29 +31,120 @@ interface SponsorshipType {
   icon: React.ReactNode
   percentage: number
 }
-export function BrandSponsorshipPanel() {
+
+const SPONSORSHIP_TYPE_IDS: SponsorshipTypeId[] = [
+  'product',
+  'discount',
+  'financial',
+  'custom'
+]
+
+const createDefaultProductDetails = (): OfferProductDetails => ({
+  name: '',
+  description: '',
+  quantity: ''
+})
+
+const createDefaultDiscountDetails = (): OfferDiscountDetails => ({
+  code: '',
+  value: '',
+  validFrom: '',
+  validTo: ''
+})
+
+const createDefaultFinancialDetails = (): OfferFinancialDetails => ({
+  amount: '',
+  terms: 'upfront'
+})
+
+const createDefaultCustomMix = (): OfferCustomMix => ({
+  product: 33,
+  discount: 33,
+  financial: 34
+})
+
+export function BrandSponsorshipPanel({
+  brandId
+}: BrandSponsorshipPanelProps) {
   const [selectedTypes, setSelectedTypes] = useState<SponsorshipTypeId[]>([])
-  const [productDetails, setProductDetails] = useState({
-    name: '',
-    description: '',
-    quantity: ''
-  })
-  const [discountDetails, setDiscountDetails] = useState({
-    code: '',
-    value: '',
-    validFrom: '',
-    validTo: ''
-  })
-  const [financialDetails, setFinancialDetails] = useState({
-    amount: '',
-    terms: 'upfront'
-  })
-  const [customMix, setCustomMix] = useState({
-    product: 33,
-    discount: 33,
-    financial: 34
-  })
+  const [productDetails, setProductDetails] = useState<OfferProductDetails>(() =>
+    createDefaultProductDetails()
+  )
+  const [discountDetails, setDiscountDetails] =
+    useState<OfferDiscountDetails>(() => createDefaultDiscountDetails())
+  const [financialDetails, setFinancialDetails] =
+    useState<OfferFinancialDetails>(() => createDefaultFinancialDetails())
+  const [customMix, setCustomMix] = useState<OfferCustomMix>(() =>
+    createDefaultCustomMix()
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState<'draft' | 'published' | null>(null)
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null)
+  const [feedback, setFeedback] = useState<
+    { type: 'success' | 'error'; message: string } | null
+  >(null)
+
+  useEffect(() => {
+    if (!brandId) {
+      setSelectedTypes([])
+      setProductDetails(createDefaultProductDetails())
+      setDiscountDetails(createDefaultDiscountDetails())
+      setFinancialDetails(createDefaultFinancialDetails())
+      setCustomMix(createDefaultCustomMix())
+      setStatus(null)
+      setUpdatedAt(null)
+      setLoading(false)
+      return
+    }
+
+    let isMounted = true
+
+    const loadOffer = async () => {
+      setLoading(true)
+      try {
+        const offer = await fetchSponsorshipOffer(brandId)
+        if (!isMounted) return
+        if (offer) {
+          const sanitizedTypes = offer.selectedTypes.filter(
+            (type): type is SponsorshipTypeId =>
+              SPONSORSHIP_TYPE_IDS.includes(type as SponsorshipTypeId)
+          )
+          setSelectedTypes(sanitizedTypes)
+          setProductDetails(offer.productDetails)
+          setDiscountDetails(offer.discountDetails)
+          setFinancialDetails(offer.financialDetails)
+          setCustomMix(offer.customMix)
+          setStatus(offer.status)
+          setUpdatedAt(offer.updatedAt)
+        } else {
+          setSelectedTypes([])
+          setProductDetails(createDefaultProductDetails())
+          setDiscountDetails(createDefaultDiscountDetails())
+          setFinancialDetails(createDefaultFinancialDetails())
+          setCustomMix(createDefaultCustomMix())
+          setStatus(null)
+          setUpdatedAt(null)
+        }
+        setFeedback(null)
+      } catch (error) {
+        console.error(error)
+        if (isMounted) {
+          setFeedback({
+            type: 'error',
+            message: 'Failed to load sponsorship offer. Please try again.'
+          })
+        }
+      } finally {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    loadOffer()
+    return () => {
+      isMounted = false
+    }
+  }, [brandId])
 
   const sponsorshipTypes: SponsorshipType[] = [
     {
@@ -73,6 +178,7 @@ export function BrandSponsorshipPanel() {
   ]
 
   const handleTypeToggle = (typeId: SponsorshipTypeId) => {
+    setFeedback(null)
     setSelectedTypes((prev) =>
       prev.includes(typeId)
         ? prev.filter((id) => id !== typeId)
@@ -83,55 +189,89 @@ export function BrandSponsorshipPanel() {
     type: 'product' | 'discount' | 'financial',
     value: number
   ) => {
-    const remaining = 100 - value
-    if (type === 'product') {
-      // Distribute remaining percentage between discount and financial
-      const discountShare = Math.round(
-        remaining *
-          (customMix.discount / (customMix.discount + customMix.financial))
+    const clamped = Math.max(0, Math.min(100, value))
+    setCustomMix((prev) => {
+      const otherKeys = (
+        ['product', 'discount', 'financial'] as const
+      ).filter((key) => key !== type)
+      const otherTotal = otherKeys.reduce((sum, key) => sum + prev[key], 0)
+      const ratios =
+        otherTotal === 0
+          ? otherKeys.map(() => 1 / otherKeys.length)
+          : otherKeys.map((key) => prev[key] / otherTotal)
+      const remaining = 100 - clamped
+      const firstValue = Math.round(remaining * ratios[0])
+      const secondValue = remaining - firstValue
+      const next: OfferCustomMix = {
+        product: prev.product,
+        discount: prev.discount,
+        financial: prev.financial
+      }
+      next[type] = clamped
+      next[otherKeys[0]] = firstValue
+      next[otherKeys[1]] = secondValue
+      return next
+    })
+  }
+
+  const handleSave = async (nextStatus: 'draft' | 'published') => {
+    if (!brandId || selectedTypes.length === 0) return
+    setIsSubmitting(true)
+    setFeedback(null)
+    try {
+      const payload = {
+        selectedTypes,
+        productDetails,
+        discountDetails,
+        financialDetails,
+        customMix
+      }
+      const offer = await saveSponsorshipOffer(brandId, payload, nextStatus)
+      const sanitizedTypes = offer.selectedTypes.filter(
+        (type): type is SponsorshipTypeId =>
+          SPONSORSHIP_TYPE_IDS.includes(type as SponsorshipTypeId)
       )
-      setCustomMix({
-        product: value,
-        discount: discountShare,
-        financial: remaining - discountShare
+      setSelectedTypes(sanitizedTypes)
+      setProductDetails(offer.productDetails)
+      setDiscountDetails(offer.discountDetails)
+      setFinancialDetails(offer.financialDetails)
+      setCustomMix(offer.customMix)
+      setStatus(offer.status)
+      setUpdatedAt(offer.updatedAt)
+      setFeedback({
+        type: 'success',
+        message:
+          nextStatus === 'draft'
+            ? 'Draft saved successfully.'
+            : 'Offer published successfully.'
       })
-    } else if (type === 'discount') {
-      // Distribute remaining percentage between product and financial
-      const productShare = Math.round(
-        remaining *
-          (customMix.product / (customMix.product + customMix.financial))
-      )
-      setCustomMix({
-        product: productShare,
-        discount: value,
-        financial: remaining - productShare
+    } catch (error) {
+      console.error(error)
+      setFeedback({
+        type: 'error',
+        message: 'Failed to save sponsorship offer. Please try again.'
       })
-    } else {
-      // Distribute remaining percentage between product and discount
-      const productShare = Math.round(
-        remaining *
-          (customMix.product / (customMix.product + customMix.discount))
-      )
-      setCustomMix({
-        product: productShare,
-        discount: remaining - productShare,
-        financial: value
-      })
+    } finally {
+      setIsSubmitting(false)
     }
   }
-  const handleSaveDraft = () => {
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      // Show success message
-    }, 1000)
+
+  if (!brandId) {
+    return (
+      <div className='bg-white rounded-lg shadow-sm p-6 border border-indigo-100'>
+        <p className='text-gray-600'>
+          Complete your brand profile to configure sponsorship offers.
+        </p>
+      </div>
+    )
   }
-  const handlePublish = () => {
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      // Show success message
-    }, 1000)
+
+  if (loading) {
+    return (
+      <div className='bg-white rounded-lg shadow-sm p-6 border border-indigo-100'>
+        <p className='text-gray-600'>Loading your sponsorship offer...</p>
+      </div>
+    )
   }
   return (
     <div className='bg-white rounded-lg shadow-sm p-6 border border-indigo-100 relative overflow-hidden'>
@@ -143,6 +283,32 @@ export function BrandSponsorshipPanel() {
         <span className='mr-2 text-2xl'>✦</span>
         Choose Your Sponsorship Type
       </h2>
+      {status && (
+        <div className='mb-4 text-sm text-gray-600'>
+          Current status:{' '}
+          <span
+            className={
+              status === 'published'
+                ? 'text-green-600 font-medium'
+                : 'text-yellow-600 font-medium'
+            }
+          >
+            {status === 'published' ? 'Published' : 'Draft'}
+          </span>
+          {updatedAt && ` • Last saved ${new Date(updatedAt).toLocaleString()}`}
+        </div>
+      )}
+      {feedback && (
+        <div
+          className={`mb-4 rounded-md border px-4 py-2 text-sm ${
+            feedback.type === 'success'
+              ? 'border-green-200 bg-green-50 text-green-700'
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {feedback.message}
+        </div>
+      )}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         {sponsorshipTypes.map((type) => (
           <div
@@ -541,8 +707,10 @@ export function BrandSponsorshipPanel() {
         <Button
           variant='outline'
           className='flex items-center hover:bg-indigo-50 transition-colors'
-          onClick={handleSaveDraft}
-          disabled={isSubmitting || selectedTypes.length === 0}
+          onClick={() => handleSave('draft')}
+          disabled={
+            isSubmitting || selectedTypes.length === 0 || !brandId
+          }
         >
           <SaveIcon className='h-4 w-4 mr-2' />
           Save Draft
@@ -550,8 +718,10 @@ export function BrandSponsorshipPanel() {
         <Button
           variant='primary'
           className='flex items-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 shadow-md hover:shadow-lg transition-all'
-          onClick={handlePublish}
-          disabled={isSubmitting || selectedTypes.length === 0}
+          onClick={() => handleSave('published')}
+          disabled={
+            isSubmitting || selectedTypes.length === 0 || !brandId
+          }
         >
           <SendIcon className='h-4 w-4 mr-2' />
           Publish Offer

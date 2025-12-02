@@ -9,13 +9,15 @@ interface ProductFormProps {
   onSubmit: (data: Omit<SponsorshipProduct, 'id' | 'order'>) => void
   onCancel: () => void
   editing?: boolean
+  isSubmitting?: boolean
 }
 
 export function ProductForm({
   initialData,
   onSubmit,
   onCancel,
-  editing
+  editing,
+  isSubmitting
 }: ProductFormProps) {
   const [formData, setFormData] = useState<
     Omit<SponsorshipProduct, 'id' | 'order'>
@@ -169,8 +171,13 @@ export function ProductForm({
             type='submit'
             variant='primary'
             className='bg-gradient-to-r from-green-500 to-green-600'
+            disabled={isSubmitting}
           >
-            {editing ? 'Update Product' : 'Save Product'}
+            {isSubmitting
+              ? 'Saving...'
+              : editing
+                ? 'Update Product'
+                : 'Save Product'}
           </Button>
         </div>
       </form>

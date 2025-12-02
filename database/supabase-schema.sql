@@ -122,6 +122,43 @@ CREATE TABLE public.contracts (
 );
 -- Enable RLS
 ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
+
+-- Sponsorship products table
+CREATE TABLE public.sponsorship_products (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  brand_id UUID REFERENCES public.brands ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  goals TEXT NOT NULL,
+  quantity INTEGER NOT NULL,
+  unit TEXT NOT NULL,
+  details TEXT,
+  status TEXT NOT NULL DEFAULT 'online' CHECK (status IN ('online', 'offline')),
+  images JSONB NOT NULL DEFAULT '[]'::jsonb,
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+ALTER TABLE public.sponsorship_products ENABLE ROW LEVEL SECURITY;
+
+-- Sponsorship offers table
+CREATE TABLE public.sponsorship_offers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  brand_id UUID REFERENCES public.brands ON DELETE CASCADE,
+  selected_types TEXT[] NOT NULL DEFAULT '{}',
+  product_details JSONB,
+  discount_details JSONB,
+  financial_details JSONB,
+  custom_mix JSONB,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+ALTER TABLE public.sponsorship_offers
+  ADD CONSTRAINT sponsorship_offers_brand_unique UNIQUE (brand_id);
+
+ALTER TABLE public.sponsorship_offers ENABLE ROW LEVEL SECURITY;
 -- Community members table
 CREATE TABLE public.community_members (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -258,6 +295,78 @@ CREATE POLICY "Allow users to read their contracts"
       SELECT user_id FROM public.brands WHERE id = brand_id
       UNION
       SELECT user_id FROM public.organizers WHERE id = organizer_id
+    )
+  );
+
+-- Sponsorship products policies
+CREATE POLICY "Allow public to view sponsorship products"
+  ON public.sponsorship_products FOR SELECT
+  USING (true);
+
+CREATE POLICY "Allow brands to insert sponsorship products"
+  ON public.sponsorship_products FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.brands
+      WHERE id = brand_id AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Allow brands to update sponsorship products"
+  ON public.sponsorship_products FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.brands
+      WHERE id = brand_id AND user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.brands
+      WHERE id = brand_id AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Allow brands to delete sponsorship products"
+  ON public.sponsorship_products FOR DELETE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.brands
+      WHERE id = brand_id AND user_id = auth.uid()
+    )
+  );
+
+-- Sponsorship offers policies
+CREATE POLICY "Allow public to view sponsorship offers"
+  ON public.sponsorship_offers FOR SELECT
+  USING (true);
+
+CREATE POLICY "Allow brands to insert sponsorship offers"
+  ON public.sponsorship_offers FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.brands
+      WHERE id = brand_id AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Allow brands to update sponsorship offers"
+  ON public.sponsorship_offers FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.brands
+      WHERE id = brand_id AND user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.brands
+      WHERE id = brand_id AND user_id = auth.uid()
     )
   );
 

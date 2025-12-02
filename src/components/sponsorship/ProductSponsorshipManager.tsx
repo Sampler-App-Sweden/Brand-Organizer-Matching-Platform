@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { PackageIcon, PlusIcon } from 'lucide-react'
 import { Button } from '../ui'
 import { ProductForm } from './ProductForm'
@@ -7,42 +7,91 @@ import {
   SponsorshipProduct,
   ProductSponsorshipManagerProps
 } from './sponsorshipTypes'
+import {
+  fetchSponsorshipProducts,
+  createSponsorshipProduct,
+  updateSponsorshipProduct,
+  deleteSponsorshipProduct,
+  updateProductOrders
+} from '../../services/sponsorshipService'
 
 export function ProductSponsorshipManager({
-  initialProducts = [],
+  brandId,
   onSave
 }: ProductSponsorshipManagerProps) {
-  const [products, setProducts] =
-    useState<SponsorshipProduct[]>(initialProducts)
+  const [products, setProducts] = useState<SponsorshipProduct[]>([])
   const [editingProduct, setEditingProduct] =
     useState<SponsorshipProduct | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [draggedProduct, setDraggedProduct] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const latestProductsRef = useRef<SponsorshipProduct[]>([])
+
+  useEffect(() => {
+    latestProductsRef.current = products
+  }, [products])
+
+  useEffect(() => {
+    if (!brandId) {
+      setLoading(false)
+      setProducts([])
+      return
+    }
+
+    const loadProducts = async () => {
+      setLoading(true)
+      try {
+        const data = await fetchSponsorshipProducts(brandId)
+        setProducts(data)
+        setError(null)
+        onSave?.(data)
+      } catch (err) {
+        console.error(err)
+        setError('Failed to load sponsorship products. Please try again.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProducts()
+  }, [brandId, onSave])
 
   // Add or update product
-  const handleFormSubmit = (data: Omit<SponsorshipProduct, 'id' | 'order'>) => {
-    let updatedProducts: SponsorshipProduct[]
-    if (editingProduct) {
-      updatedProducts = products.map((p) =>
-        p.id === editingProduct.id
-          ? {
-              ...p,
-              ...data
-            }
-          : p
-      )
-    } else {
-      const newProduct: SponsorshipProduct = {
-        ...data,
-        id: `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        order: products.length
+  const handleFormSubmit = async (
+    data: Omit<SponsorshipProduct, 'id' | 'order'>
+  ) => {
+    if (!brandId) return
+    setSaving(true)
+    try {
+      let updatedList: SponsorshipProduct[]
+      if (editingProduct) {
+        const updated = await updateSponsorshipProduct(editingProduct.id, {
+          ...data,
+          order: editingProduct.order
+        })
+        updatedList = products.map((product) =>
+          product.id === updated.id ? updated : product
+        )
+      } else {
+        const created = await createSponsorshipProduct(brandId, {
+          ...data,
+          order: products.length
+        })
+        updatedList = [...products, created]
       }
-      updatedProducts = [...products, newProduct]
+      setProducts(updatedList)
+      onSave?.(updatedList)
+      setIsFormOpen(false)
+      setEditingProduct(null)
+      setError(null)
+    } catch (err) {
+      console.error(err)
+      setError('Failed to save sponsorship product. Please try again.')
+    } finally {
+      setSaving(false)
     }
-    setProducts(updatedProducts)
-    setIsFormOpen(false)
-    setEditingProduct(null)
-    if (onSave) onSave(updatedProducts)
   }
 
   const handleEdit = (product: SponsorshipProduct) => {
@@ -50,16 +99,27 @@ export function ProductSponsorshipManager({
     setIsFormOpen(true)
   }
 
-  const handleDelete = (productId: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
+  const handleDelete = async (productId: string) => {
+    if (!brandId) return
+    if (!confirm('Are you sure you want to delete this product?')) return
+
+    try {
+      await deleteSponsorshipProduct(productId)
       const updatedProducts = products
-        .filter((p) => p.id !== productId)
-        .map((p, index) => ({
-          ...p,
+        .filter((product) => product.id !== productId)
+        .map((product, index) => ({ ...product, order: index }))
+      setProducts(updatedProducts)
+      onSave?.(updatedProducts)
+      await updateProductOrders(
+        updatedProducts.map((product, index) => ({
+          id: product.id,
           order: index
         }))
-      setProducts(updatedProducts)
-      if (onSave) onSave(updatedProducts)
+      )
+      setError(null)
+    } catch (err) {
+      console.error(err)
+      setError('Failed to delete sponsorship product. Please try again.')
     }
   }
 
@@ -76,18 +136,44 @@ export function ProductSponsorshipManager({
     const updatedProducts = [...products]
     const [draggedItem] = updatedProducts.splice(draggedIndex, 1)
     updatedProducts.splice(targetIndex, 0, draggedItem)
-    const reorderedProducts = updatedProducts.map((p, index) => ({
-      ...p,
+    const reorderedProducts = updatedProducts.map((product, index) => ({
+      ...product,
       order: index
     }))
     setProducts(reorderedProducts)
   }
 
-  const handleDragEnd = () => {
-    if (draggedProduct && onSave) {
-      onSave(products)
+  const handleDragEnd = async () => {
+    if (!draggedProduct || !brandId) {
+      setDraggedProduct(null)
+      return
+    }
+
+    try {
+      const orderedProducts = latestProductsRef.current
+      await updateProductOrders(
+        orderedProducts.map((product, index) => ({
+          id: product.id,
+          order: index
+        }))
+      )
+      onSave?.(orderedProducts)
+      setError(null)
+    } catch (err) {
+      console.error(err)
+      setError('Failed to update product order. Please try again.')
     }
     setDraggedProduct(null)
+  }
+
+  if (!brandId) {
+    return (
+      <div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
+        <p className='text-gray-600'>
+          Complete your brand profile to start adding sponsorship products.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -115,11 +201,18 @@ export function ProductSponsorshipManager({
               setIsFormOpen(true)
               setEditingProduct(null)
             }}
+            disabled={saving}
           >
             <PlusIcon className='h-4 w-4 mr-1' />
             Add New Product
           </Button>
         </div>
+
+        {error && (
+          <div className='mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700'>
+            {error}
+          </div>
+        )}
 
         {/* Product Form */}
         {isFormOpen && (
@@ -143,11 +236,16 @@ export function ProductSponsorshipManager({
               setEditingProduct(null)
             }}
             editing={!!editingProduct}
+            isSubmitting={saving}
           />
         )}
 
         {/* Products List */}
-        {products.length === 0 ? (
+        {loading ? (
+          <div className='text-center py-12 text-gray-500'>
+            Loading your products...
+          </div>
+        ) : products.length === 0 ? (
           <div className='text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
             <PackageIcon className='h-12 w-12 text-gray-400 mx-auto mb-3' />
             <h3 className='text-lg font-medium text-gray-900 mb-1'>
@@ -163,6 +261,7 @@ export function ProductSponsorshipManager({
                 setIsFormOpen(true)
                 setEditingProduct(null)
               }}
+              disabled={saving}
             >
               <PlusIcon className='h-4 w-4 mr-1' />
               Add New Product
