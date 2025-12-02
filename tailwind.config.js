@@ -25,8 +25,8 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Space Grotesk"', ...defaultTheme.fontFamily.sans],
-        sans: ['"Inter"', ...defaultTheme.fontFamily.sans]
+        display: ['"Zen Kaku Gothic New"', ...defaultTheme.fontFamily.sans],
+        sans: ['"Syne"', ...defaultTheme.fontFamily.sans]
       },
       spacing: {
         section: '5rem',
