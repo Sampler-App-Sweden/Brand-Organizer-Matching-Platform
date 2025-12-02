@@ -191,17 +191,37 @@ export const getSavedMembers = async (
 
   if (!savedMemberIds.length) return []
 
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  const validIds = savedMemberIds.filter((id) => uuidRegex.test(id))
+  const legacyIds = savedMemberIds.filter((id) => !uuidRegex.test(id))
+
+  if (legacyIds.length) {
+    console.warn(
+      'Removing legacy saved member ids that are not valid UUIDs:',
+      legacyIds
+    )
+    localStorage.setItem(
+      `user_${userId}_savedMembers`,
+      JSON.stringify(validIds)
+    )
+  }
+
+  if (!validIds.length) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from(COMMUNITY_TABLE)
     .select('*')
-    .in('id', savedMemberIds)
+    .in('id', validIds)
 
   if (error) {
     throw new Error(`Failed to load saved members: ${error.message}`)
   }
 
   const orderMap = new Map<string, number>()
-  savedMemberIds.forEach((id, index) => orderMap.set(id, index))
+  validIds.forEach((id, index) => orderMap.set(id, index))
 
   return (data as CommunityMemberRow[])
     .map(mapRowToMember)

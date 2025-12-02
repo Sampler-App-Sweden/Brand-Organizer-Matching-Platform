@@ -6,7 +6,7 @@ import {
   Sparkles,
   UsersIcon
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { CommunityCard } from '../../components/community/CommunityCard'
@@ -26,29 +26,33 @@ export function CommunityPage() {
     search: undefined
   })
   const [searchTerm, setSearchTerm] = useState('')
+  const fetchMembers = useCallback(
+    async (pageNum: number, replace = false) => {
+      try {
+        setLoading(true)
+        const data = await getCommunityMembers({
+          page: pageNum,
+          limit: 12,
+          ...filters
+        })
+        if (replace) {
+          setMembers(data)
+        } else {
+          setMembers((prev) => [...prev, ...data])
+        }
+        setHasMore(data.length === 12)
+        setLoading(false)
+      } catch (error) {
+        console.error('Failed to fetch community members:', error)
+        setLoading(false)
+      }
+    },
+    [filters]
+  )
+
   useEffect(() => {
     fetchMembers(1, true)
-  }, [filters])
-  const fetchMembers = async (pageNum: number, replace = false) => {
-    try {
-      setLoading(true)
-      const data = await getCommunityMembers({
-        page: pageNum,
-        limit: 12,
-        ...filters
-      })
-      if (replace) {
-        setMembers(data)
-      } else {
-        setMembers((prev) => [...prev, ...data])
-      }
-      setHasMore(data.length === 12)
-      setLoading(false)
-    } catch (error) {
-      console.error('Failed to fetch community members:', error)
-      setLoading(false)
-    }
-  }
+  }, [fetchMembers])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,11 +67,17 @@ export function CommunityPage() {
     setPage(nextPage)
     fetchMembers(nextPage)
   }
-  const handleFilterChange = (key: string, value: any) => {
-    setFilters({
-      ...filters,
-      [key]: value
-    })
+  const handleFilterChange = <K extends keyof CommunityQueryParams>(
+    key: K,
+    value: CommunityQueryParams[K]
+  ) => {
+    setFilters(
+      (prev) =>
+        ({
+          ...prev,
+          [key]: value
+        } as CommunityQueryParams)
+    )
     setPage(1)
   }
   const handleFeatureToggle = (memberId: string, featured: boolean) => {
