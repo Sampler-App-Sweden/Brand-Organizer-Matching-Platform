@@ -1,33 +1,22 @@
+import { ArrowLeftIcon, CalendarIcon, ExternalLinkIcon, GlobeIcon, MailIcon, PackageIcon, PhoneIcon, SparklesIcon, StarIcon, TargetIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
-import { Layout } from '../components/layout'
-import { Button } from '../components/ui'
-import { getCommunityMemberById } from '../services/communityService'
-import { CommunityMember } from '../types/community'
-import { useAuth } from '../context/AuthContext'
-import { InterestOfferWizard } from '../components/community/InterestOfferWizard'
-import {
-  ArrowLeftIcon,
-  CalendarIcon,
-  ExternalLinkIcon,
-  GlobeIcon,
-  MailIcon,
-  PackageIcon,
-  PhoneIcon,
-  SparklesIcon,
-  StarIcon,
-  TargetIcon,
-  UsersIcon
-} from 'lucide-react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+
+import { InterestOfferWizard } from '../../components/community/InterestOfferWizard'
+import { Layout } from '../../components/layout'
+import { Button } from '../../components/ui'
+import { useAuth } from '../../context/AuthContext'
+import { getCommunityMemberById } from '../../services/communityService'
+import { CommunityMember } from '../../types/community'
+
 export function CommunityMemberDetail() {
-  const { memberId } = useParams<{
-    memberId: string
-  }>()
+  const { memberId } = useParams<{ memberId: string }>()
   const [member, setMember] = useState<CommunityMember | null>(null)
   const [loading, setLoading] = useState(true)
   const [showWizard, setShowWizard] = useState(false)
   const { currentUser } = useAuth()
   const navigate = useNavigate()
+
   useEffect(() => {
     const fetchMember = async () => {
       if (!memberId) return
@@ -43,15 +32,6 @@ export function CommunityMemberDetail() {
     }
     fetchMember()
   }, [memberId])
-  // Determine if the current user can interact with this member
-  const canInteract = () => {
-    if (!currentUser || !member) return false
-    // User must be logged in and be a different type than the member they're viewing
-    return (
-      (currentUser.type === 'brand' && member.type === 'organizer') ||
-      (currentUser.type === 'organizer' && member.type === 'brand')
-    )
-  }
   // Get CTA text based on user type and member type
   const getCtaText = () => {
     if (!currentUser) return 'Register to Connect'
@@ -473,6 +453,7 @@ export function CommunityMemberDetail() {
     </Layout>
   )
 }
+
 // Helper function to extract social media name from URL
 function getSocialMediaName(url: string): string {
   try {
@@ -482,7 +463,7 @@ function getSocialMediaName(url: string): string {
     if (hostname.includes('twitter')) return 'Twitter'
     if (hostname.includes('linkedin')) return 'LinkedIn'
     return hostname.replace('www.', '')
-  } catch (e) {
+  } catch (error) {
     return url
   }
 }

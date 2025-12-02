@@ -1,23 +1,35 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Layout } from '../components/layout'
-import { FormField, Button } from '../components/ui'
 import {
   CheckCircleIcon,
-  UploadIcon,
   FlaskConicalIcon,
-  Sparkles
+  Sparkles,
+  UploadIcon
 } from 'lucide-react'
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import { Layout } from '../components/layout'
+import { Button, FormField } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { registerCommunityMember } from '../services/communityService'
+
+type RegistrationFormData = {
+  name: string
+  type: 'brand' | 'organizer'
+  shortDescription: string
+  description: string
+  website: string
+  email: string
+  phone: string
+  socialLinks: string
+}
+
 export function CommunityRegistration() {
   const { currentUser } = useAuth()
   const navigate = useNavigate()
   const [formSubmitted, setFormSubmitted] = useState(false)
-  const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegistrationFormData>({
     name: '',
     type: 'brand',
     shortDescription: '',
@@ -41,7 +53,6 @@ export function CommunityRegistration() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setLogoFile(file)
     // Create preview
     const reader = new FileReader()
     reader.onloadend = () => {
@@ -169,7 +180,6 @@ export function CommunityRegistration() {
                         <button
                           type='button'
                           onClick={() => {
-                            setLogoFile(null)
                             setLogoPreview(null)
                           }}
                           className='absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1'
@@ -231,7 +241,6 @@ export function CommunityRegistration() {
                 label='Short Description'
                 id='shortDescription'
                 required
-                maxLength={60}
                 value={formData.shortDescription}
                 onChange={handleChange}
                 placeholder='A brief one-line description (max 60 characters)'

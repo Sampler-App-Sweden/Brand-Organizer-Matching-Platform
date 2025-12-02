@@ -1,21 +1,20 @@
-import { useEffect, useState } from 'react'
-import { Layout } from '../components/layout'
 import {
-  getCommunityMembers,
-  toggleFeatureStatus
-} from '../services/communityService'
-import { CommunityMember, CommunityQueryParams } from '../types/community'
-import { CommunityCard } from '../components/community/CommunityCard'
-import { Button } from '../components/ui'
-import { Link } from 'react-router-dom'
-import {
-  UsersIcon,
-  SearchIcon,
+  CalendarIcon,
   FilterIcon,
-  Sparkles,
   PackageIcon,
-  CalendarIcon
+  SearchIcon,
+  Sparkles,
+  UsersIcon
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+import { CommunityCard } from '../../components/community/CommunityCard'
+import { Layout } from '../../components/layout'
+import { Button } from '../../components/ui'
+import { getCommunityMembers } from '../../services/communityService'
+import { CommunityMember, CommunityQueryParams } from '../../types/community'
+
 export function CommunityPage() {
   const [members, setMembers] = useState<CommunityMember[]>([])
   const [loading, setLoading] = useState(true)
@@ -30,7 +29,7 @@ export function CommunityPage() {
   useEffect(() => {
     fetchMembers(1, true)
   }, [filters])
-  const fetchMembers = async (pageNum: number, replace: boolean = false) => {
+  const fetchMembers = async (pageNum: number, replace = false) => {
     try {
       setLoading(true)
       const data = await getCommunityMembers({
@@ -50,6 +49,7 @@ export function CommunityPage() {
       setLoading(false)
     }
   }
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setFilters({
@@ -82,6 +82,7 @@ export function CommunityPage() {
       )
     )
   }
+
   return (
     <Layout>
       <div className='bg-white min-h-screen'>

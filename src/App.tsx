@@ -10,16 +10,14 @@ import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
-import { CommunityMemberDetail } from './pages/CommunityMemberDetail'
-import { CommunityPage } from './pages/CommunityPage'
+import { CommunityMemberDetail, CommunityPage } from './pages/community'
 import { CommunityRegistration } from './pages/CommunityRegistration'
-import { BrandDashboard } from './pages/dashboard/BrandDashboard'
+import { BrandDashboard, OrganizerDashboard } from './pages/dashboard'
 import { EditProfilePage } from './pages/dashboard/EditProfilePage'
 import { InspirationBoardPage } from './pages/dashboard/InspirationBoardPage'
 import { MatchDetails } from './pages/dashboard/MatchDetails'
 import { MatchesPage } from './pages/dashboard/MatchesPage'
 import { MessagesPage } from './pages/dashboard/MessagesPage'
-import { OrganizerDashboard } from './pages/dashboard/OrganizerDashboard'
 import { SavedItemsPage } from './pages/dashboard/SavedItemsPage'
 import { Home } from './pages/Home'
 import { Login } from './pages/Login'
@@ -28,15 +26,12 @@ import { OrganizerForm } from './pages/OrganizerForm'
 import { OrganizersDirectoryPage } from './pages/OrganizersDirectoryPage'
 import { Register } from './pages/register/Register'
 import { initializeCollaborations } from './services/collaborationService'
-import { initializeCommunityMembers } from './services/communityService'
 import { initEmailJS } from './services/emailService'
 
 import './styles/tech-effects.css'
 
 const AppRoutes = () => {
   useEffect(() => {
-    // Initialize sample community members
-    initializeCommunityMembers()
     // Initialize sample collaborations
     initializeCollaborations()
     // Initialize EmailJS

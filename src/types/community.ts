@@ -19,4 +19,8 @@ export interface CommunityQueryParams {
   featured?: boolean;
   type?: 'brand' | 'organizer';
   search?: string;
+  category?: string;
+  location?: string;
+  eventType?: string;
+  audienceSize?: string;
 }
