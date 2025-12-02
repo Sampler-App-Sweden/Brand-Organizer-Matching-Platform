@@ -336,13 +336,28 @@ BEGIN
          email = NEW.email
    WHERE user_id = NEW.id;
 
-  -- Update community directory entries
+  -- Keep community directory metadata in sync
   UPDATE public.community_members
-     SET name = NEW.name,
-         email = NEW.email,
-         logo_url = COALESCE(NEW.logo_url, logo_url),
-         description = COALESCE(NEW.description, description)
-   WHERE user_id = NEW.id;
+    SET email = NEW.email,
+      logo_url = COALESCE(NEW.logo_url, logo_url),
+      description = COALESCE(NEW.description, description)
+  WHERE user_id = NEW.id;
+
+  -- Ensure brand listings display their company name
+  UPDATE public.community_members cm
+    SET name = COALESCE(b.company_name, cm.name)
+   FROM public.brands b
+  WHERE cm.user_id = NEW.id
+    AND cm.type = 'brand'
+    AND b.user_id = NEW.id;
+
+  -- Ensure organizer listings display their organizer name
+  UPDATE public.community_members cm
+    SET name = COALESCE(o.organizer_name, cm.name)
+   FROM public.organizers o
+  WHERE cm.user_id = NEW.id
+    AND cm.type = 'organizer'
+    AND o.user_id = NEW.id;
 
   RETURN NEW;
 END;
