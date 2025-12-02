@@ -3,7 +3,8 @@ import {
   HandshakeIcon,
   HomeIcon,
   MessageSquareIcon,
-  UsersIcon
+  UsersIcon,
+  LogOut
 } from 'lucide-react'
 
 // Dashboard sidebar items
@@ -82,7 +83,7 @@ export const sidebarItems = {
     },
     {
       label: 'Log out',
-      icon: createElement(MessageSquareIcon, { className: 'h-5 w-5' }),
+      icon: createElement(LogOut, { className: 'h-5 w-5' }),
       path: '/logout'
     }
   ]

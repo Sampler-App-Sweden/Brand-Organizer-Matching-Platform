@@ -10,40 +10,14 @@ import {
   UsersIcon,
   X
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { useAuth } from '../../context/AuthContext'
 
-interface NavbarProps {
-  transparent?: boolean
-}
-
-export function Navbar({ transparent = false }: NavbarProps) {
+export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isCommunityOpen, setIsCommunityOpen] = useState(false)
   const { currentUser } = useAuth()
-  const navigate = useNavigate()
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const dropdown = document.getElementById('community-dropdown')
-      const trigger = document.getElementById('community-trigger')
-      if (
-        dropdown &&
-        trigger &&
-        !dropdown.contains(event.target as Node) &&
-        !trigger.contains(event.target as Node)
-      ) {
-        setIsCommunityOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
 
   // Determine dashboard link based on user type
   const getDashboardLink = () => {
