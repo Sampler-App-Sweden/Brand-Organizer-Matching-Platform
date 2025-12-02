@@ -4,7 +4,12 @@ import type {
   SponsorshipOffer,
   SponsorshipOfferPayload,
   SponsorshipProduct,
-  SponsorshipStatus
+  SponsorshipStatus,
+  SponsorshipTypeId,
+  OfferProductDetails,
+  OfferDiscountDetails,
+  OfferFinancialDetails,
+  OfferCustomMix
 } from '../types/sponsorship'
 
 interface SponsorshipProductRow {
@@ -35,6 +40,105 @@ interface SponsorshipOfferRow {
   updated_at: string
 }
 
+const SPONSORSHIP_TYPE_VALUES: SponsorshipTypeId[] = [
+  'product',
+  'discount',
+  'financial',
+  'custom'
+]
+
+const defaultProductDetails: OfferProductDetails = {
+  name: '',
+  description: '',
+  quantity: ''
+}
+
+const defaultDiscountDetails: OfferDiscountDetails = {
+  code: '',
+  value: '',
+  validFrom: '',
+  validTo: ''
+}
+
+const defaultFinancialDetails: OfferFinancialDetails = {
+  amount: '',
+  terms: 'upfront'
+}
+
+const defaultCustomMix: OfferCustomMix = {
+  product: 33,
+  discount: 33,
+  financial: 34
+}
+
+const normalizeSelectedTypes = (
+  types: string[] | null
+): SponsorshipTypeId[] => {
+  if (!Array.isArray(types)) return []
+  return types.filter((type): type is SponsorshipTypeId =>
+    SPONSORSHIP_TYPE_VALUES.includes(type as SponsorshipTypeId)
+  )
+}
+
+const normalizeProductDetails = (
+  details: Record<string, unknown> | null
+): OfferProductDetails => {
+  if (!details) return { ...defaultProductDetails }
+  return {
+    name: typeof details.name === 'string' ? details.name : defaultProductDetails.name,
+    description:
+      typeof details.description === 'string'
+        ? details.description
+        : defaultProductDetails.description,
+    quantity:
+      typeof details.quantity === 'string'
+        ? details.quantity
+        : defaultProductDetails.quantity
+  }
+}
+
+const normalizeDiscountDetails = (
+  details: Record<string, unknown> | null
+): OfferDiscountDetails => {
+  if (!details) return { ...defaultDiscountDetails }
+  return {
+    code: typeof details.code === 'string' ? details.code : defaultDiscountDetails.code,
+    value: typeof details.value === 'string' ? details.value : defaultDiscountDetails.value,
+    validFrom:
+      typeof details.validFrom === 'string'
+        ? details.validFrom
+        : defaultDiscountDetails.validFrom,
+    validTo:
+      typeof details.validTo === 'string'
+        ? details.validTo
+        : defaultDiscountDetails.validTo
+  }
+}
+
+const normalizeFinancialDetails = (
+  details: Record<string, unknown> | null
+): OfferFinancialDetails => {
+  if (!details) return { ...defaultFinancialDetails }
+  return {
+    amount: typeof details.amount === 'string' ? details.amount : defaultFinancialDetails.amount,
+    terms: typeof details.terms === 'string' ? details.terms : defaultFinancialDetails.terms
+  }
+}
+
+const normalizeCustomMix = (
+  mix: Record<string, unknown> | null
+): OfferCustomMix => {
+  if (!mix) return { ...defaultCustomMix }
+  const product = mix.product
+  const discount = mix.discount
+  const financial = mix.financial
+  return {
+    product: typeof product === 'number' ? product : defaultCustomMix.product,
+    discount: typeof discount === 'number' ? discount : defaultCustomMix.discount,
+    financial: typeof financial === 'number' ? financial : defaultCustomMix.financial
+  }
+}
+
 const stripImageFiles = (images: ProductImage[]) =>
   images.map((image) => ({ id: image.id, url: image.url }))
 
@@ -53,30 +157,11 @@ const mapProductRow = (row: SponsorshipProductRow): SponsorshipProduct => ({
 const mapOfferRow = (row: SponsorshipOfferRow): SponsorshipOffer => ({
   id: row.id,
   brandId: row.brand_id,
-  selectedTypes: (row.selected_types ?? []) as string[],
-  productDetails:
-    (row.product_details as SponsorshipOffer['productDetails']) ?? {
-      name: '',
-      description: '',
-      quantity: ''
-    },
-  discountDetails:
-    (row.discount_details as SponsorshipOffer['discountDetails']) ?? {
-      code: '',
-      value: '',
-      validFrom: '',
-      validTo: ''
-    },
-  financialDetails:
-    (row.financial_details as SponsorshipOffer['financialDetails']) ?? {
-      amount: '',
-      terms: 'upfront'
-    },
-  customMix: (row.custom_mix as SponsorshipOffer['customMix']) ?? {
-    product: 33,
-    discount: 33,
-    financial: 34
-  },
+  selectedTypes: normalizeSelectedTypes(row.selected_types),
+  productDetails: normalizeProductDetails(row.product_details),
+  discountDetails: normalizeDiscountDetails(row.discount_details),
+  financialDetails: normalizeFinancialDetails(row.financial_details),
+  customMix: normalizeCustomMix(row.custom_mix),
   status: row.status,
   createdAt: row.created_at,
   updatedAt: row.updated_at
@@ -192,7 +277,7 @@ export async function fetchSponsorshipOffer(
     .eq('brand_id', brandId)
     .maybeSingle()
 
-  if (error && error.code !== 'PGRST116') {
+  if (error) {
     throw new Error(`Failed to load sponsorship offer: ${error.message}`)
   }
 
