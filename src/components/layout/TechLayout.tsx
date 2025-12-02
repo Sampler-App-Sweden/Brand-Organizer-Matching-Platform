@@ -1,8 +1,8 @@
 import { ReactNode } from 'react'
 
 import { TechBackground, TechDataStream } from '../effects'
+import { Navbar } from '../layout'
 import { Footer } from './Footer'
-import { TechNavbar } from './TechNavbar'
 
 interface TechLayoutProps {
   children: ReactNode
@@ -19,7 +19,7 @@ export function TechLayout({
     <div className='min-h-screen flex flex-col bg-gray-50 relative overflow-hidden'>
       <TechBackground />
       <TechDataStream className='opacity-30' />
-      {showHeader && <TechNavbar />}
+      {showHeader && <Navbar />}
       <main className='flex-grow relative z-10'>{children}</main>
       {showFooter && (
         <Footer className='bg-opacity-90 backdrop-blur-sm relative z-10' />

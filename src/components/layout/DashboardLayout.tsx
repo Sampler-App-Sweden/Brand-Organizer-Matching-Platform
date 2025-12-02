@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 
 import { TechBackground } from '../effects'
-import { DashboardNavbar } from './DashboardNavbar'
+import { Navbar } from '../layout'
 import { sidebarItems } from './sidebarItems'
 
 interface DashboardLayoutProps {
@@ -21,7 +21,7 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
         <TechBackground />
       </div>
 
-      <DashboardNavbar />
+      <Navbar />
 
       {/* Dashboard Content Area with Sidebar */}
       <div className='flex-1 flex relative z-10'>
