@@ -12,6 +12,7 @@ import {
   Conversation,
   Message,
   getOrCreateConversation,
+  getConversationMessages,
   sendMessage
 } from '../../services/chatService'
 import { Match } from '../../services/matchingService'
@@ -55,6 +56,9 @@ export function MatchDetails() {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [conversation, setConversation] = useState<Conversation | null>(null)
+  const [messagesLoading, setMessagesLoading] = useState(false)
+  const [sendingMessage, setSendingMessage] = useState(false)
+  const [messageError, setMessageError] = useState<string | null>(null)
   const [showContractForm, setShowContractForm] = useState(false)
   const [contract, setContract] = useState<Contract | null>(null)
   useEffect(() => {
@@ -83,9 +87,17 @@ export function MatchDetails() {
         }
         // Get conversation
         if (brandData && organizerData) {
-          const conv = getOrCreateConversation(brandData.id, organizerData.id)
-          setConversation(conv)
-          setMessages(conv.messages)
+          setMessagesLoading(true)
+          try {
+            const conv = await getOrCreateConversation(
+              brandData.id,
+              organizerData.id
+            )
+            setConversation(conv)
+            setMessages(conv.messages)
+          } finally {
+            setMessagesLoading(false)
+          }
         }
         // Check if there's an existing contract
         const contracts = JSON.parse(
@@ -112,18 +124,22 @@ export function MatchDetails() {
       console.error('Failed to update match status:', error)
     }
   }
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!conversation || !newMessage.trim() || !currentUser) return
-    sendMessage(conversation.id, currentUser.id, userType, newMessage)
-    setNewMessage('')
-    // Refresh messages
-    const storedConversations = JSON.parse(
-      localStorage.getItem('conversations') || '[]'
-    ) as Conversation[]
-    const conv = storedConversations.find((c) => c.id === conversation.id)
-    if (conv) {
-      setMessages(conv.messages)
+
+    try {
+      setSendingMessage(true)
+      setMessageError(null)
+      await sendMessage(conversation.id, currentUser.id, userType, newMessage)
+      setNewMessage('')
+      const refreshedMessages = await getConversationMessages(conversation.id)
+      setMessages(refreshedMessages)
+    } catch (error) {
+      console.error('Failed to send message:', error)
+      setMessageError('Kunde inte skicka meddelandet. Försök igen.')
+    } finally {
+      setSendingMessage(false)
     }
   }
   const handleContractCreated = (contractData: Contract) => {
@@ -597,7 +613,11 @@ export function MatchDetails() {
         </div>
         <div className='border rounded-lg mb-4'>
           <div className='h-64 overflow-y-auto p-4 space-y-3'>
-            {messages.length === 0 ? (
+            {messagesLoading ? (
+              <div className='text-center text-gray-500 py-8'>
+                Laddar meddelanden...
+              </div>
+            ) : messages.length === 0 ? (
               <div className='text-center text-gray-500 py-8'>
                 Inga meddelanden än. Starta konversationen!
               </div>
@@ -644,17 +664,22 @@ export function MatchDetails() {
               className='flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              disabled={match.status === 'rejected'}
+              disabled={match.status === 'rejected' || sendingMessage}
             />
             <Button
               type='submit'
               variant='primary'
               className='ml-2'
-              disabled={!newMessage.trim() || match.status === 'rejected'}
+              disabled={
+                !newMessage.trim() || match.status === 'rejected' || sendingMessage
+              }
             >
-              Skicka
+              {sendingMessage ? 'Skickar...' : 'Skicka'}
             </Button>
           </form>
+          {messageError && (
+            <div className='px-3 pb-3 text-sm text-red-600'>{messageError}</div>
+          )}
         </div>
         <div className='text-xs text-gray-500'>
           <p>

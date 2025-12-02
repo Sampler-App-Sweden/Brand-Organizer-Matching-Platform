@@ -6,6 +6,7 @@ import {
   saveOrganizer,
   updateOrganizer
 } from '../services/dataService'
+import type { Organizer } from '../types'
 
 export interface OrganizerFormData {
   organizerName: string
@@ -28,7 +29,7 @@ export interface OrganizerFormData {
   audienceDescription: string
   audienceDemographics: string[]
   sponsorshipNeeds: string
-  seekingFinancialSponsorship: string
+  seekingFinancialSponsorship: Organizer['seekingFinancialSponsorship']
   financialSponsorshipAmount: string
   financialSponsorshipOffers: string
   offeringTypes: string[]

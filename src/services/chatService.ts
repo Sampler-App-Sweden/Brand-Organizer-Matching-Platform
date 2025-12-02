@@ -1,12 +1,15 @@
+import { supabase } from './supabaseClient'
+
 // Chat service for AI-powered communication
 export interface Message {
   id: string
   conversationId: string
-  senderId: string
+  senderId: string | null
   senderType: 'brand' | 'organizer' | 'ai'
   content: string
   timestamp: Date
 }
+
 export interface Conversation {
   id: string
   brandId: string
@@ -15,126 +18,278 @@ export interface Conversation {
   createdAt: Date
   lastActivity: Date
 }
+
+interface ConversationRow {
+  id: string
+  brand_id: string
+  organizer_id: string
+  created_at: string
+  last_activity: string | null
+}
+
+interface MessageRow {
+  id: string
+  conversation_id: string
+  sender_id: string | null
+  sender_type: 'brand' | 'organizer' | 'ai'
+  content: string
+  timestamp: string
+}
+
+const mapMessageRow = (row: MessageRow): Message => ({
+  id: row.id,
+  conversationId: row.conversation_id,
+  senderId: row.sender_id,
+  senderType: row.sender_type,
+  content: row.content,
+  timestamp: new Date(row.timestamp)
+})
+
+const mapConversationRow = (
+  row: ConversationRow,
+  messages: Message[] = []
+): Conversation => ({
+  id: row.id,
+  brandId: row.brand_id,
+  organizerId: row.organizer_id,
+  messages,
+  createdAt: new Date(row.created_at),
+  lastActivity: new Date(row.last_activity ?? row.created_at)
+})
+
+const hydrateConversations = async (
+  rows: ConversationRow[]
+): Promise<Conversation[]> => {
+  if (!rows.length) return []
+
+  const conversationIds = rows.map((row) => row.id)
+  const { data: messageRows, error: messagesError } = await supabase
+    .from('messages')
+    .select('*')
+    .in('conversation_id', conversationIds)
+    .order('timestamp', { ascending: true })
+
+  if (messagesError) {
+    throw new Error(`Failed to load messages: ${messagesError.message}`)
+  }
+
+  const messagesByConversation = new Map<string, Message[]>()
+  ;(messageRows as MessageRow[]).forEach((row) => {
+    const existing = messagesByConversation.get(row.conversation_id) ?? []
+    existing.push(mapMessageRow(row))
+    messagesByConversation.set(row.conversation_id, existing)
+  })
+
+  return rows.map((row) =>
+    mapConversationRow(row, messagesByConversation.get(row.id) ?? [])
+  )
+}
+
+const fetchConversationById = async (
+  conversationId: string
+): Promise<Conversation | null> => {
+  const { data, error } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('id', conversationId)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(`Failed to load conversation: ${error.message}`)
+  }
+
+  if (!data) return null
+
+  const messages = await getConversationMessages(conversationId)
+  return mapConversationRow(data as ConversationRow, messages)
+}
+
+const shouldTriggerAIResponse = (content: string) => {
+  const lowered = content.toLowerCase()
+  return (
+    lowered.includes('?') ||
+    lowered.includes('help') ||
+    lowered.includes('suggest')
+  )
+}
+
 // Get or create a conversation between a brand and an organizer
-export const getOrCreateConversation = (
+export const getOrCreateConversation = async (
   brandId: string,
   organizerId: string
-): Conversation => {
-  const conversations = JSON.parse(
-    localStorage.getItem('conversations') || '[]'
-  ) as Conversation[]
-  let conversation = conversations.find(
-    (c) => c.brandId === brandId && c.organizerId === organizerId
-  )
-  if (!conversation) {
-    conversation = {
-      id: `conv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      brandId,
-      organizerId,
-      messages: [],
-      createdAt: new Date(),
-      lastActivity: new Date()
-    }
-    conversations.push(conversation)
-    localStorage.setItem('conversations', JSON.stringify(conversations))
+): Promise<Conversation> => {
+  const { data, error } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('brand_id', brandId)
+    .eq('organizer_id', organizerId)
+    .maybeSingle()
+
+  if (error && error.code !== 'PGRST116') {
+    throw new Error(`Failed to fetch conversation: ${error.message}`)
   }
-  return conversation
+
+  if (!data) {
+    const { data: inserted, error: insertError } = await supabase
+      .from('conversations')
+      .insert({ brand_id: brandId, organizer_id: organizerId })
+      .select('*')
+      .single()
+
+    if (insertError) {
+      throw new Error(`Failed to create conversation: ${insertError.message}`)
+    }
+
+    return mapConversationRow(inserted as ConversationRow, [])
+  }
+
+  const messages = await getConversationMessages((data as ConversationRow).id)
+  return mapConversationRow(data as ConversationRow, messages)
 }
+
 // Send a message in a conversation
-export const sendMessage = (
+export const sendMessage = async (
   conversationId: string,
   senderId: string,
   senderType: 'brand' | 'organizer',
   content: string
-): Message => {
-  const conversations = JSON.parse(
-    localStorage.getItem('conversations') || '[]'
-  ) as Conversation[]
-  const conversationIndex = conversations.findIndex(
-    (c) => c.id === conversationId
-  )
-  if (conversationIndex === -1) {
-    throw new Error('Conversation not found')
+): Promise<Message> => {
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      conversation_id: conversationId,
+      sender_id: senderId,
+      sender_type: senderType,
+      content
+    })
+    .select('*')
+    .single()
+
+  if (error) {
+    throw new Error(`Failed to send message: ${error.message}`)
   }
-  const message: Message = {
-    id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    conversationId,
-    senderId,
-    senderType,
-    content,
-    timestamp: new Date()
-  }
-  // Add the message to the conversation
-  conversations[conversationIndex].messages.push(message)
-  conversations[conversationIndex].lastActivity = new Date()
-  localStorage.setItem('conversations', JSON.stringify(conversations))
-  // Generate AI response if needed
-  if (
-    content.toLowerCase().includes('?') ||
-    content.toLowerCase().includes('help') ||
-    content.toLowerCase().includes('suggest')
-  ) {
-    const aiResponse = generateAIResponse(
-      content,
-      senderType,
-      conversations[conversationIndex]
-    )
-    const aiMessage: Message = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      conversationId,
-      senderId: 'ai-assistant',
-      senderType: 'ai',
-      content: aiResponse,
-      timestamp: new Date()
+
+  await supabase
+    .from('conversations')
+    .update({ last_activity: new Date().toISOString() })
+    .eq('id', conversationId)
+
+  const message = mapMessageRow(data as MessageRow)
+
+  if (shouldTriggerAIResponse(content)) {
+    const conversation = await fetchConversationById(conversationId)
+    if (conversation) {
+      const aiResponse = generateAIResponse(content, senderType)
+
+      const { error: aiError } = await supabase.from('messages').insert({
+        conversation_id: conversationId,
+        sender_id: null,
+        sender_type: 'ai',
+        content: aiResponse
+      })
+
+      if (!aiError) {
+        await supabase
+          .from('conversations')
+          .update({ last_activity: new Date().toISOString() })
+          .eq('id', conversationId)
+      }
     }
-    conversations[conversationIndex].messages.push(aiMessage)
-    conversations[conversationIndex].lastActivity = new Date()
-    localStorage.setItem('conversations', JSON.stringify(conversations))
   }
+
   return message
 }
+
 // Get all messages in a conversation
-export const getConversationMessages = (conversationId: string): Message[] => {
-  const conversations = JSON.parse(
-    localStorage.getItem('conversations') || '[]'
-  ) as Conversation[]
-  const conversation = conversations.find((c) => c.id === conversationId)
-  if (!conversation) {
-    return []
+export const getConversationMessages = async (
+  conversationId: string
+): Promise<Message[]> => {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', conversationId)
+    .order('timestamp', { ascending: true })
+
+  if (error) {
+    throw new Error(`Failed to fetch messages: ${error.message}`)
   }
-  return conversation.messages
+
+  return (data as MessageRow[]).map(mapMessageRow)
 }
+
 // Get all conversations for a brand
-export const getBrandConversations = (brandId: string): Conversation[] => {
-  const conversations = JSON.parse(
-    localStorage.getItem('conversations') || '[]'
-  ) as Conversation[]
-  return conversations.filter((c) => c.brandId === brandId)
+export const getBrandConversations = async (
+  brandId: string
+): Promise<Conversation[]> => {
+  const { data, error } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('brand_id', brandId)
+    .order('last_activity', { ascending: false })
+
+  if (error) {
+    throw new Error(`Failed to fetch brand conversations: ${error.message}`)
+  }
+
+  return hydrateConversations(data as ConversationRow[])
 }
+
 // Get all conversations for an organizer
-export const getOrganizerConversations = (
+export const getOrganizerConversations = async (
   organizerId: string
-): Conversation[] => {
-  const conversations = JSON.parse(
-    localStorage.getItem('conversations') || '[]'
-  ) as Conversation[]
-  return conversations.filter((c) => c.organizerId === organizerId)
+): Promise<Conversation[]> => {
+  const { data, error } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('organizer_id', organizerId)
+    .order('last_activity', { ascending: false })
+
+  if (error) {
+    throw new Error(`Failed to fetch organizer conversations: ${error.message}`)
+  }
+
+  return hydrateConversations(data as ConversationRow[])
 }
+
 // Get conversations where the current user has sent at least one message
-export const getConversationsBySenderId = (userId: string): Conversation[] => {
-  const conversations = JSON.parse(
-    localStorage.getItem('conversations') || '[]'
-  ) as Conversation[]
-  return conversations.filter((conversation) =>
-    conversation.messages.some((message) => message.senderId === userId)
+export const getConversationsBySenderId = async (
+  userId: string
+): Promise<Conversation[]> => {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('conversation_id')
+    .eq('sender_id', userId)
+
+  if (error) {
+    throw new Error(`Failed to fetch sent conversations: ${error.message}`)
+  }
+
+  const conversationIds = Array.from(
+    new Set(
+      (data as { conversation_id: string }[]).map((row) => row.conversation_id)
+    )
   )
+
+  if (!conversationIds.length) return []
+
+  const { data: conversationRows, error: conversationsError } = await supabase
+    .from('conversations')
+    .select('*')
+    .in('id', conversationIds)
+
+  if (conversationsError) {
+    throw new Error(
+      `Failed to fetch conversations by sender: ${conversationsError.message}`
+    )
+  }
+
+  return hydrateConversations(conversationRows as ConversationRow[])
 }
 
 // Generate AI response based on message content
 const generateAIResponse = (
   message: string,
-  senderType: 'brand' | 'organizer',
-  conversation: Conversation
+  senderType: 'brand' | 'organizer'
 ): string => {
   const lowercaseMessage = message.toLowerCase()
   // Pricing and budget questions

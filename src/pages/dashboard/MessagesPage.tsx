@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import {
@@ -66,165 +66,48 @@ export function MessagesPage() {
   const [sortBy, setSortBy] = useState<'recent' | 'unread'>('recent')
   const [partnerInfo, setPartnerInfo] = useState<Brand | Organizer | null>(null)
   const [userType, setUserType] = useState<'brand' | 'organizer'>('brand')
+  const [messagesLoading, setMessagesLoading] = useState(false)
+  const [sendingMessage, setSendingMessage] = useState(false)
+  const [messageError, setMessageError] = useState<string | null>(null)
+  const [conversationsError, setConversationsError] = useState<string | null>(
+    null
+  )
 
-  const partnerDisplayName = partnerInfo
-    ? userType === 'brand'
-      ? (partnerInfo as Organizer).organizerName || 'Unknown Organizer'
-      : (partnerInfo as Brand).companyName || 'Unknown Brand'
-    : 'Unknown Partner'
-  const partnerInitial = partnerDisplayName.charAt(0) || 'U'
+  const selectedConversationRef = useRef<string | null>(null)
+
   useEffect(() => {
-    const loadConversations = async () => {
-      if (!currentUser) return
-      setLoading(true)
-      // Determine if the user is a brand or organizer
-      const userType = currentUser.type as 'brand' | 'organizer'
-      setUserType(userType)
-      // Get conversations based on user type
-      let rawConversations: Conversation[] = []
-      if (userType === 'brand') {
-        const brandData = await getBrandByUserId(currentUser.id)
-        if (brandData) {
-          rawConversations = await getBrandConversations(brandData.id)
-        }
-      } else {
-        const organizerData = await getOrganizerByUserId(currentUser.id)
-        if (organizerData) {
-          rawConversations = await getOrganizerConversations(organizerData.id)
-        }
+    selectedConversationRef.current = selectedConversation
+  }, [selectedConversation])
+
+  const fetchMessages = useCallback(
+    async (
+      conversationId: string,
+      options: { showLoading?: boolean } = { showLoading: true }
+    ) => {
+      if (options.showLoading) {
+        setMessagesLoading(true)
       }
-      if (currentUser) {
-        const sentConversations = getConversationsBySenderId(currentUser.id)
-        if (sentConversations.length) {
-          const mergedMap = new Map<string, Conversation>()
-          const mergedItems = [...rawConversations, ...sentConversations]
-          mergedItems.forEach((conv) => {
-            if (!mergedMap.has(conv.id)) {
-              mergedMap.set(conv.id, conv)
-            }
-          })
-          rawConversations = Array.from(mergedMap.values())
+      setMessageError(null)
+      try {
+        const messagesData = await getConversationMessages(conversationId)
+        setMessages(messagesData)
+        return messagesData
+      } catch (error) {
+        console.error('Failed to load messages:', error)
+        setMessageError('Failed to load messages. Please try again.')
+        setMessages([])
+        return []
+      } finally {
+        if (options.showLoading) {
+          setMessagesLoading(false)
         }
       }
-      // Enhance conversations with metadata
-      const enhancedConversations = await Promise.all(
-        rawConversations.map(async (conv) => {
-          const brandData = await getBrandById(conv.brandId)
-          const organizerData = await getOrganizerById(conv.organizerId)
-          // Get last message
-          const lastMessage =
-            conv.messages.length > 0
-              ? conv.messages[conv.messages.length - 1]
-              : null
-          const lastMessageTime = lastMessage?.timestamp
-            ? new Date(lastMessage.timestamp)
-            : conv.lastActivity || conv.createdAt
-          const awaitingReply = Boolean(
-            lastMessage &&
-              currentUser &&
-              lastMessage.senderId === currentUser.id &&
-              lastMessage.senderType === userType
-          )
-          // Mock unread count (in a real app, this would be stored in the database)
-          const unreadCount = Math.floor(Math.random() * 3)
-          // Mock phase (in a real app, this would be stored in the database)
-          const phases: ConversationPhase[] = [
-            'inquiry',
-            'negotiation',
-            'contract_draft',
-            'completed'
-          ]
-          const phase = phases[Math.floor(Math.random() * phases.length)]
-          // Reference is either the product name or event name
-          const reference =
-            userType === 'brand'
-              ? organizerData?.eventName || 'Unknown Event'
-              : brandData?.productName || 'Unknown Product'
-          return {
-            id: conv.id,
-            brandId: conv.brandId,
-            organizerId: conv.organizerId,
-            brandName: brandData?.companyName || 'Unknown Brand',
-            brandLogo:
-              'https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=250&q=80',
-            organizerName: organizerData?.organizerName || 'Unknown Organizer',
-            organizerLogo:
-              'https://images.unsplash.com/photo-1561489404-42f5a5c8e0eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=250&q=80',
-            lastMessage: lastMessage?.content || 'No messages yet',
-            lastMessageTime,
-            unreadCount,
-            phase,
-            reference,
-            awaitingReply
-          }
-        })
-      )
-      setConversations(enhancedConversations)
-      // Select the first conversation by default if available
-      if (enhancedConversations.length > 0 && !selectedConversation) {
-        setSelectedConversation(enhancedConversations[0].id)
-        loadMessages(enhancedConversations[0].id)
-        // Load partner info
-        const partnerType = userType === 'brand' ? 'organizer' : 'brand'
-        const partnerId =
-          partnerType === 'brand'
-            ? enhancedConversations[0].brandId
-            : enhancedConversations[0].organizerId
-        const partnerData =
-          partnerType === 'brand'
-            ? await getBrandById(partnerId)
-            : await getOrganizerById(partnerId)
-        setPartnerInfo(partnerData)
-      }
-      setLoading(false)
-    }
-    loadConversations()
-  }, [currentUser, selectedConversation])
-  const loadMessages = async (conversationId: string) => {
-    const messagesData = await getConversationMessages(conversationId)
-    setMessages(messagesData)
-  }
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedConversation || !newMessage.trim() || !currentUser) return
-    await sendMessage(
-      selectedConversation,
-      currentUser.id,
-      userType,
-      newMessage
-    )
-    setNewMessage('')
-    const updatedMessages = await getConversationMessages(selectedConversation)
-    setMessages(updatedMessages)
-    const lastMessage =
-      updatedMessages.length > 0
-        ? updatedMessages[updatedMessages.length - 1]
-        : null
-    setConversations((prev) =>
-      prev.map((conversation) =>
-        conversation.id === selectedConversation
-          ? {
-              ...conversation,
-              lastMessage: lastMessage?.content || conversation.lastMessage,
-              lastMessageTime: lastMessage
-                ? new Date(lastMessage.timestamp)
-                : conversation.lastMessageTime,
-              awaitingReply: Boolean(
-                lastMessage &&
-                  lastMessage.senderId === currentUser.id &&
-                  lastMessage.senderType === userType
-              )
-            }
-          : conversation
-      )
-    )
-  }
-  const handleSelectConversation = async (conversationId: string) => {
-    setSelectedConversation(conversationId)
-    loadMessages(conversationId)
-    // Load partner info
-    const conversation = conversations.find((c) => c.id === conversationId)
-    if (conversation) {
+    },
+    []
+  )
+
+  const fetchPartnerDetails = useCallback(
+    async (conversation: EnhancedConversation) => {
       const partnerType = userType === 'brand' ? 'organizer' : 'brand'
       const partnerId =
         partnerType === 'brand'
@@ -235,7 +118,214 @@ export function MessagesPage() {
           ? await getBrandById(partnerId)
           : await getOrganizerById(partnerId)
       setPartnerInfo(partnerData)
+    },
+    [userType]
+  )
+
+  const partnerDisplayName = partnerInfo
+    ? userType === 'brand'
+      ? (partnerInfo as Organizer).organizerName || 'Unknown Organizer'
+      : (partnerInfo as Brand).companyName || 'Unknown Brand'
+    : 'Unknown Partner'
+  const partnerInitial = partnerDisplayName.charAt(0) || 'U'
+  useEffect(() => {
+    const loadConversations = async () => {
+      if (!currentUser) {
+        setConversations([])
+        setSelectedConversation(null)
+        setPartnerInfo(null)
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setConversationsError(null)
+
+      try {
+        const derivedUserType =
+          (currentUser.type as 'brand' | 'organizer') || 'brand'
+        setUserType(derivedUserType)
+
+        let rawConversations: Conversation[] = []
+
+        if (derivedUserType === 'brand') {
+          const brandData = await getBrandByUserId(currentUser.id)
+          if (brandData) {
+            rawConversations = await getBrandConversations(brandData.id)
+          }
+        } else {
+          const organizerData = await getOrganizerByUserId(currentUser.id)
+          if (organizerData) {
+            rawConversations = await getOrganizerConversations(organizerData.id)
+          }
+        }
+
+        const sentConversations = await getConversationsBySenderId(
+          currentUser.id
+        )
+        if (sentConversations.length) {
+          const mergedMap = new Map<string, Conversation>()
+          const mergedItems = [...rawConversations, ...sentConversations]
+          mergedItems.forEach((conv) => {
+            if (!mergedMap.has(conv.id)) {
+              mergedMap.set(conv.id, conv)
+            }
+          })
+          rawConversations = Array.from(mergedMap.values())
+        }
+
+        const enhancedConversations = await Promise.all(
+          rawConversations.map(async (conv) => {
+            const brandData = await getBrandById(conv.brandId)
+            const organizerData = await getOrganizerById(conv.organizerId)
+
+            const lastMessage =
+              conv.messages.length > 0
+                ? conv.messages[conv.messages.length - 1]
+                : null
+            const lastMessageTime = lastMessage?.timestamp
+              ? new Date(lastMessage.timestamp)
+              : conv.lastActivity || conv.createdAt
+            const awaitingReply = Boolean(
+              lastMessage &&
+                currentUser &&
+                lastMessage.senderId === currentUser.id &&
+                lastMessage.senderType === derivedUserType
+            )
+
+            const unreadCount = Math.floor(Math.random() * 3)
+            const phases: ConversationPhase[] = [
+              'inquiry',
+              'negotiation',
+              'contract_draft',
+              'completed'
+            ]
+            const phase = phases[Math.floor(Math.random() * phases.length)]
+            const reference =
+              derivedUserType === 'brand'
+                ? organizerData?.eventName || 'Unknown Event'
+                : brandData?.productName || 'Unknown Product'
+
+            return {
+              id: conv.id,
+              brandId: conv.brandId,
+              organizerId: conv.organizerId,
+              brandName: brandData?.companyName || 'Unknown Brand',
+              brandLogo:
+                'https://images.unsplash.com/photo-1560472355-536de3962603?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=250&q=80',
+              organizerName:
+                organizerData?.organizerName || 'Unknown Organizer',
+              organizerLogo:
+                'https://images.unsplash.com/photo-1561489404-42f5a5c8e0eb?ixlib=rb-4.0.3&auto=format&fit=crop&w=250&h=250&q=80',
+              lastMessage: lastMessage?.content || 'No messages yet',
+              lastMessageTime,
+              unreadCount,
+              phase,
+              reference,
+              awaitingReply
+            }
+          })
+        )
+
+        setConversations(enhancedConversations)
+
+        const currentSelectedId = selectedConversationRef.current
+        if (!currentSelectedId && enhancedConversations.length > 0) {
+          setSelectedConversation(enhancedConversations[0].id)
+        } else if (
+          currentSelectedId &&
+          !enhancedConversations.some((conv) => conv.id === currentSelectedId)
+        ) {
+          setSelectedConversation(
+            enhancedConversations.length ? enhancedConversations[0].id : null
+          )
+        }
+
+        if (!enhancedConversations.length) {
+          setMessages([])
+          setPartnerInfo(null)
+        }
+      } catch (error) {
+        console.error('Failed to load conversations:', error)
+        setConversationsError('Failed to load conversations. Please try again.')
+        setConversations([])
+        setSelectedConversation(null)
+      } finally {
+        setLoading(false)
+      }
     }
+
+    loadConversations()
+  }, [currentUser])
+
+  useEffect(() => {
+    const hydrateSelection = async () => {
+      if (!selectedConversation) {
+        setMessages([])
+        setPartnerInfo(null)
+        return
+      }
+
+      const activeConversation = conversations.find(
+        (c) => c.id === selectedConversation
+      )
+
+      if (!activeConversation) return
+
+      await fetchMessages(selectedConversation)
+      await fetchPartnerDetails(activeConversation)
+    }
+
+    hydrateSelection()
+  }, [selectedConversation, conversations, fetchMessages, fetchPartnerDetails])
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedConversation || !newMessage.trim() || !currentUser) return
+    try {
+      setSendingMessage(true)
+      setMessageError(null)
+      await sendMessage(
+        selectedConversation,
+        currentUser.id,
+        userType,
+        newMessage
+      )
+      setNewMessage('')
+      const updatedMessages = await fetchMessages(selectedConversation, {
+        showLoading: false
+      })
+      const lastMessage =
+        updatedMessages.length > 0
+          ? updatedMessages[updatedMessages.length - 1]
+          : null
+      setConversations((prev) =>
+        prev.map((conversation) =>
+          conversation.id === selectedConversation
+            ? {
+                ...conversation,
+                lastMessage: lastMessage?.content || conversation.lastMessage,
+                lastMessageTime: lastMessage
+                  ? new Date(lastMessage.timestamp)
+                  : conversation.lastMessageTime,
+                awaitingReply: Boolean(
+                  lastMessage &&
+                    lastMessage.senderId === currentUser.id &&
+                    lastMessage.senderType === userType
+                )
+              }
+            : conversation
+        )
+      )
+    } catch (error) {
+      console.error('Failed to send message:', error)
+      setMessageError('Failed to send message. Please try again.')
+    } finally {
+      setSendingMessage(false)
+    }
+  }
+  const handleSelectConversation = (conversationId: string) => {
+    if (conversationId === selectedConversation) return
+    setSelectedConversation(conversationId)
   }
   const filterConversations = () => {
     let filtered = [...conversations]
@@ -380,6 +470,11 @@ export function MessagesPage() {
           <div className='flex flex-1 gap-4 overflow-hidden'>
             {/* Conversation list */}
             <div className='w-full md:w-1/3 bg-white rounded-lg shadow-sm overflow-hidden flex flex-col'>
+              {conversationsError && (
+                <div className='p-3 text-sm text-red-600 border-b border-red-100 bg-red-50'>
+                  {conversationsError}
+                </div>
+              )}
               <div className='overflow-y-auto flex-1'>
                 {filterConversations().length === 0 ? (
                   <div className='p-6 text-center text-gray-500'>
@@ -575,7 +670,17 @@ export function MessagesPage() {
                   </div>
                   {/* Messages */}
                   <div className='flex-1 overflow-y-auto p-4 space-y-4'>
-                    {messages.length === 0 ? (
+                    {messagesLoading ? (
+                      <div className='flex flex-col items-center justify-center h-full text-gray-500'>
+                        <MessageSquareIcon className='h-12 w-12 mb-2 text-gray-400' />
+                        <p>Loading messages...</p>
+                      </div>
+                    ) : messageError ? (
+                      <div className='flex flex-col items-center justify-center h-full text-red-600 text-center px-4'>
+                        <MessageSquareIcon className='h-12 w-12 mb-2 text-red-400' />
+                        <p>{messageError}</p>
+                      </div>
+                    ) : messages.length === 0 ? (
                       <div className='flex flex-col items-center justify-center h-full text-gray-500'>
                         <MessageSquareIcon className='h-12 w-12 mb-2 text-gray-400' />
                         <p>No messages yet. Start the conversation!</p>
@@ -643,15 +748,20 @@ export function MessagesPage() {
                           <Button
                             type='submit'
                             variant='primary'
-                            disabled={!newMessage.trim()}
+                            disabled={!newMessage.trim() || sendingMessage}
                             className='flex items-center'
                           >
                             <SendIcon className='h-4 w-4 mr-1' />
-                            Send
+                            {sendingMessage ? 'Sending...' : 'Send'}
                           </Button>
                         </div>
                       </div>
                     </form>
+                    {messageError && (
+                      <div className='mt-2 text-sm text-red-600'>
+                        {messageError}
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
