@@ -6,7 +6,7 @@ import { ProductCard } from './ProductCard'
 import {
   SponsorshipProduct,
   ProductSponsorshipManagerProps
-} from './sponsorshipTypes'
+} from '../../types/sponsorship'
 import {
   fetchSponsorshipProducts,
   createSponsorshipProduct,

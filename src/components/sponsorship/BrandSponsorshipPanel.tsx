@@ -14,7 +14,7 @@ import {
   OfferFinancialDetails,
   OfferProductDetails,
   SponsorshipTypeId
-} from './sponsorshipTypes'
+} from '../../types/sponsorship'
 import {
   fetchSponsorshipOffer,
   saveSponsorshipOffer
@@ -63,15 +63,14 @@ const createDefaultCustomMix = (): OfferCustomMix => ({
   financial: 34
 })
 
-export function BrandSponsorshipPanel({
-  brandId
-}: BrandSponsorshipPanelProps) {
+export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
   const [selectedTypes, setSelectedTypes] = useState<SponsorshipTypeId[]>([])
-  const [productDetails, setProductDetails] = useState<OfferProductDetails>(() =>
-    createDefaultProductDetails()
+  const [productDetails, setProductDetails] = useState<OfferProductDetails>(
+    () => createDefaultProductDetails()
   )
-  const [discountDetails, setDiscountDetails] =
-    useState<OfferDiscountDetails>(() => createDefaultDiscountDetails())
+  const [discountDetails, setDiscountDetails] = useState<OfferDiscountDetails>(
+    () => createDefaultDiscountDetails()
+  )
   const [financialDetails, setFinancialDetails] =
     useState<OfferFinancialDetails>(() => createDefaultFinancialDetails())
   const [customMix, setCustomMix] = useState<OfferCustomMix>(() =>
@@ -81,9 +80,10 @@ export function BrandSponsorshipPanel({
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<'draft' | 'published' | null>(null)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState<
-    { type: 'success' | 'error'; message: string } | null
-  >(null)
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error'
+    message: string
+  } | null>(null)
 
   useEffect(() => {
     if (!brandId) {
@@ -191,9 +191,9 @@ export function BrandSponsorshipPanel({
   ) => {
     const clamped = Math.max(0, Math.min(100, value))
     setCustomMix((prev) => {
-      const otherKeys = (
-        ['product', 'discount', 'financial'] as const
-      ).filter((key) => key !== type)
+      const otherKeys = (['product', 'discount', 'financial'] as const).filter(
+        (key) => key !== type
+      )
       const otherTotal = otherKeys.reduce((sum, key) => sum + prev[key], 0)
       const ratios =
         otherTotal === 0
@@ -708,9 +708,7 @@ export function BrandSponsorshipPanel({
           variant='outline'
           className='flex items-center hover:bg-indigo-50 transition-colors'
           onClick={() => handleSave('draft')}
-          disabled={
-            isSubmitting || selectedTypes.length === 0 || !brandId
-          }
+          disabled={isSubmitting || selectedTypes.length === 0 || !brandId}
         >
           <SaveIcon className='h-4 w-4 mr-2' />
           Save Draft
@@ -719,9 +717,7 @@ export function BrandSponsorshipPanel({
           variant='primary'
           className='flex items-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 shadow-md hover:shadow-lg transition-all'
           onClick={() => handleSave('published')}
-          disabled={
-            isSubmitting || selectedTypes.length === 0 || !brandId
-          }
+          disabled={isSubmitting || selectedTypes.length === 0 || !brandId}
         >
           <SendIcon className='h-4 w-4 mr-2' />
           Publish Offer

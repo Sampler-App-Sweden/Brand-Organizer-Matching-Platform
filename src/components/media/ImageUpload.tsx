@@ -1,18 +1,18 @@
 import { useRef } from 'react'
 import { ImageIcon, XIcon } from 'lucide-react'
-import { ProductImage } from './sponsorshipTypes'
+import { ProductImage } from '../../types/sponsorship'
 
-interface ProductImageUploadProps {
+interface ImageUploadProps {
   images: ProductImage[]
   onImagesChange: (images: ProductImage[]) => void
   maxImages?: number
 }
 
-export function ProductImageUpload({
+export function ImageUpload({
   images,
   onImagesChange,
   maxImages = 5
-}: ProductImageUploadProps) {
+}: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

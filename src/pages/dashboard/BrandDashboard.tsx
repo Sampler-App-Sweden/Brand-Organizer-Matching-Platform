@@ -11,7 +11,7 @@ import { TrendingUpIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
 import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
-import { Brand, Organizer } from '../../types'
+import { Brand } from '../../types'
 import { MatchRow } from '../dashboard/MatchRow'
 
 export function BrandDashboard() {

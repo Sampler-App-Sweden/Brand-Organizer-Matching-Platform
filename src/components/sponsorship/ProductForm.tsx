@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Sparkles } from 'lucide-react'
 import { Button } from '../ui'
-import { ProductImage, SponsorshipProduct } from './sponsorshipTypes'
-import { ProductImageUpload } from './ProductImageUpload'
+import { ProductImage, SponsorshipProduct } from '../../types/sponsorship'
+import { ImageUpload } from '../media/ImageUpload'
 
 interface ProductFormProps {
   initialData?: Omit<SponsorshipProduct, 'id' | 'order'>
@@ -85,7 +85,7 @@ export function ProductForm({
             <label className='block text-sm font-medium text-gray-700 mb-1'>
               Product Images (up to 5)
             </label>
-            <ProductImageUpload
+            <ImageUpload
               images={formData.images}
               onImagesChange={handleImagesChange}
               maxImages={5}
@@ -176,8 +176,8 @@ export function ProductForm({
             {isSubmitting
               ? 'Saving...'
               : editing
-                ? 'Update Product'
-                : 'Save Product'}
+              ? 'Update Product'
+              : 'Save Product'}
           </Button>
         </div>
       </form>

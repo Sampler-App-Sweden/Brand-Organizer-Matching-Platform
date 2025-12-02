@@ -1,6 +1,6 @@
 import React from 'react'
 import { EditIcon, TrashIcon, GripIcon, PackageIcon } from 'lucide-react'
-import { SponsorshipProduct } from './sponsorshipTypes'
+import { SponsorshipProduct } from '../../types/sponsorship'
 
 interface ProductCardProps {
   product: SponsorshipProduct

@@ -281,8 +281,7 @@ CREATE POLICY "Anyone can view organizer profiles"
       SELECT user_id FROM public.brands WHERE id = brand_id
       UNION
       SELECT user_id FROM public.organizers WHERE id = organizer_id
-    )
-  );
+    );
 
 -- Contracts policies
 CREATE POLICY "Allow users to read their contracts"
@@ -305,6 +304,9 @@ CREATE POLICY "Allow brands to insert sponsorship products"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.brands
+    )
+  );
+
 CREATE POLICY "Allow brands to view own sponsorship products"
   ON public.sponsorship_products FOR SELECT
   TO authenticated
@@ -351,6 +353,8 @@ CREATE POLICY "Allow brands to insert sponsorship offers"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.brands
+    )
+  );
 CREATE POLICY "Allow brands to view own sponsorship offers"
   ON public.sponsorship_offers FOR SELECT
   TO authenticated
