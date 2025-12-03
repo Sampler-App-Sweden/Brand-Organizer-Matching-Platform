@@ -7,6 +7,8 @@ import {
   updateBrand
 } from '../services/dataService'
 
+type YesNo = 'yes' | 'no' | ''
+
 export interface BrandFormData {
   companyName: string
   contactName: string
@@ -29,11 +31,11 @@ export interface BrandFormData {
   marketingGoals: string
   budget: string
   eventMarketingBudget: string
-  interestedInFinancialSponsorship: string
+  interestedInFinancialSponsorship: YesNo
   financialSponsorshipAmount: string
   successMetrics: string
-  interestedInSamplingTools: string
-  hasTestPanels: string
+  interestedInSamplingTools: YesNo
+  hasTestPanels: YesNo
   testPanelDetails: string
   additionalInfo: string
 }
