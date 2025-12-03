@@ -42,11 +42,6 @@ export function DashboardNavbar() {
       path: '/for-organizers'
     },
     {
-      label: 'Saved',
-      icon: <BookmarkIcon className='h-5 w-5' />,
-      path: '/saved'
-    },
-    {
       label: 'Inspiration',
       icon: <SparklesIcon className='h-5 w-5' />,
       path: '/inspiration'

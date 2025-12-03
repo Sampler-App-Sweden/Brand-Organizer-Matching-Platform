@@ -6,7 +6,6 @@ import {
   Menu,
   PackageIcon,
   SparklesIcon,
-  StarIcon,
   UsersIcon,
   X
 } from 'lucide-react'
@@ -74,11 +73,6 @@ export function Navbar() {
       {
         label: 'Organizers',
         path: '/organizers'
-      },
-      {
-        label: 'Saved',
-        path: '/dashboard/saved',
-        icon: <StarIcon className='h-4 w-4 mr-0.5' />
       },
       {
         label: 'Inspiration',

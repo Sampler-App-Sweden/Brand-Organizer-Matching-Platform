@@ -19,13 +19,13 @@ export function TechNavbar() {
               to='/brands'
               className='text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all hover:after:w-full'
             >
-              For Brands
+              Brands
             </Link>
             <Link
               to='/organizers'
               className='text-gray-600 hover:text-blue-600 transition-colors text-sm font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all hover:after:w-full'
             >
-              For Organizers
+              Organizers
             </Link>
             <Link
               to='/community'
