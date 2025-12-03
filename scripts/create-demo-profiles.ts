@@ -962,17 +962,33 @@ async function createOrUpdateAccount(
 
   if (existingProfile?.id) {
     await supabase.auth.admin.deleteUser(existingProfile.id)
+  } else {
+    const { data: userList, error: listUsersError } =
+      await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 })
+
+    if (listUsersError) {
+      throw new Error(
+        `Failed to inspect existing auth users: ${listUsersError.message}`
+      )
+    }
+
+    const existingUser = userList.users.find(
+      (user) => user.email?.toLowerCase() === account.email.toLowerCase()
+    )
+
+    if (existingUser?.id) {
+      await supabase.auth.admin.deleteUser(existingUser.id)
+    }
   }
 
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.admin.createUser({
     email: account.email,
     password: account.password,
-    options: {
-      data: {
-        type: account.type,
-        name: account.name,
-        role: account.type === 'brand' ? 'Brand' : 'Organizer'
-      }
+    email_confirm: true,
+    user_metadata: {
+      type: account.type,
+      name: account.name,
+      role: account.type === 'brand' ? 'Brand' : 'Organizer'
     }
   })
 
@@ -992,11 +1008,36 @@ async function createOrUpdateAccount(
     id: userId,
     role: account.type === 'brand' ? 'Brand' : 'Organizer',
     name: account.name,
-    email: account.email,
-    ...account.extra
+    email: account.email
   }
 
-  await supabase.from('profiles').upsert(profilePayload)
+  const allowedProfileExtraKeys = ['phone', 'logo_url', 'description'] as const
+
+  for (const key of allowedProfileExtraKeys) {
+    if (key === 'description') {
+      const description = account.extra.description ?? account.extra.short_description
+      if (description) {
+        profilePayload.description = description
+      }
+      continue
+    }
+
+    const value = account.extra[key]
+    if (value) {
+      profilePayload[key] = value
+    }
+  }
+
+  const { error: profileUpsertError } = await supabase
+    .from('profiles')
+    .upsert(profilePayload)
+
+  if (profileUpsertError) {
+    throw new Error(
+      `Failed to upsert profile for ${account.email}: ${profileUpsertError.message}`
+    )
+  }
+
   console.log(`Synced profile for ${account.email}`)
 
   return { type: account.type, email: account.email, userId }
