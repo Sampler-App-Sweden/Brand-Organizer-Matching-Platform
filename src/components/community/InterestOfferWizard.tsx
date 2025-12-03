@@ -69,6 +69,20 @@ export function InterestOfferWizard({
     getFallbackOptions(currentUser?.type)
   )
   const [itemOptionsLoading, setItemOptionsLoading] = useState(false)
+  const recipientMissingAccount = !member.userId
+
+  const handleEmailFallback = () => {
+    if (!member.email) return
+    const subject = `Collaboration interest from ${
+      currentUser?.name || 'a Brand Organizer member'
+    }`
+    const mailto = `mailto:${member.email}?subject=${encodeURIComponent(
+      subject
+    )}`
+    if (typeof window !== 'undefined') {
+      window.open(mailto)
+    }
+  }
 
   useEffect(() => {
     let isMounted = true
@@ -262,7 +276,34 @@ export function InterestOfferWizard({
           <XIcon className='h-5 w-5' />
         </button>
         <div className='p-6'>
-          {isComplete ? (
+          {recipientMissingAccount ? (
+            <div className='space-y-4 text-center py-8'>
+              <h2 className='text-2xl font-bold text-gray-900'>
+                We can't message this profile yet
+              </h2>
+              <p className='text-gray-600 max-w-xl mx-auto'>
+                {member.name} was imported without a linked Brand Organizer
+                account, so in-app messaging isn't available. Reach out using
+                their public contact details below or ask them to finish
+                onboarding.
+              </p>
+              {member.email ? (
+                <Button
+                  onClick={handleEmailFallback}
+                  className='flex items-center justify-center mx-auto'
+                >
+                  Email {member.name}
+                </Button>
+              ) : (
+                <p className='text-sm text-gray-500'>
+                  No email address is listed for this profile yet.
+                </p>
+              )}
+              <Button variant='outline' onClick={onClose} className='mx-auto'>
+                Close
+              </Button>
+            </div>
+          ) : isComplete ? (
             <div className='text-center py-8'>
               <CheckCircleIcon className='h-16 w-16 text-green-500 mx-auto mb-4' />
               <h2 className='text-2xl font-bold text-gray-900 mb-2'>

@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
 
+import { logoutAndRedirect } from '../../context/AuthContext'
 import { TechBackground } from '../effects'
 import { Navbar } from '../layout'
-import { sidebarItems } from './sidebarItems'
+import { SidebarItem, sidebarItems } from './sidebarItems'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -11,8 +12,12 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
   const location = useLocation()
-  const currentSidebarItems = sidebarItems[userType]
+  const currentSidebarItems: SidebarItem[] = sidebarItems[userType]
   const commonItems = sidebarItems.common
+
+  const handleLogout = async () => {
+    await logoutAndRedirect()
+  }
 
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col relative overflow-hidden'>
@@ -33,14 +38,54 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
                 DASHBOARD MENU
               </div>
               <nav className='space-y-1'>
-                {currentSidebarItems.map((item) => (
+                {currentSidebarItems.map((item) => {
+                  const itemPath = item.path ?? ''
+                  return (
+                    <Link
+                      key={item.path ?? item.label}
+                      to={itemPath}
+                      className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors ${
+                        location.pathname === itemPath ||
+                        (itemPath !== '' &&
+                          itemPath !== '/' &&
+                          location.pathname.startsWith(itemPath))
+                          ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 pl-3'
+                          : ''
+                      }`}
+                    >
+                      {item.icon}
+                      <span className='ml-3'>{item.label}</span>
+                    </Link>
+                  )
+                })}
+              </nav>
+            </div>
+
+            <div className='mt-auto pt-4 border-t border-gray-100 space-y-1'>
+              {commonItems.map((item) => {
+                if (item.action === 'logout') {
+                  return (
+                    <button
+                      key={item.action ?? item.label}
+                      onClick={handleLogout}
+                      className='w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors text-left'
+                    >
+                      {item.icon}
+                      <span className='ml-3'>{item.label}</span>
+                    </button>
+                  )
+                }
+
+                if (!item.path) {
+                  return null
+                }
+
+                return (
                   <Link
                     key={item.path}
                     to={item.path}
                     className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors ${
-                      location.pathname === item.path ||
-                      (item.path !== '/' &&
-                        location.pathname.startsWith(item.path))
+                      location.pathname === item.path
                         ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 pl-3'
                         : ''
                     }`}
@@ -48,25 +93,8 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
                     {item.icon}
                     <span className='ml-3'>{item.label}</span>
                   </Link>
-                ))}
-              </nav>
-            </div>
-
-            <div className='mt-auto pt-4 border-t border-gray-100 space-y-1'>
-              {commonItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors ${
-                    location.pathname === item.path
-                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 pl-3'
-                      : ''
-                  }`}
-                >
-                  {item.icon}
-                  <span className='ml-3'>{item.label}</span>
-                </Link>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>

@@ -663,6 +663,14 @@ CREATE POLICY "Allow users to read their conversations"
     )
   );
 
+DROP POLICY IF EXISTS "Allow users to start conversations" ON public.conversations;
+CREATE POLICY "Allow users to start conversations"
+  ON public.conversations FOR INSERT
+  WITH CHECK (
+    brand_id IN (SELECT id FROM public.brands WHERE user_id = auth.uid())
+    OR organizer_id IN (SELECT id FROM public.organizers WHERE user_id = auth.uid())
+  );
+
 -- Messages policies
 DROP POLICY IF EXISTS "Allow users to read their messages" ON public.messages;
 CREATE POLICY "Allow users to read their messages"

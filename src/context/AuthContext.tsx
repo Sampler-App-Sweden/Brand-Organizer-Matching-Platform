@@ -1,12 +1,14 @@
-import React, { useEffect, useState, createContext, useContext } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
+
 import {
-  signIn,
-  signUp,
-  signOut,
   getCurrentUser,
-  getSession
+  getSession,
+  signIn,
+  signOut,
+  signUp
 } from '../services/supabaseAuthService'
 import { supabase } from '../services/supabaseClient'
+
 interface User {
   id: string
   email: string
@@ -183,4 +185,9 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
+}
+
+export const logoutAndRedirect = async () => {
+  await supabase.auth.signOut()
+  window.location.href = '/login'
 }

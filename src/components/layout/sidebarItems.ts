@@ -1,14 +1,23 @@
-import { createElement } from 'react'
-import {
-  HandshakeIcon,
-  HomeIcon,
-  MessageSquareIcon,
-  UsersIcon,
-  LogOut
-} from 'lucide-react'
+import { HandshakeIcon, HomeIcon, LogOut, MessageSquareIcon, UsersIcon } from 'lucide-react'
+import { createElement, ReactElement } from 'react'
+
+export type SidebarAction = 'logout'
+export interface SidebarItem {
+  label: string
+  icon: ReactElement
+  path?: string
+  action?: SidebarAction
+}
+
+export type SidebarCollection = {
+  brand: SidebarItem[]
+  organizer: SidebarItem[]
+  admin: SidebarItem[]
+  common: SidebarItem[]
+}
 
 // Dashboard sidebar items
-export const sidebarItems = {
+export const sidebarItems: SidebarCollection = {
   brand: [
     {
       label: 'Dashboard',
@@ -84,7 +93,7 @@ export const sidebarItems = {
     {
       label: 'Log out',
       icon: createElement(LogOut, { className: 'h-5 w-5' }),
-      path: '/logout'
+      action: 'logout'
     }
   ]
 }

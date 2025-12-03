@@ -13,12 +13,12 @@ import {
 import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-import { useAuth } from '../../context/AuthContext'
+import { logoutAndRedirect, useAuth } from '../../context/AuthContext'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
-  const { currentUser, logout } = useAuth()
+  const { currentUser } = useAuth()
   const location = useLocation()
   const isOnDashboard = location.pathname.startsWith('/dashboard')
   const isAuthenticated = Boolean(currentUser)
@@ -104,7 +104,7 @@ export function Navbar() {
 
   const handleLogout = async () => {
     try {
-      await logout()
+      await logoutAndRedirect()
     } finally {
       setShowUserMenu(false)
       setMobileMenuOpen(false)
