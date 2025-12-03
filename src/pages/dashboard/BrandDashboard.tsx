@@ -195,7 +195,7 @@ export function BrandDashboard() {
         <div className='flex justify-between items-center mb-4'>
           <h2 className='text-lg font-semibold text-gray-900'>Your Profile</h2>
           <Link
-            to='/brand'
+            to='/dashboard/edit-profile'
             className='text-sm text-indigo-600 hover:text-indigo-800'
           >
             Edit profile

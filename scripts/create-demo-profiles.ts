@@ -351,8 +351,164 @@ const brandSeeds: BrandSeed[] = [
         order_index: 1
       }
     ]
+  },
+  {
+    email: 'glowco@demo.com',
+    password: 'demo123',
+    type: 'brand',
+    name: 'GlowCo Beauty',
+    extra: {
+      company_name: 'GlowCo Beauty',
+      short_description: 'Beauty ritual experiences with clean science',
+      description:
+        'GlowCo pairs dermatologist-backed skincare with immersive launch experiences in salons and wellness festivals.',
+      website: 'https://glowco.demo',
+      phone: '555-070-7070'
+    },
+    brandData: {
+      company_name: 'GlowCo Beauty',
+      contact_name: 'Ivy Soderholm',
+      contact_title: 'VP Partnerships',
+      email: 'glowco@demo.com',
+      phone: '555-070-7070',
+      website: 'https://glowco.demo',
+      industry: 'beauty_cosmetics',
+      product_name: 'Glow Serum',
+      product_description:
+        'A targeted barrier-repair serum that blends barrier peptides with Nordic botanicals.',
+      product_quantity: '1,500 units',
+      target_audience: 'Beauty editors, salon guests, and wellness studio members',
+      age_range: '25-40',
+      sponsorship_type: ['Sampling', 'Content Collaboration'],
+      marketing_goals:
+        'Secure salon lounge placements and collect creator testimonial reels',
+      budget: '$18,000',
+      event_marketing_budget: '$7,500',
+      interested_in_financial_sponsorship: true,
+      financial_sponsorship_amount: '$12,000',
+      success_metrics: 'Stocking invitations, social mentions, waitlist spikes',
+      interested_in_sampling_tools: true,
+      has_test_panels: true,
+      test_panel_details: 'Weekly panel with 20 Nordic skincare advocates',
+      additional_info: 'Can bring mini facial stations and editorial kits.'
+    },
+    products: [
+      {
+        name: 'Glow Serum Hospitality Kits',
+        goals:
+          'Place ritual kits in premium pop-up salons and concierge lounges.',
+        quantity: 300,
+        unit: 'kits',
+        details:
+          'Each kit includes a full-size serum, mini mist, and QR story about the glow ritual.',
+        status: 'online',
+        images: [
+          {
+            url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9',
+            alt: 'Skincare bottles on marble'
+          },
+          {
+            url: 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6',
+            alt: 'Beauty serum with flowers'
+          }
+        ],
+        order_index: 0
+      },
+      {
+        name: 'Radiant Experience Stations',
+        goals: 'Deliver guided glow rituals with licensed aestheticians.',
+        quantity: 15,
+        unit: 'stations',
+        details:
+          'Mobile stations include pampering stylists, custom playlists, and photo-ready backdrops.',
+        status: 'online',
+        images: [
+          {
+            url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1',
+            alt: 'Glowing beauty station'
+          }
+        ],
+        order_index: 1
+      }
+    ]
+  },
+  {
+    email: 'lumen@demo.com',
+    password: 'demo123',
+    type: 'brand',
+    name: 'Lumen Collective',
+    extra: {
+      company_name: 'Lumen Collective',
+      short_description: 'Experiential lighting and stage craft for events',
+      description:
+        'Lumen Collective partners with experiential organizers to deliver programmable light sculptures and ambient artistry for product launches.',
+      website: 'https://lumen.demo',
+      phone: '555-080-8080'
+    },
+    brandData: {
+      company_name: 'Lumen Collective',
+      contact_name: 'Marcus Eklund',
+      contact_title: 'Experience Director',
+      email: 'lumen@demo.com',
+      phone: '555-080-8080',
+      website: 'https://lumen.demo',
+      industry: 'entertainment',
+      product_name: 'Immersive Light Bars',
+      product_description:
+        'Modular programmable light bars that adapt to brand palettes and respond to live audio.',
+      product_quantity: '120 units',
+      target_audience: 'Live stage producers, festivals, and tech showcases',
+      age_range: '30-55',
+      sponsorship_type: ['Event Sponsorship', 'Content Collaboration', 'Retail Experience'],
+      marketing_goals:
+        'Place installations at flagship events and capture cinematic footage',
+      budget: '$30,000',
+      event_marketing_budget: '$12,000',
+      interested_in_financial_sponsorship: true,
+      financial_sponsorship_amount: '$15,000',
+      success_metrics: 'Cinematic coverage, live reactions, social tags',
+      interested_in_sampling_tools: false,
+      has_test_panels: false,
+      test_panel_details: 'N/A',
+      additional_info: 'Offers integration with AV partners and designers.'
+    },
+    products: [
+      {
+        name: 'Aurora Bar Set',
+        goals: 'Deliver ambient installations for main stages and lounges.',
+        quantity: 24,
+        unit: 'bars',
+        details:
+          'Each bar is programmable, stackable, and includes touch-reactive effects.',
+        status: 'online',
+        images: [
+          {
+            url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30',
+            alt: 'Colorful light installation'
+          }
+        ],
+        order_index: 0
+      },
+      {
+        name: 'Lumen Story Kit',
+        goals:
+          'Equip VIP activations with storytelling light cues tied to brand launches.',
+        quantity: 12,
+        unit: 'kits',
+        details:
+          'Includes curated light scripts, sensors, and mini light bars.',
+        status: 'online',
+        images: [
+          {
+            url: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
+            alt: 'Event lighting script'
+          }
+        ],
+        order_index: 1
+      }
+    ]
   }
-]
+];
 
 const organizerSeeds: OrganizerSeed[] = [
   {
@@ -540,8 +696,132 @@ const organizerSeeds: OrganizerSeed[] = [
         ]
       }
     ]
+  },
+  {
+    email: 'urbanwellness@demo.com',
+    password: 'demo123',
+    type: 'organizer',
+    name: 'Urban Wellness Week',
+    extra: {
+      organizer_name: 'Urban Wellness Week',
+      phone: '555-090-9090',
+      website: 'https://urbanwellness.demo',
+      description:
+        'City-wide experiences that highlight mindful movement, botanical tastings, and cultural riffing.'
+    },
+    organizerData: {
+      organizer_name: 'Urban Wellness Week',
+      contact_name: 'Noor Badi',
+      email: 'urbanwellness@demo.com',
+      phone: '555-090-9090',
+      website: 'https://urbanwellness.demo',
+      address: 'Kungsgatan 28',
+      postal_code: '111 35',
+      city: 'Stockholm'
+    },
+    events: [
+      {
+        name: 'Urban Wellness Week',
+        event_type: 'Festival Week',
+        elevator_pitch:
+          'A layered series of rooftop lounges, sound baths, and mindful market pop-ups that pair brands with movement lovers.',
+        frequency: 'Annual',
+        start_date: '2026-05-17',
+        location: 'Stockholm, Sweden',
+        attendee_count: '2,200',
+        audience_description:
+          'Wellness professionals, creative founders, and culturally curious locals.',
+        audience_demographics: ['25-45', 'Wellness creators', 'Nordic + EU'],
+        sponsorship_needs:
+          'Sampling partners, workshop leaders, and immersive storytelling teams.',
+        seeking_financial_sponsorship: true,
+        financial_sponsorship_amount: '$10,000',
+        financial_sponsorship_offers:
+          'Digital content suite, wellness guide inclusion, and elevated dwell moments.',
+        offering_types: [
+          'Sampling',
+          'Content Collaboration',
+          'Immersive Experience'
+        ],
+        brand_visibility:
+          'Pop-up markets, rooftop lounges, and digital festival map placements.',
+        content_creation:
+          'In-house mini documentaries, live social reels, and community spotlights.',
+        lead_generation: 'Email opt-ins, workshop bookings, and wellness passport scans.',
+        product_feedback: 'Guided tasting tables and workshop reflections.',
+        bonus_value: [
+          'Sound bath performance feature',
+          'Wellness Week guide inclusion'
+        ],
+        bonus_value_details:
+          'Guide reaches 25k attendees and offers shoutouts on closing night.',
+        additional_info:
+          'Works with Nordic design houses to build floating lounge architecture.',
+        media_files: [
+          'https://images.unsplash.com/photo-1506126613408-eca07ce68773'
+        ]
+      }
+    ]
+  },
+  {
+    email: 'lumenstages@demo.com',
+    password: 'demo123',
+    type: 'organizer',
+    name: 'Lumen Stages Collective',
+    extra: {
+      organizer_name: 'Lumen Stages Collective',
+      phone: '555-110-1101',
+      website: 'https://lumenstages.demo',
+      description:
+        'Immersive stage producers blending programmable lighting with brand storytelling.'
+    },
+    organizerData: {
+      organizer_name: 'Lumen Stages Collective',
+      contact_name: 'Sofia Leclerc',
+      email: 'lumenstages@demo.com',
+      phone: '555-110-1101',
+      website: 'https://lumenstages.demo',
+      address: 'Götgatan 85',
+      postal_code: '116 62',
+      city: 'Stockholm'
+    },
+    events: [
+      {
+        name: 'Immersive Voltage Series',
+        event_type: 'Immersive Series',
+        elevator_pitch:
+          'Quarterly curated evenings where programmable light, sonic sets, and tasting concepts collide.',
+        frequency: 'Quarterly',
+        start_date: '2026-11-01',
+        location: 'Stockholm, Sweden',
+        attendee_count: '1,000',
+        audience_description:
+          'Design-forward tastemakers, brand storytellers, and experiential producers.',
+        audience_demographics: ['30-50', 'Creative directors', 'Nordic + EU'],
+        sponsorship_needs:
+          'Light installations, immersive lounges, and content collab partners.',
+        seeking_financial_sponsorship: true,
+        financial_sponsorship_amount: '$14,000',
+        financial_sponsorship_offers:
+          'Brand takeover nights, curated VIP lounges, and digital film packages.',
+        offering_types: ['Immersive Experience', 'Sampling', 'Content Collaboration'],
+        brand_visibility:
+          'Main stage, sculptural lounges, and pre-show receptions.',
+        content_creation:
+          'Short films, live-streamed lighting cues, and DJ sets captured for social.',
+        lead_generation: 'VIP list, lounge RSVPs, and brand match cards.',
+        product_feedback: 'Live demos within immersive lounges.',
+        bonus_value: ['Lighting-focused creative consult', 'Feature in Lumen reel'],
+        bonus_value_details:
+          'Consult pairs designers with the brand for bespoke cues, reel hits 40k views.',
+        additional_info: 'Partners with AV studios for technical support.',
+        media_files: [
+          'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee'
+        ]
+      }
+    ]
   }
-]
+];
 
 const matchSeeds: MatchSeed[] = [
   {
@@ -571,6 +851,26 @@ const matchSeeds: MatchSeed[] = [
     match_reasons: [
       'Wellness-focused pop-up needs mindful hydration',
       'Community venue loves storytelling partners'
+    ],
+    status: 'pending'
+  },
+  {
+    brandEmail: 'glowco@demo.com',
+    organizerEmail: 'urbanwellness@demo.com',
+    score: 88,
+    match_reasons: [
+      'Rooftop lounges and mindful workshops need premium skincare sampling',
+      'Organizers prioritize content storytelling and creator testimonials'
+    ],
+    status: 'pending'
+  },
+  {
+    brandEmail: 'lumen@demo.com',
+    organizerEmail: 'lumenstages@demo.com',
+    score: 91,
+    match_reasons: [
+      'Programmable light bars amplify curated VIP experiences',
+      'Organizers co-create cinematic reels and immersive lounges'
     ],
     status: 'pending'
   }
