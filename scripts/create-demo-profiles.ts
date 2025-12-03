@@ -114,6 +114,22 @@ type MatchSeed = {
   status: 'pending' | 'accepted' | 'rejected'
 }
 
+type ContractSeed = {
+  brandEmail: string
+  organizerEmail: string
+  sponsorship_amount: string
+  sponsorship_type: string
+  deliverables: string
+  start_date: string
+  end_date: string
+  payment_terms: string
+  cancellation_policy: string
+  additional_terms?: string
+  brand_approved?: boolean
+  organizer_approved?: boolean
+  status: 'pending' | 'approved' | 'cancelled'
+}
+
 type DemoAccount = BrandSeed | OrganizerSeed
 
 type SeededAccount = {
@@ -377,7 +393,8 @@ const brandSeeds: BrandSeed[] = [
       product_description:
         'A targeted barrier-repair serum that blends barrier peptides with Nordic botanicals.',
       product_quantity: '1,500 units',
-      target_audience: 'Beauty editors, salon guests, and wellness studio members',
+      target_audience:
+        'Beauty editors, salon guests, and wellness studio members',
       age_range: '25-40',
       sponsorship_type: ['Sampling', 'Content Collaboration'],
       marketing_goals:
@@ -459,7 +476,11 @@ const brandSeeds: BrandSeed[] = [
       product_quantity: '120 units',
       target_audience: 'Live stage producers, festivals, and tech showcases',
       age_range: '30-55',
-      sponsorship_type: ['Event Sponsorship', 'Content Collaboration', 'Retail Experience'],
+      sponsorship_type: [
+        'Event Sponsorship',
+        'Content Collaboration',
+        'Retail Experience'
+      ],
       marketing_goals:
         'Place installations at flagship events and capture cinematic footage',
       budget: '$30,000',
@@ -508,7 +529,7 @@ const brandSeeds: BrandSeed[] = [
       }
     ]
   }
-];
+]
 
 const organizerSeeds: OrganizerSeed[] = [
   {
@@ -747,7 +768,8 @@ const organizerSeeds: OrganizerSeed[] = [
           'Pop-up markets, rooftop lounges, and digital festival map placements.',
         content_creation:
           'In-house mini documentaries, live social reels, and community spotlights.',
-        lead_generation: 'Email opt-ins, workshop bookings, and wellness passport scans.',
+        lead_generation:
+          'Email opt-ins, workshop bookings, and wellness passport scans.',
         product_feedback: 'Guided tasting tables and workshop reflections.',
         bonus_value: [
           'Sound bath performance feature',
@@ -804,14 +826,21 @@ const organizerSeeds: OrganizerSeed[] = [
         financial_sponsorship_amount: '$14,000',
         financial_sponsorship_offers:
           'Brand takeover nights, curated VIP lounges, and digital film packages.',
-        offering_types: ['Immersive Experience', 'Sampling', 'Content Collaboration'],
+        offering_types: [
+          'Immersive Experience',
+          'Sampling',
+          'Content Collaboration'
+        ],
         brand_visibility:
           'Main stage, sculptural lounges, and pre-show receptions.',
         content_creation:
           'Short films, live-streamed lighting cues, and DJ sets captured for social.',
         lead_generation: 'VIP list, lounge RSVPs, and brand match cards.',
         product_feedback: 'Live demos within immersive lounges.',
-        bonus_value: ['Lighting-focused creative consult', 'Feature in Lumen reel'],
+        bonus_value: [
+          'Lighting-focused creative consult',
+          'Feature in Lumen reel'
+        ],
         bonus_value_details:
           'Consult pairs designers with the brand for bespoke cues, reel hits 40k views.',
         additional_info: 'Partners with AV studios for technical support.',
@@ -821,7 +850,7 @@ const organizerSeeds: OrganizerSeed[] = [
       }
     ]
   }
-];
+]
 
 const matchSeeds: MatchSeed[] = [
   {
@@ -873,6 +902,44 @@ const matchSeeds: MatchSeed[] = [
       'Organizers co-create cinematic reels and immersive lounges'
     ],
     status: 'pending'
+  }
+]
+
+const contractSeeds: ContractSeed[] = [
+  {
+    brandEmail: 'glowco@demo.com',
+    organizerEmail: 'urbanwellness@demo.com',
+    sponsorship_amount: '$12,000',
+    sponsorship_type: 'Sampling & Content',
+    deliverables:
+      'Glow Serum Hospitality kits, guided lounge rituals, and creator interviews captured for Urban Wellness Week.',
+    start_date: '2026-05-01',
+    end_date: '2026-05-20',
+    payment_terms: '50% upfront, 50% upon delivery of content plan',
+    cancellation_policy:
+      '30-day notice required with penalty equal to 30% of the sponsorship amount.',
+    additional_terms:
+      'Urban Wellness Week supplies premium lounge space and floating architecture for the brand.',
+    brand_approved: true,
+    organizer_approved: false,
+    status: 'pending'
+  },
+  {
+    brandEmail: 'lumen@demo.com',
+    organizerEmail: 'lumenstages@demo.com',
+    sponsorship_amount: '$22,000',
+    sponsorship_type: 'Experiential Lighting',
+    deliverables:
+      'Aurora Bar sets, Lumen Story Kits, and technical staff for Immersive Voltage Series lounges.',
+    start_date: '2026-10-15',
+    end_date: '2027-02-01',
+    payment_terms: 'Net 30 after final event invoice',
+    cancellation_policy: 'Cancellation within 15 days triggers a 40% fee.',
+    additional_terms:
+      'Organizer covers lodging and transportation for the Lumen technical team.',
+    brand_approved: true,
+    organizer_approved: true,
+    status: 'approved'
   }
 ]
 
@@ -1115,6 +1182,90 @@ async function seedMatches(
   console.log('Seeded demo matches')
 }
 
+async function seedContracts(
+  seeds: ContractSeed[],
+  brandIds: Map<string, string>,
+  organizerIds: Map<string, string>
+) {
+  const entries: Array<{
+    match_id: string
+    brand_id: string
+    organizer_id: string
+    sponsorship_amount: string
+    sponsorship_type: string
+    deliverables: string
+    start_date: string
+    end_date: string
+    payment_terms: string
+    cancellation_policy: string
+    additional_terms: string | null
+    brand_approved: boolean
+    organizer_approved: boolean
+    status: 'pending' | 'approved' | 'cancelled'
+  }> = []
+
+  for (const seed of seeds) {
+    const brandId = brandIds.get(seed.brandEmail)
+    const organizerId = organizerIds.get(seed.organizerEmail)
+
+    if (!brandId || !organizerId) {
+      console.warn(
+        `Skipping contract for ${seed.brandEmail} + ${seed.organizerEmail} because IDs are missing.`
+      )
+      continue
+    }
+
+    const { data: matchRecord, error: matchError } = await supabase
+      .from('matches')
+      .select('id')
+      .eq('brand_id', brandId)
+      .eq('organizer_id', organizerId)
+      .maybeSingle()
+
+    if (matchError) {
+      throw new Error(
+        `Failed to fetch match for ${seed.brandEmail} + ${seed.organizerEmail}: ${matchError.message}`
+      )
+    }
+
+    if (!matchRecord?.id) {
+      console.warn(
+        `No match found for ${seed.brandEmail} + ${seed.organizerEmail}, skipping contract.`
+      )
+      continue
+    }
+
+    entries.push({
+      match_id: matchRecord.id,
+      brand_id: brandId,
+      organizer_id: organizerId,
+      sponsorship_amount: seed.sponsorship_amount,
+      sponsorship_type: seed.sponsorship_type,
+      deliverables: seed.deliverables,
+      start_date: seed.start_date,
+      end_date: seed.end_date,
+      payment_terms: seed.payment_terms,
+      cancellation_policy: seed.cancellation_policy,
+      additional_terms: seed.additional_terms ?? null,
+      brand_approved: seed.brand_approved ?? false,
+      organizer_approved: seed.organizer_approved ?? false,
+      status: seed.status
+    })
+  }
+
+  if (entries.length === 0) {
+    return
+  }
+
+  const { error } = await supabase.from('contracts').insert(entries)
+
+  if (error) {
+    throw new Error(`Failed to insert contracts: ${error.message}`)
+  }
+
+  console.log('Seeded demo contracts')
+}
+
 async function main() {
   const seededAccounts: SeededAccount[] = []
 
@@ -1179,6 +1330,8 @@ async function main() {
   }
 
   await seedMatches(matchSeeds, brandIdByEmail, organizerIdByEmail)
+
+  await seedContracts(contractSeeds, brandIdByEmail, organizerIdByEmail)
 
   console.log('Demo profiles seeded.')
 }
