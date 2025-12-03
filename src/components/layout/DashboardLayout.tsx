@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 
-import { logoutAndRedirect } from '../../context/AuthContext'
+import { logoutAndRedirect } from '../../services/logoutService'
 import { TechBackground } from '../effects'
 import { Navbar } from '../layout'
 import { SidebarItem, sidebarItems } from './sidebarItems'

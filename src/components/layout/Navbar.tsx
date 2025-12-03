@@ -13,7 +13,8 @@ import {
 import { useMemo, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-import { logoutAndRedirect, useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/AuthContext'
+import { logoutAndRedirect } from '../../services/logoutService'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

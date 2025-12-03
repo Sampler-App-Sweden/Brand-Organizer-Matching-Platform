@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 
+import { logoutAndRedirect as logoutService } from '../services/logoutService'
 import {
   getCurrentUser,
   getSession,
   signIn,
-  signOut,
   signUp
 } from '../services/supabaseAuthService'
 import { supabase } from '../services/supabaseClient'
@@ -156,8 +156,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
   const logout = async () => {
     try {
-      await signOut()
       setCurrentUser(null)
+      await logoutService()
     } catch (error) {
       console.error('Logout error:', error)
       throw error
@@ -185,9 +185,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
-}
-
-export const logoutAndRedirect = async () => {
-  await supabase.auth.signOut()
-  window.location.href = '/login'
 }
