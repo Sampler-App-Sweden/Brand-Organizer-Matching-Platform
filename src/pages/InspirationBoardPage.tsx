@@ -1,13 +1,15 @@
+import { ExternalLinkIcon, FilterIcon, StarIcon, XIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { DashboardLayout } from '../../components/layout'
-import { useAuth } from '../../context/AuthContext'
+
+import { DashboardLayout } from '../components/layout'
+import { useAuth } from '../context/AuthContext'
 import {
   getAllCollaborations,
   getSavedCollaborations,
   toggleSavedCollaboration
-} from '../../services/collaborationService'
-import { Collaboration } from '../../types/collaboration'
-import { StarIcon, FilterIcon, XIcon, ExternalLinkIcon } from 'lucide-react'
+} from '../services/collaborationService'
+import { Collaboration } from '../types/collaboration'
+
 export function InspirationBoardPage() {
   const { currentUser } = useAuth()
   const [collaborations, setCollaborations] = useState<Collaboration[]>([])
