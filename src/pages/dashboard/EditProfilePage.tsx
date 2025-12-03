@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+
 import { DashboardLayout } from '../../components/layout'
-import { useAuth } from '../../context/AuthContext'
 import { FormField } from '../../components/ui'
 import { Button } from '../../components/ui'
-import { supabase } from '../../services/supabaseClient'
+import { useAuth } from '../../context/AuthContext'
 import {
   getBrandByUserId,
   getOrganizerByUserId
 } from '../../services/dataService'
+import { supabase } from '../../services/supabaseClient'
+
 import type { Brand, Organizer } from '../../types'
 
 export function EditProfilePage() {
@@ -22,6 +24,10 @@ export function EditProfilePage() {
     phone: '',
     description: '',
     logo_url: ''
+  })
+  const [contactInfo, setContactInfo] = useState({
+    person: '',
+    email: ''
   })
   const [toast, setToast] = useState({
     show: false,
@@ -74,17 +80,22 @@ export function EditProfilePage() {
 
       if (error && error.code !== 'PGRST116') throw error
 
+      let brandRecord: Brand | null = null
+      let organizerRecord: Organizer | null = null
       let fallbackProfile: typeof profile | null = null
       if (currentUser.type === 'brand') {
-        const brand = await getBrandByUserId(currentUser.id)
-        if (brand) {
-          fallbackProfile = buildProfileFromBrand(brand, currentUser.email)
+        brandRecord = await getBrandByUserId(currentUser.id)
+        if (brandRecord) {
+          fallbackProfile = buildProfileFromBrand(
+            brandRecord,
+            currentUser.email
+          )
         }
       } else if (currentUser.type === 'organizer') {
-        const organizer = await getOrganizerByUserId(currentUser.id)
-        if (organizer) {
+        organizerRecord = await getOrganizerByUserId(currentUser.id)
+        if (organizerRecord) {
           fallbackProfile = buildProfileFromOrganizer(
-            organizer,
+            organizerRecord,
             currentUser.email
           )
         }
@@ -97,6 +108,27 @@ export function EditProfilePage() {
         description: data?.description || fallbackProfile?.description || '',
         logo_url: data?.logo_url || fallbackProfile?.logo_url || ''
       })
+
+      const contactDefaults = (() => {
+        if (currentUser.type === 'brand' && brandRecord) {
+          return {
+            person: brandRecord.contactName || '',
+            email: brandRecord.email || currentUser.email || ''
+          }
+        }
+        if (currentUser.type === 'organizer' && organizerRecord) {
+          return {
+            person: organizerRecord.contactName || '',
+            email: organizerRecord.email || currentUser.email || ''
+          }
+        }
+        return {
+          person: currentUser.name || '',
+          email: currentUser.email || ''
+        }
+      })()
+
+      setContactInfo(contactDefaults)
     } catch (error) {
       console.error('Error loading profile:', error)
       showToast('Failed to load profile', 'error')
@@ -115,8 +147,6 @@ export function EditProfilePage() {
     setSaving(true)
 
     try {
-      console.log('Updating profile with name:', profile.name)
-
       const { error } = await supabase.from('profiles').upsert({
         id: currentUser?.id,
         role:
@@ -135,16 +165,29 @@ export function EditProfilePage() {
 
       if (error) throw error
 
-      console.log('Profile updated successfully, refreshing user...')
+      if (currentUser?.type === 'brand') {
+        await supabase
+          .from('brands')
+          .update({
+            contact_name: contactInfo.person || null,
+            email: contactInfo.email || null
+          })
+          .eq('user_id', currentUser.id)
+      } else if (currentUser?.type === 'organizer') {
+        await supabase
+          .from('organizers')
+          .update({
+            contact_name: contactInfo.person || null,
+            email: contactInfo.email || null
+          })
+          .eq('user_id', currentUser.id)
+      }
 
       // Refresh user data in AuthContext
       await refreshUser()
 
-      console.log('User refreshed')
-
       showToast('Profile updated successfully!', 'success')
     } catch (error) {
-      console.error('Error updating profile:', error)
       showToast('Failed to update profile', 'error')
     } finally {
       setSaving(false)
@@ -187,6 +230,37 @@ export function EditProfilePage() {
               onChange={(e) => setProfile({ ...profile, name: e.target.value })}
               placeholder='Your name or company name'
             />
+
+            {currentUser?.type !== 'admin' && (
+              <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+                <FormField
+                  label='Contact person'
+                  id='contact_person'
+                  type='text'
+                  value={contactInfo.person}
+                  onChange={(e) =>
+                    setContactInfo({
+                      ...contactInfo,
+                      person: e.target.value
+                    })
+                  }
+                  placeholder='Who should brands speak to?'
+                />
+                <FormField
+                  label='Contact email'
+                  id='contact_email'
+                  type='email'
+                  value={contactInfo.email}
+                  onChange={(e) =>
+                    setContactInfo({
+                      ...contactInfo,
+                      email: e.target.value
+                    })
+                  }
+                  placeholder='contact@example.com'
+                />
+              </div>
+            )}
 
             <FormField
               label='Email'

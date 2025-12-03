@@ -285,6 +285,23 @@ CREATE TABLE IF NOT EXISTS public.community_members (
 );
 -- Enable RLS
 ALTER TABLE public.community_members ENABLE ROW LEVEL SECURITY;
+
+-- Saved community members join table
+CREATE TABLE IF NOT EXISTS public.community_saved_members (
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  member_id UUID REFERENCES public.community_members ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  PRIMARY KEY (user_id, member_id)
+);
+ALTER TABLE public.community_saved_members ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow users to manage saved members" ON public.community_saved_members;
+CREATE POLICY "Allow users to manage saved members"
+  ON public.community_saved_members
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 -- Conversations table
 CREATE TABLE IF NOT EXISTS public.conversations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

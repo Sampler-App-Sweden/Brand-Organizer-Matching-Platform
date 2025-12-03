@@ -1,10 +1,48 @@
 import { ArrowRightIcon, CheckCircleIcon, XIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { User } from '../../services/authService'
+import {
+  getOrCreateConversation,
+  sendMessage
+} from '../../services/chatService'
+import {
+  getBrandByUserId,
+  getOrganizerByUserId
+} from '../../services/dataService'
+import { fetchSponsorshipProducts } from '../../services/sponsorshipService'
+import { supabase } from '../../services/supabaseClient'
 import { CommunityMember } from '../../types/community'
 import { Button } from '../ui'
 import { FormField } from '../ui'
+
+type OfferingOption = {
+  id: string
+  name: string
+}
+
+const getFallbackOptions = (
+  userType?: User['type'] | null
+): OfferingOption[] => {
+  if (userType === 'organizer') {
+    return [
+      { id: 'fallback-event-1', name: 'Summer Festival 2023' },
+      { id: 'fallback-event-2', name: 'Winter Conference 2023' },
+      { id: 'fallback-event-3', name: 'Monthly Networking Event' }
+    ]
+  }
+
+  return [
+    { id: 'fallback-product-1', name: 'Organic Energy Drink' },
+    { id: 'fallback-product-2', name: 'Protein Bars' },
+    { id: 'fallback-product-3', name: 'Merchandise Pack' }
+  ]
+}
+
+type EventOptionRow = {
+  id: string
+  name: string | null
+}
 
 interface InterestOfferWizardProps {
   member: CommunityMember
@@ -26,6 +64,84 @@ export function InterestOfferWizard({
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [itemOptions, setItemOptions] = useState<OfferingOption[]>(() =>
+    getFallbackOptions(currentUser?.type)
+  )
+  const [itemOptionsLoading, setItemOptionsLoading] = useState(false)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadOptions = async () => {
+      if (!currentUser) {
+        setItemOptions(getFallbackOptions(null))
+        return
+      }
+
+      setItemOptionsLoading(true)
+
+      try {
+        if (currentUser.type === 'brand') {
+          const brandRecord = await getBrandByUserId(currentUser.id)
+          if (brandRecord?.id) {
+            const products = await fetchSponsorshipProducts(brandRecord.id)
+            if (isMounted && products.length) {
+              setItemOptions(
+                products.map((product) => ({
+                  id: product.id,
+                  name: product.name
+                }))
+              )
+              return
+            }
+          }
+        } else if (currentUser.type === 'organizer') {
+          const organizerRecord = await getOrganizerByUserId(currentUser.id)
+          if (organizerRecord?.id) {
+            const { data, error } = await supabase
+              .from('events')
+              .select('id, name')
+              .eq('organizer_id', organizerRecord.id)
+              .order('created_at', { ascending: false })
+
+            if (error) {
+              throw error
+            }
+
+            if (isMounted && data && data.length) {
+              setItemOptions(
+                (data as EventOptionRow[]).map((event) => ({
+                  id: event.id,
+                  name: event.name || 'Untitled Event'
+                }))
+              )
+              return
+            }
+          }
+        }
+
+        if (isMounted) {
+          setItemOptions(getFallbackOptions(currentUser.type))
+        }
+      } catch (error) {
+        console.error('Failed to load offering options:', error)
+        if (isMounted) {
+          setItemOptions(getFallbackOptions(currentUser.type))
+        }
+      } finally {
+        if (isMounted) {
+          setItemOptionsLoading(false)
+        }
+      }
+    }
+
+    loadOptions()
+
+    return () => {
+      isMounted = false
+    }
+  }, [currentUser])
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -37,22 +153,91 @@ export function InterestOfferWizard({
       [name]: value
     }))
   }
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!currentUser) return
+
     setIsSubmitting(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
+    setSubmitError(null)
+
+    try {
+      const senderType =
+        currentUser.type === 'brand'
+          ? 'brand'
+          : currentUser.type === 'organizer'
+          ? 'organizer'
+          : null
+
+      if (!senderType) {
+        throw new Error('Only brands and organizers can send offers right now.')
+      }
+
+      if (!member.userId) {
+        throw new Error('This member profile is missing account details.')
+      }
+
+      let brandId: string | null = null
+      let organizerId: string | null = null
+
+      if (senderType === 'brand' && member.type === 'organizer') {
+        const [brandRecord, organizerRecord] = await Promise.all([
+          getBrandByUserId(currentUser.id),
+          getOrganizerByUserId(member.userId)
+        ])
+        brandId = brandRecord?.id ?? null
+        organizerId = organizerRecord?.id ?? null
+      } else if (senderType === 'organizer' && member.type === 'brand') {
+        const [organizerRecord, brandRecord] = await Promise.all([
+          getOrganizerByUserId(currentUser.id),
+          getBrandByUserId(member.userId)
+        ])
+        organizerId = organizerRecord?.id ?? null
+        brandId = brandRecord?.id ?? null
+      } else {
+        throw new Error(
+          'Offers currently require a conversation between a brand and an organizer.'
+        )
+      }
+
+      if (!brandId || !organizerId) {
+        throw new Error(
+          'We need complete brand and organizer profiles before starting a conversation.'
+        )
+      }
+
+      const conversation = await getOrCreateConversation(brandId, organizerId)
+
+      const selectedItemName = itemOptions.find(
+        (item) => item.id === formData.targetItem
+      )?.name
+
+      const composedContent = [
+        `${formData.name} (${formData.email}${
+          formData.phone ? ` • ${formData.phone}` : ''
+        })`,
+        selectedItemName ? `Focus: ${selectedItemName}` : null,
+        formData.message
+      ]
+        .filter(Boolean)
+        .join('\n\n')
+
+      await sendMessage(
+        conversation.id,
+        currentUser.id,
+        senderType,
+        composedContent
+      )
+
       setIsComplete(true)
-      // In a real implementation, this would send the data to a backend API
-      console.log('Submitting interest/offer:', {
-        from: currentUser?.id,
-        to: member.id,
-        fromType: currentUser?.type,
-        toType: member.type,
-        ...formData,
-        timestamp: new Date()
-      })
-    }, 1500)
+    } catch (error) {
+      console.error('Failed to send offer message:', error)
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to send your message. Please try again.'
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
   const nextStep = () => setStep(step + 1)
   const prevStep = () => setStep(step - 1)
@@ -66,31 +251,6 @@ export function InterestOfferWizard({
     }
     return 'Connect'
   }
-  // Sample products/events for the dropdown
-  // In a real implementation, these would come from the user's profile
-  const sampleItems = [
-    {
-      id: '1',
-      name:
-        currentUser?.type === 'brand'
-          ? 'Organic Energy Drink'
-          : 'Summer Festival 2023'
-    },
-    {
-      id: '2',
-      name:
-        currentUser?.type === 'brand'
-          ? 'Protein Bars'
-          : 'Winter Conference 2023'
-    },
-    {
-      id: '3',
-      name:
-        currentUser?.type === 'brand'
-          ? 'Merchandise Pack'
-          : 'Monthly Networking Event'
-    }
-  ]
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4'>
       <div className='bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto relative'>
@@ -205,10 +365,18 @@ export function InterestOfferWizard({
                     required
                     value={formData.targetItem}
                     onChange={handleChange}
-                    options={sampleItems.map((item) => ({
+                    options={itemOptions.map((item) => ({
                       value: item.id,
                       label: item.name
                     }))}
+                    disabled={itemOptionsLoading}
+                    helpText={
+                      itemOptionsLoading
+                        ? 'Loading from Supabase...'
+                        : currentUser?.type === 'brand'
+                        ? 'Products pulled from your sponsorship catalog'
+                        : 'Events pulled from your organizer profile'
+                    }
                   />
                   <div className='flex justify-between mt-6'>
                     <Button variant='outline' onClick={prevStep}>
@@ -285,7 +453,7 @@ export function InterestOfferWizard({
                         </span>{' '}
                         <span className='text-gray-900'>
                           {
-                            sampleItems.find(
+                            itemOptions.find(
                               (item) => item.id === formData.targetItem
                             )?.name
                           }
@@ -299,6 +467,11 @@ export function InterestOfferWizard({
                       </div>
                     </div>
                   </div>
+                  {submitError && (
+                    <div className='text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3'>
+                      {submitError}
+                    </div>
+                  )}
                   <div className='flex justify-between'>
                     <Button variant='outline' onClick={prevStep}>
                       Back
