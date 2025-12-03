@@ -48,12 +48,12 @@ export function Navbar() {
         icon: <UsersIcon className='h-4 w-4 mr-1' />
       },
       {
-        label: 'For Brands',
+        label: 'Brands',
         path: '/brands',
         icon: <PackageIcon className='h-4 w-4 mr-1' />
       },
       {
-        label: 'For Organizers',
+        label: 'Organizers',
         path: '/organizers',
         icon: <CalendarIcon className='h-4 w-4 mr-1' />
       }
@@ -68,11 +68,11 @@ export function Navbar() {
         path: '/community'
       },
       {
-        label: 'For Brands',
+        label: 'Brands',
         path: '/brands'
       },
       {
-        label: 'For Organizers',
+        label: 'Organizers',
         path: '/organizers'
       },
       {
