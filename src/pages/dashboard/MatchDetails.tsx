@@ -137,7 +137,7 @@ export function MatchDetails() {
       setMessages(refreshedMessages)
     } catch (error) {
       console.error('Failed to send message:', error)
-      setMessageError('Kunde inte skicka meddelandet. Försök igen.')
+      setMessageError('Could not send the message. Please try again.')
     } finally {
       setSendingMessage(false)
     }
@@ -150,7 +150,7 @@ export function MatchDetails() {
     return (
       <DashboardLayout userType={userType}>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-gray-500'>Laddar...</div>
+          <div className='text-gray-500'>Loading...</div>
         </div>
       </DashboardLayout>
     )
@@ -160,18 +160,18 @@ export function MatchDetails() {
       <DashboardLayout userType={userType}>
         <div className='bg-white rounded-lg shadow-sm p-6'>
           <h2 className='text-xl font-bold text-gray-900 mb-2'>
-            Match hittades inte
+            Match not found
           </h2>
           <p className='text-gray-600 mb-4'>
-            Matchen du letar efter finns inte eller så har du inte behörighet
-            att visa den.
+            The match you are looking for either does not exist or you don't
+            have permission to view it.
           </p>
           <button
             onClick={() => navigate(-1)}
             className='flex items-center text-indigo-600 hover:text-indigo-800'
           >
             <ArrowLeftIcon className='h-4 w-4 mr-1' />
-            Gå tillbaka
+            Go back
           </button>
         </div>
       </DashboardLayout>
@@ -185,7 +185,7 @@ export function MatchDetails() {
           className='flex items-center text-indigo-600 hover:text-indigo-800'
         >
           <ArrowLeftIcon className='h-4 w-4 mr-1' />
-          Tillbaka till matchningar
+          Back to matches
         </button>
       </div>
       <div className='bg-white rounded-lg shadow-sm p-6 mb-6'>
@@ -215,14 +215,14 @@ export function MatchDetails() {
               <div className='ml-3'>
                 <h3 className='text-sm font-medium text-yellow-800'>
                   {userType === 'brand'
-                    ? 'Ny sponsringsmöjlighet'
-                    : 'Ny sponsormatch'}
+                    ? 'New sponsorship opportunity'
+                    : 'New sponsor match'}
                 </h3>
                 <div className='mt-2 text-sm text-yellow-700'>
                   <p>
                     {userType === 'brand'
-                      ? 'Du har matchats med detta event baserat på dina preferenser och krav.'
-                      : 'Du har matchats med detta varumärke baserat på dina eventdetaljer och deras sponsringskriterier.'}
+                      ? 'You have been matched with this event based on your preferences and requirements.'
+                      : 'You have been matched with this brand based on your event details and their sponsorship criteria.'}
                   </p>
                 </div>
                 <div className='mt-4'>
@@ -233,7 +233,7 @@ export function MatchDetails() {
                       className='flex items-center'
                     >
                       <CheckIcon className='h-4 w-4 mr-1' />
-                      Acceptera match
+                      Accept match
                     </Button>
                     <Button
                       variant='danger'
@@ -241,7 +241,7 @@ export function MatchDetails() {
                       className='flex items-center'
                     >
                       <XIcon className='h-4 w-4 mr-1' />
-                      Avböj
+                      Decline
                     </Button>
                   </div>
                 </div>
@@ -257,13 +257,13 @@ export function MatchDetails() {
               </div>
               <div className='ml-3'>
                 <h3 className='text-sm font-medium text-green-800'>
-                  Match accepterad
+                  Match accepted
                 </h3>
                 <div className='mt-2 text-sm text-green-700'>
                   <p>
                     {userType === 'brand'
-                      ? 'Du har accepterat denna sponsringsmöjlighet. Använd meddelandesystemet nedan för att diskutera detaljer.'
-                      : 'Detta varumärke har bekräftats som sponsor för ditt event. Använd meddelandesystemet nedan för att diskutera detaljer.'}
+                      ? 'You have accepted this sponsorship opportunity. Use the messaging system below to discuss details.'
+                      : 'This brand has been confirmed as a sponsor for your event. Use the messaging system below to discuss details.'}
                   </p>
                 </div>
                 {!contract && match.status === 'accepted' && (
@@ -274,7 +274,7 @@ export function MatchDetails() {
                       className='flex items-center'
                     >
                       <FileTextIcon className='h-4 w-4 mr-1' />
-                      Skapa sponsringsavtal
+                      Create sponsorship agreement
                     </Button>
                   </div>
                 )}
@@ -290,13 +290,13 @@ export function MatchDetails() {
               </div>
               <div className='ml-3'>
                 <h3 className='text-sm font-medium text-red-800'>
-                  Match avböjd
+                  Match declined
                 </h3>
                 <div className='mt-2 text-sm text-red-700'>
                   <p>
                     {userType === 'brand'
-                      ? 'Du har avböjt denna sponsringsmöjlighet.'
-                      : 'Detta varumärke har avböjt att sponsra ditt event.'}
+                      ? 'You have declined this sponsorship opportunity.'
+                      : 'This brand has declined to sponsor your event.'}
                   </p>
                 </div>
               </div>
@@ -306,7 +306,7 @@ export function MatchDetails() {
         {/* Match reasons */}
         <div className='mb-6'>
           <h2 className='text-lg font-semibold text-gray-900 mb-3'>
-            Varför ni matchade
+            Why you matched
           </h2>
           <ul className='space-y-2'>
             {match.matchReasons.map((reason, index) => (
@@ -324,34 +324,36 @@ export function MatchDetails() {
           {userType === 'brand' ? (
             <div>
               <h2 className='text-lg font-semibold text-gray-900 mb-3'>
-                Eventdetaljer
+                Event details
               </h2>
               <div className='space-y-4'>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Eventnamn
+                    Event name
                   </h3>
                   <p className='text-gray-900'>{organizer.eventName}</p>
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Eventbeskrivning
+                    Event description
                   </h3>
                   <p className='text-gray-900'>{organizer.elevatorPitch}</p>
                 </div>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-500'>Datum</h3>
+                  <h3 className='text-sm font-medium text-gray-500'>Date</h3>
                   <p className='text-gray-900'>
                     {new Date(organizer.eventDate).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-500'>Plats</h3>
+                  <h3 className='text-sm font-medium text-gray-500'>
+                    Location
+                  </h3>
                   <p className='text-gray-900'>{organizer.location}</p>
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Publikstorlek
+                    Audience size
                   </h3>
                   <p className='text-gray-900'>
                     {organizer.attendeeCount === 'under_100'
@@ -359,17 +361,17 @@ export function MatchDetails() {
                       : organizer.attendeeCount === '100_500'
                       ? '100 - 500'
                       : organizer.attendeeCount === '500_1000'
-                      ? '500 - 1 000'
+                      ? '500 - 1,000'
                       : organizer.attendeeCount === '1000_5000'
-                      ? '1 000 - 5 000'
+                      ? '1,000 - 5,000'
                       : organizer.attendeeCount === '5000_plus'
-                      ? '5 000+'
-                      : 'Ej angivet'}
+                      ? '5,000+'
+                      : 'Not specified'}
                   </p>
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Publikbeskrivning
+                    Audience description
                   </h3>
                   <p className='text-gray-900'>
                     {organizer.audienceDescription}
@@ -388,7 +390,7 @@ export function MatchDetails() {
                   </p>
                 </div>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-500'>Adress</h3>
+                  <h3 className='text-sm font-medium text-gray-500'>Address</h3>
                   <p className='text-gray-900'>
                     {organizer.address}
                     <br />
@@ -400,64 +402,66 @@ export function MatchDetails() {
           ) : (
             <div>
               <h2 className='text-lg font-semibold text-gray-900 mb-3'>
-                Varumärkesdetaljer
+                Brand details
               </h2>
               <div className='space-y-4'>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Företagsnamn
+                    Company name
                   </h3>
                   <p className='text-gray-900'>{brand.companyName}</p>
                 </div>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-500'>Produkt</h3>
+                  <h3 className='text-sm font-medium text-gray-500'>Product</h3>
                   <p className='text-gray-900'>{brand.productName}</p>
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Produktbeskrivning
+                    Product description
                   </h3>
                   <p className='text-gray-900'>{brand.productDescription}</p>
                 </div>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-500'>Bransch</h3>
+                  <h3 className='text-sm font-medium text-gray-500'>
+                    Industry
+                  </h3>
                   <p className='text-gray-900'>
                     {brand.industry === 'food_beverage'
-                      ? 'Livsmedel & Dryck'
+                      ? 'Food & Beverage'
                       : brand.industry === 'beauty_cosmetics'
-                      ? 'Skönhet & Kosmetika'
+                      ? 'Beauty & Cosmetics'
                       : brand.industry === 'health_wellness'
-                      ? 'Hälsa & Välmående'
+                      ? 'Health & Wellness'
                       : brand.industry === 'tech'
-                      ? 'Teknik'
+                      ? 'Tech'
                       : brand.industry === 'fashion'
-                      ? 'Mode & Kläder'
+                      ? 'Fashion & Apparel'
                       : brand.industry === 'home_goods'
-                      ? 'Hem & Inredning'
+                      ? 'Home & Interior'
                       : brand.industry === 'sports_fitness'
-                      ? 'Sport & Fitness'
+                      ? 'Sports & Fitness'
                       : brand.industry === 'entertainment'
-                      ? 'Underhållning'
-                      : 'Annat'}
+                      ? 'Entertainment'
+                      : 'Other'}
                   </p>
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Sponsringstyp
+                    Sponsorship type
                   </h3>
                   <p className='text-gray-900'>
                     {brand.sponsorshipType
                       .map((type: string) =>
                         type === 'product_sampling'
-                          ? 'Produktprovning'
+                          ? 'Product sampling'
                           : type === 'financial_sponsorship'
-                          ? 'Finansiell sponsring'
+                          ? 'Financial sponsorship'
                           : type === 'in_kind_goods'
-                          ? 'Varor'
+                          ? 'Goods'
                           : type === 'merchandise'
                           ? 'Merchandise'
                           : type === 'experience'
-                          ? 'Varumärkesupplevelse'
+                          ? 'Brand experience'
                           : type
                       )
                       .join(', ')}
@@ -465,7 +469,7 @@ export function MatchDetails() {
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Kontaktinformation
+                    Contact information
                   </h3>
                   <p className='text-gray-900'>
                     {brand.contactName}
@@ -476,7 +480,7 @@ export function MatchDetails() {
                   </p>
                 </div>
                 <div>
-                  <h3 className='text-sm font-medium text-gray-500'>Adress</h3>
+                  <h3 className='text-sm font-medium text-gray-500'>Address</h3>
                   <p className='text-gray-900'>
                     {brand.address}
                     <br />
@@ -488,35 +492,35 @@ export function MatchDetails() {
           )}
           <div>
             <h2 className='text-lg font-semibold text-gray-900 mb-3'>
-              {userType === 'brand' ? 'Vad de behöver' : 'Vad de erbjuder'}
+              {userType === 'brand' ? 'What they need' : 'What they offer'}
             </h2>
             {userType === 'brand' ? (
               <div className='space-y-4'>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Sponsringsbehov
+                    Sponsorship needs
                   </h3>
                   <p className='text-gray-900'>{organizer.sponsorshipNeeds}</p>
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Erbjudanden för sponsorer
+                    Sponsor offerings
                   </h3>
                   <p className='text-gray-900'>
                     {organizer.offeringTypes
                       .map((type: string) =>
                         type === 'brand_visibility'
-                          ? 'Varumärkessynlighet'
+                          ? 'Brand visibility'
                           : type === 'content_creation'
-                          ? 'Innehållsskapande'
+                          ? 'Content creation'
                           : type === 'lead_generation'
-                          ? 'Leadgenerering'
+                          ? 'Lead generation'
                           : type === 'product_sampling'
-                          ? 'Produktprovning'
+                          ? 'Product sampling'
                           : type === 'product_feedback'
-                          ? 'Produktfeedback'
+                          ? 'Product feedback'
                           : type === 'merchandise_sales'
-                          ? 'Merchandise-försäljning'
+                          ? 'Merchandise sales'
                           : type
                       )
                       .join(', ')}
@@ -525,7 +529,7 @@ export function MatchDetails() {
                 {organizer.brandVisibility && (
                   <div>
                     <h3 className='text-sm font-medium text-gray-500'>
-                      Detaljer om varumärkessynlighet
+                      Brand visibility details
                     </h3>
                     <p className='text-gray-900'>{organizer.brandVisibility}</p>
                   </div>
@@ -533,7 +537,7 @@ export function MatchDetails() {
                 {organizer.bonusValueDetails && (
                   <div>
                     <h3 className='text-sm font-medium text-gray-500'>
-                      Ytterligare värde
+                      Additional value
                     </h3>
                     <p className='text-gray-900'>
                       {organizer.bonusValueDetails}
@@ -545,40 +549,40 @@ export function MatchDetails() {
               <div className='space-y-4'>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Marknadsföringsmål
+                    Marketing goals
                   </h3>
                   <p className='text-gray-900'>{brand.marketingGoals}</p>
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Budgetintervall
+                    Budget range
                   </h3>
                   <p className='text-gray-900'>
                     {brand.budget === 'under_10000'
-                      ? 'Under 10 000 kr'
+                      ? 'Under 10,000 SEK'
                       : brand.budget === '10000_50000'
-                      ? '10 000 - 50 000 kr'
+                      ? '10,000 - 50,000 SEK'
                       : brand.budget === '50000_100000'
-                      ? '50 000 - 100 000 kr'
+                      ? '50,000 - 100,000 SEK'
                       : brand.budget === '100000_250000'
-                      ? '100 000 - 250 000 kr'
+                      ? '100,000 - 250,000 SEK'
                       : brand.budget === '250000_plus'
-                      ? '250 000 kr+'
-                      : 'Ej angivet'}
+                      ? '250,000 SEK+'
+                      : 'Not specified'}
                   </p>
                 </div>
                 <div>
                   <h3 className='text-sm font-medium text-gray-500'>
-                    Tillgänglig kvantitet
+                    Available quantity
                   </h3>
                   <p className='text-gray-900'>
-                    {brand.productQuantity || 'Ej angivet'}
+                    {brand.productQuantity || 'Not specified'}
                   </p>
                 </div>
                 {brand.hasTestPanels === 'yes' && (
                   <div>
                     <h3 className='text-sm font-medium text-gray-500'>
-                      Testpaneler & Samplingaktiviteter
+                      Test panels & sampling activities
                     </h3>
                     <p className='text-gray-900'>{brand.testPanelDetails}</p>
                   </div>
@@ -609,17 +613,17 @@ export function MatchDetails() {
       <div className='bg-white rounded-lg shadow-sm p-6'>
         <div className='flex items-center mb-4'>
           <MessageSquareIcon className='h-5 w-5 text-indigo-600 mr-2' />
-          <h2 className='text-lg font-semibold text-gray-900'>Meddelanden</h2>
+          <h2 className='text-lg font-semibold text-gray-900'>Messages</h2>
         </div>
         <div className='border rounded-lg mb-4'>
           <div className='h-64 overflow-y-auto p-4 space-y-3'>
             {messagesLoading ? (
               <div className='text-center text-gray-500 py-8'>
-                Laddar meddelanden...
+                Loading messages...
               </div>
             ) : messages.length === 0 ? (
               <div className='text-center text-gray-500 py-8'>
-                Inga meddelanden än. Starta konversationen!
+                No messages yet. Start the conversation!
               </div>
             ) : (
               messages.map((message) => (
@@ -642,7 +646,7 @@ export function MatchDetails() {
                   >
                     {message.senderType === 'ai' && (
                       <div className='text-xs font-medium text-gray-500 mb-1'>
-                        AI Assistent
+                        AI Assistant
                       </div>
                     )}
                     <p className='text-sm'>{message.content}</p>
@@ -660,7 +664,7 @@ export function MatchDetails() {
           <form onSubmit={handleSendMessage} className='border-t p-3 flex'>
             <input
               type='text'
-              placeholder='Skriv ett meddelande...'
+              placeholder='Type a message...'
               className='flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
@@ -671,10 +675,12 @@ export function MatchDetails() {
               variant='primary'
               className='ml-2'
               disabled={
-                !newMessage.trim() || match.status === 'rejected' || sendingMessage
+                !newMessage.trim() ||
+                match.status === 'rejected' ||
+                sendingMessage
               }
             >
-              {sendingMessage ? 'Skickar...' : 'Skicka'}
+              {sendingMessage ? 'Sending...' : 'Send'}
             </Button>
           </form>
           {messageError && (
@@ -683,8 +689,8 @@ export function MatchDetails() {
         </div>
         <div className='text-xs text-gray-500'>
           <p>
-            Behöver du hjälp med din konversation? Vår AI-assistent kommer att
-            föreslå hjälpsamma svar när du ställer frågor.
+            Need help with your conversation? Our AI assistant will suggest
+            helpful replies whenever you ask questions.
           </p>
         </div>
       </div>
