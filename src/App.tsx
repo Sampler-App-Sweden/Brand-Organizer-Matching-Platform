@@ -11,19 +11,20 @@ import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
 import { CommunityMemberDetail, CommunityPage } from './pages/community'
-import { CommunityRegistration } from './pages/register/CommunityRegistration'
 import { BrandDashboard, OrganizerDashboard } from './pages/dashboard'
 import { EditProfilePage } from './pages/dashboard/EditProfilePage'
-import { InspirationBoardPage } from './pages/InspirationBoardPage'
 import { MatchDetails } from './pages/dashboard/MatchDetails'
 import { MatchesPage } from './pages/dashboard/MatchesPage'
 import { MessagesPage } from './pages/dashboard/MessagesPage'
 import { SavedItemsPage } from './pages/dashboard/SavedItemsPage'
 import { Home } from './pages/Home'
+import { InspirationBoardPage } from './pages/InspirationBoardPage'
 import { Login } from './pages/Login'
 import { LoginTroubleshooting } from './pages/LoginTroubleshooting'
 import { OrganizerForm } from './pages/OrganizerForm'
 import { OrganizersDirectoryPage } from './pages/OrganizersDirectoryPage'
+import { ProfileDetailPage } from './pages/ProfileDetailPage'
+import { CommunityRegistration } from './pages/register/CommunityRegistration'
 import { Register } from './pages/register/Register'
 import { initializeCollaborations } from './services/collaborationService'
 import { initEmailJS } from './services/emailService'
@@ -49,6 +50,7 @@ const AppRoutes = () => {
       {/* Directory pages */}
       <Route path='/brands' element={<BrandsDirectoryPage />} />
       <Route path='/organizers' element={<OrganizersDirectoryPage />} />
+      <Route path='/profiles/:profileId' element={<ProfileDetailPage />} />
       {/* Community routes */}
       <Route path='/community' element={<CommunityPage />} />
       <Route path='/community/:memberId' element={<CommunityMemberDetail />} />

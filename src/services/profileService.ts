@@ -181,6 +181,23 @@ export async function getProfiles(): Promise<ProfileOverview[]> {
   return rows.map(mapRowToProfile)
 }
 
+export async function getProfileOverviewById(
+  id: string
+): Promise<ProfileOverview | null> {
+  const { data, error } = await supabase
+    .from('profile_overview')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle<ProfileOverviewRow>()
+
+  if (error) {
+    console.error('Error fetching profile overview:', error)
+    throw new Error(`Error fetching profile: ${error.message}`)
+  }
+
+  return data ? mapRowToProfile(data) : null
+}
+
 // Get profile by ID
 export async function getProfileById(id: string) {
   const { data, error } = await supabase
