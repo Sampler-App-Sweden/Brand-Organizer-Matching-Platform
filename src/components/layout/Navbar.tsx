@@ -42,7 +42,7 @@ export function Navbar() {
   const marketingLinks = useMemo(
     () => [
       {
-        label: 'Our Community',
+        label: 'Community',
         path: '/community',
         icon: <UsersIcon className='h-4 w-4 mr-1' />
       },
@@ -63,7 +63,7 @@ export function Navbar() {
   const dashboardLinks = useMemo(
     () => [
       {
-        label: 'Our Community',
+        label: 'Community',
         path: '/community'
       },
       {

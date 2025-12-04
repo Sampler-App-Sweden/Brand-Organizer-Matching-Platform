@@ -1,20 +1,16 @@
-import { getMemberMatches } from '../../services/communityService'
-import { CommunityMember } from '../../types/community'
+import { ProfileOverview } from '../../services/profileService'
 import { DirectoryCard } from './DirectoryCard'
 
 interface DirectoryGridProps {
-  members: CommunityMember[]
+  profiles: ProfileOverview[]
 }
-export function DirectoryGrid({ members }: DirectoryGridProps) {
+
+export function DirectoryGrid({ profiles }: DirectoryGridProps) {
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
-      {members.map((member) => {
-        // Get mock matches for this member type until real data is wired up
-        const matches = getMemberMatches(member.id, member.type)
-        return (
-          <DirectoryCard key={member.id} member={member} matches={matches} />
-        )
-      })}
+      {profiles.map((profile) => (
+        <DirectoryCard key={profile.id} profile={profile} />
+      ))}
     </div>
   )
 }

@@ -2,27 +2,13 @@ import { FilterIcon, PackageIcon, SearchIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Layout } from '../components/layout'
-import { getProfiles } from '../services/profileService'
+import { getProfiles, ProfileOverview } from '../services/profileService'
 
-interface Profile {
-  id: string
-  role: 'Brand' | 'Organizer'
-  name: string
-  logoURL?: string
-  description: string
-  whatTheySeek: {
-    sponsorshipTypes: string[]
-    budgetRange: string
-    quantity?: number
-    eventTypes?: string[]
-    audienceTags?: string[]
-    notes?: string
-  }
-  created_at: string
-}
 export function ProfilesExplorer() {
-  const [profiles, setProfiles] = useState<Profile[]>([])
-  const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([])
+  const [profiles, setProfiles] = useState<ProfileOverview[]>([])
+  const [filteredProfiles, setFilteredProfiles] = useState<ProfileOverview[]>(
+    []
+  )
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | 'Brand' | 'Organizer'>(
@@ -62,18 +48,27 @@ export function ProfilesExplorer() {
     // Apply search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
-      result = result.filter(
-        (profile) =>
-          profile.name.toLowerCase().includes(term) ||
-          profile.description.toLowerCase().includes(term) ||
-          profile.whatTheySeek?.notes?.toLowerCase().includes(term) ||
+      result = result.filter((profile) => {
+        const descriptionMatch =
+          profile.description?.toLowerCase().includes(term) ?? false
+        const notesMatch =
+          profile.whatTheySeek?.notes?.toLowerCase().includes(term) ?? false
+        const audienceMatch =
           profile.whatTheySeek?.audienceTags?.some((tag) =>
             tag.toLowerCase().includes(term)
-          ) ||
+          ) ?? false
+        const eventMatch =
           profile.whatTheySeek?.eventTypes?.some((type) =>
             type.toLowerCase().includes(term)
-          )
-      )
+          ) ?? false
+        return (
+          profile.name.toLowerCase().includes(term) ||
+          descriptionMatch ||
+          notesMatch ||
+          audienceMatch ||
+          eventMatch
+        )
+      })
     }
     setFilteredProfiles(result)
   }, [profiles, roleFilter, sponsorshipFilter, searchTerm])
@@ -235,7 +230,7 @@ export function ProfilesExplorer() {
                   </div>
                   {/* Description */}
                   <p className='text-sm text-gray-600 mb-4 line-clamp-2'>
-                    {profile.description}
+                    {profile.description || 'No description provided yet.'}
                   </p>
                   {/* What they seek */}
                   <div>
@@ -248,14 +243,20 @@ export function ProfilesExplorer() {
                         Sponsorship Types:
                       </span>
                       <div className='flex flex-wrap gap-1'>
-                        {profile.whatTheySeek.sponsorshipTypes?.map((type) => (
-                          <span
-                            key={type}
-                            className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800'
-                          >
-                            {type}
+                        {profile.whatTheySeek.sponsorshipTypes?.length ? (
+                          profile.whatTheySeek.sponsorshipTypes.map((type) => (
+                            <span
+                              key={type}
+                              className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800'
+                            >
+                              {type}
+                            </span>
+                          ))
+                        ) : (
+                          <span className='text-xs text-gray-400'>
+                            No preferences shared.
                           </span>
-                        ))}
+                        )}
                       </div>
                     </div>
                     {/* Budget range */}
@@ -264,7 +265,7 @@ export function ProfilesExplorer() {
                         Budget Range:
                       </span>
                       <span className='text-sm text-gray-900'>
-                        {profile.whatTheySeek.budgetRange}
+                        {profile.whatTheySeek.budgetRange || 'Not specified'}
                       </span>
                     </div>
                     {/* Tags */}

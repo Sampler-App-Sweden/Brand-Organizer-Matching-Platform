@@ -1,6 +1,5 @@
 import {
   BellIcon,
-  BookmarkIcon,
   HandshakeIcon,
   HomeIcon,
   Menu as MenuIcon,
@@ -27,17 +26,17 @@ export function DashboardNavbar() {
 
   const mainNavItems = [
     {
-      label: 'Our Community',
+      label: 'Community',
       icon: <UsersIcon className='h-5 w-5' />,
       path: '/community'
     },
     {
-      label: 'For Brands',
+      label: 'Brands',
       icon: <HandshakeIcon className='h-5 w-5' />,
       path: '/for-brands'
     },
     {
-      label: 'For Organizers',
+      label: 'Organizers',
       icon: <HomeIcon className='h-5 w-5' />,
       path: '/for-organizers'
     },

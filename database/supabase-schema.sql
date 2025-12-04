@@ -422,6 +422,72 @@ CREATE POLICY "Allow users to update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
+-- Enriched profiles view for discovery surfaces
+DROP VIEW IF EXISTS public.profile_overview;
+CREATE VIEW public.profile_overview
+WITH (security_invoker = true)
+AS
+WITH organizer_event_details AS (
+  SELECT DISTINCT ON (e.organizer_id)
+    e.organizer_id,
+    e.event_type,
+    e.audience_description,
+    e.sponsorship_needs,
+    e.financial_sponsorship_amount,
+    e.offering_types
+  FROM public.events e
+  ORDER BY e.organizer_id, e.created_at DESC NULLS LAST
+)
+SELECT
+  p.id,
+  p.role,
+  p.name,
+  p.email,
+  p.logo_url,
+  p.description,
+  p.created_at,
+  p.updated_at,
+  CASE
+    WHEN p.role = 'Brand' THEN jsonb_build_object(
+      'sponsorshipTypes', COALESCE(to_jsonb(b.sponsorship_type), '[]'::jsonb),
+      'budgetRange', b.budget,
+      'quantity', b.product_quantity,
+      'eventTypes', '[]'::jsonb,
+      'audienceTags', to_jsonb(
+        CASE
+          WHEN b.target_audience IS NULL OR b.target_audience = '' THEN ARRAY[]::text[]
+          ELSE regexp_split_to_array(b.target_audience, '\\s*,\\s*')
+        END
+      ),
+      'notes', b.marketing_goals
+    )
+    WHEN p.role = 'Organizer' THEN jsonb_build_object(
+      'sponsorshipTypes', COALESCE(to_jsonb(od.offering_types), '[]'::jsonb),
+      'budgetRange', od.financial_sponsorship_amount,
+      'quantity', NULL,
+      'eventTypes', to_jsonb(
+        CASE
+          WHEN od.event_type IS NULL THEN ARRAY[]::text[]
+          ELSE ARRAY[od.event_type]
+        END
+      ),
+      'audienceTags', to_jsonb(
+        CASE
+          WHEN od.audience_description IS NULL OR od.audience_description = '' THEN ARRAY[]::text[]
+          ELSE regexp_split_to_array(od.audience_description, '\\s*,\\s*')
+        END
+      ),
+      'notes', od.sponsorship_needs
+    )
+    ELSE NULL
+  END AS what_they_seek
+FROM public.profiles p
+LEFT JOIN public.brands b ON b.user_id = p.id
+LEFT JOIN public.organizers o ON o.user_id = p.id
+LEFT JOIN organizer_event_details od ON od.organizer_id = o.id;
+
+GRANT SELECT ON public.profile_overview TO anon, authenticated;
+
 -- Brands policies
 DROP POLICY IF EXISTS "Allow public to read all brands" ON public.brands;
 CREATE POLICY "Allow public to read all brands"

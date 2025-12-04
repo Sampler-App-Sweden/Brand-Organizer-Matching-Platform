@@ -15,6 +15,76 @@ export interface ProfileData {
   }
 }
 
+export interface ProfileOverview {
+  id: string
+  role: 'Brand' | 'Organizer'
+  name: string
+  email: string
+  logoURL?: string | null
+  description?: string | null
+  created_at: string
+  updated_at: string
+  whatTheySeek: {
+    sponsorshipTypes: string[]
+    budgetRange?: string | null
+    quantity?: string | number | null
+    eventTypes?: string[]
+    audienceTags?: string[]
+    notes?: string | null
+  }
+}
+
+type ProfileOverviewRow = {
+  id: string
+  role: 'Brand' | 'Organizer'
+  name: string
+  email: string
+  logo_url?: string | null
+  description?: string | null
+  created_at: string
+  updated_at: string
+  what_they_seek?: Record<string, unknown> | null
+}
+
+const toStringArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return []
+  }
+  return value
+    .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+    .filter((entry): entry is string => Boolean(entry))
+}
+
+function normalizeWhatTheySeek(
+  row: ProfileOverviewRow
+): ProfileOverview['whatTheySeek'] {
+  const raw = row.what_they_seek ?? {}
+  const payload = raw as Record<string, unknown>
+  return {
+    sponsorshipTypes: toStringArray(payload.sponsorshipTypes),
+    budgetRange:
+      typeof payload.budgetRange === 'string'
+        ? (payload.budgetRange as string)
+        : (payload.budgetRange as string | null | undefined) ?? null,
+    quantity: (payload.quantity as string | number | null | undefined) ?? null,
+    eventTypes: toStringArray(payload.eventTypes),
+    audienceTags: toStringArray(payload.audienceTags),
+    notes: typeof payload.notes === 'string' ? (payload.notes as string) : null
+  }
+}
+
+const mapRowToProfile = (row: ProfileOverviewRow): ProfileOverview => ({
+  id: row.id,
+  role: row.role,
+  name: row.name,
+  email: row.email,
+  logoURL: row.logo_url,
+  description: row.description,
+  created_at: row.created_at,
+  updated_at: row.updated_at,
+  whatTheySeek: normalizeWhatTheySeek(row)
+})
+
 // Create a new profile
 export async function createProfile(profileData: ProfileData) {
   // First, get the current user
@@ -101,13 +171,14 @@ export async function createProfile(profileData: ProfileData) {
 }
 
 // Get all profiles
-export async function getProfiles() {
-  const { data, error } = await supabase.from('profiles').select('*')
+export async function getProfiles(): Promise<ProfileOverview[]> {
+  const { data, error } = await supabase.from('profile_overview').select('*')
   if (error) {
     console.error('Error fetching profiles:', error)
     throw new Error(`Error fetching profiles: ${error.message}`)
   }
-  return data || []
+  const rows = (data as ProfileOverviewRow[]) || []
+  return rows.map(mapRowToProfile)
 }
 
 // Get profile by ID

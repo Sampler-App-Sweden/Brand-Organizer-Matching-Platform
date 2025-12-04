@@ -3,37 +3,53 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { DirectoryFilters } from '../components/directory/DirectoryFilters'
+import { DirectoryFilterParams } from '../components/directory/directoryFilterTypes'
 import { DirectoryGrid } from '../components/directory/DirectoryGrid'
 import { Pagination } from '../components/directory/Pagination'
+import { filterProfilesByRole } from '../components/directory/profileDirectoryUtils'
 import { Layout } from '../components/layout'
-import { getAllCommunityMembers } from '../services/communityService'
-import { CommunityMember, CommunityQueryParams } from '../types/community'
+import { getProfiles, ProfileOverview } from '../services/profileService'
 
 export function OrganizersDirectoryPage() {
-  const [members, setMembers] = useState<CommunityMember[]>([])
+  const [profiles, setProfiles] = useState<ProfileOverview[]>([])
+  const [visibleProfiles, setVisibleProfiles] = useState<ProfileOverview[]>([])
   const [loading, setLoading] = useState(true)
   const [totalPages, setTotalPages] = useState(1)
-  const [queryParams, setQueryParams] = useState<CommunityQueryParams>({
+  const [queryParams, setQueryParams] = useState<DirectoryFilterParams>({
     page: 1,
     limit: 12,
     type: 'organizer'
   })
+
   useEffect(() => {
-    const fetchMembers = async () => {
+    const fetchProfiles = async () => {
       setLoading(true)
       try {
-        const { data, totalPages } = await getAllCommunityMembers(queryParams)
-        setMembers(data)
-        setTotalPages(totalPages)
+        const data = await getProfiles()
+        setProfiles(data)
       } catch (error) {
-        console.error('Failed to fetch organizers:', error)
+        console.error('Failed to fetch profiles:', error)
       } finally {
         setLoading(false)
       }
     }
-    fetchMembers()
-  }, [queryParams])
-  const handleFilterChange = (newParams: Partial<CommunityQueryParams>) => {
+    fetchProfiles()
+  }, [])
+
+  useEffect(() => {
+    const limit = queryParams.limit ?? 12
+    const filtered = filterProfilesByRole(
+      profiles,
+      queryParams,
+      'Organizer'
+    )
+    setTotalPages(Math.max(1, Math.ceil(filtered.length / limit)))
+    const page = queryParams.page ?? 1
+    const start = (page - 1) * limit
+    setVisibleProfiles(filtered.slice(start, start + limit))
+  }, [profiles, queryParams])
+
+  const handleFilterChange = (newParams: Partial<DirectoryFilterParams>) => {
     setQueryParams((prev) => ({
       ...prev,
       ...newParams,
@@ -101,7 +117,7 @@ export function OrganizersDirectoryPage() {
                   <div className='flex justify-center items-center h-64'>
                     <div className='inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600'></div>
                   </div>
-                ) : members.length === 0 ? (
+                ) : visibleProfiles.length === 0 ? (
                   <div className='bg-gray-50 rounded-lg p-8 text-center'>
                     <h3 className='text-xl font-medium text-gray-900 mb-2'>
                       No organizers found
@@ -112,7 +128,7 @@ export function OrganizersDirectoryPage() {
                   </div>
                 ) : (
                   <>
-                    <DirectoryGrid members={members} />
+                    <DirectoryGrid profiles={visibleProfiles} />
                     <div className='mt-8'>
                       <Pagination
                         currentPage={queryParams.page || 1}

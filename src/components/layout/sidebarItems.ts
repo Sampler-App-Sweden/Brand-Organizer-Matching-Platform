@@ -1,12 +1,4 @@
-import {
-  Bookmark,
-  HandshakeIcon,
-  HomeIcon,
-  LogOut,
-  MessageSquareIcon,
-  Package,
-  UsersIcon
-} from 'lucide-react'
+import { Bookmark, HandshakeIcon, HomeIcon, LogOut, MessageSquareIcon, Package, UsersIcon } from 'lucide-react'
 import { createElement, ReactElement } from 'react'
 
 export type SidebarAction = 'logout'

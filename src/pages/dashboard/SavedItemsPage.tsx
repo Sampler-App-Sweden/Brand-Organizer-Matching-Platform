@@ -6,8 +6,30 @@ import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import { getSavedCollaborations } from '../../services/collaborationService'
 import { getSavedMembers } from '../../services/communityService'
+import { ProfileOverview } from '../../services/profileService'
 import { Collaboration } from '../../types/collaboration'
 import { CommunityMember } from '../../types/community'
+
+const mapMemberToProfileOverview = (
+  member: CommunityMember
+): ProfileOverview => ({
+  id: member.id,
+  role: member.type === 'brand' ? 'Brand' : 'Organizer',
+  name: member.name,
+  email: member.email,
+  logoURL: member.logoUrl,
+  description: member.description || member.shortDescription,
+  created_at: member.dateRegistered,
+  updated_at: member.dateRegistered,
+  whatTheySeek: {
+    sponsorshipTypes: [],
+    budgetRange: null,
+    quantity: null,
+    eventTypes: member.type === 'organizer' ? [] : undefined,
+    audienceTags: member.type === 'brand' ? [] : undefined,
+    notes: member.shortDescription || member.description
+  }
+})
 
 export function SavedItemsPage() {
   const { currentUser } = useAuth()
@@ -130,7 +152,10 @@ export function SavedItemsPage() {
           {showMemberSection && filteredMembers.length > 0 && (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {filteredMembers.map((member) => (
-                <DirectoryCard key={member.id} member={member} />
+                <DirectoryCard
+                  key={member.id}
+                  profile={mapMemberToProfileOverview(member)}
+                />
               ))}
             </div>
           )}

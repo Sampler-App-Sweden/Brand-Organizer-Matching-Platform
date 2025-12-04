@@ -1,16 +1,12 @@
-import {
-  CheckCircleIcon,
-  FlaskConicalIcon,
-  Sparkles,
-  UploadIcon
-} from 'lucide-react'
+import { CheckCircleIcon, FlaskConicalIcon, Sparkles, UploadIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { Layout } from '../components/layout'
-import { Button, FormField } from '../components/ui'
-import { useAuth } from '../context/AuthContext'
-import { registerCommunityMember } from '../services/communityService'
+import { Layout } from '../../components/layout'
+import { Button } from '../../components/ui/Button'
+import { FormField } from '../../components/ui/FormField'
+import { useAuth } from '../../context/AuthContext'
+import { registerCommunityMember } from '../../services/communityService'
 
 type RegistrationFormData = {
   name: string
@@ -39,41 +35,42 @@ export function CommunityRegistration() {
     phone: '',
     socialLinks: ''
   })
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
     const { name, value } = e.target
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value
-    })
+    }))
   }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    // Create preview
+
     const reader = new FileReader()
     reader.onloadend = () => {
       setLogoPreview(reader.result as string)
     }
     reader.readAsDataURL(file)
   }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
     if (!currentUser) {
       navigate('/login', {
-        state: {
-          returnUrl: '/community/register'
-        }
+        state: { returnUrl: '/community/register' }
       })
       return
     }
+
     try {
       setIsLoading(true)
-      // In a real app, we'd upload the logo to a storage service
-      // and get back a URL. For this demo, we'll use the preview URL
       const logoUrl = logoPreview
       await registerCommunityMember({
         ...formData,
@@ -87,6 +84,7 @@ export function CommunityRegistration() {
       setIsLoading(false)
     }
   }
+
   if (formSubmitted) {
     return (
       <Layout>
@@ -101,30 +99,24 @@ export function CommunityRegistration() {
               in our community showcase.
             </p>
             <div className='flex flex-col sm:flex-row justify-center gap-4'>
-              <Button onClick={() => navigate('/community')}>
-                View Community
-              </Button>
-              <Button variant='outline' onClick={() => navigate('/')}>
-                Return to Home
-              </Button>
+              <Button onClick={() => navigate('/community')}>View Community</Button>
+              <Button variant='outline' onClick={() => navigate('/')}>Return to Home</Button>
             </div>
           </div>
         </div>
       </Layout>
     )
   }
+
   return (
     <Layout>
       <div className='max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow-sm relative overflow-hidden'>
-        {/* Mystical background elements */}
         <div className='absolute top-0 right-0 w-40 h-40 bg-indigo-50 rounded-full -mr-20 -mt-20 opacity-70'></div>
         <div className='absolute bottom-0 left-0 w-32 h-32 bg-purple-50 rounded-full -ml-16 -mb-16 opacity-70'></div>
         <div className='relative'>
           <div className='flex items-center mb-2'>
             <FlaskConicalIcon className='h-6 w-6 text-indigo-600 mr-2' />
-            <h1 className='text-2xl font-bold text-gray-900'>
-              Join Our Community
-            </h1>
+            <h1 className='text-2xl font-bold text-gray-900'>Join Our Community</h1>
           </div>
           <p className='text-gray-600 mb-6'>
             Register your brand or organization to be featured in our community
@@ -142,14 +134,8 @@ export function CommunityRegistration() {
                   id='type'
                   type='select'
                   options={[
-                    {
-                      value: 'brand',
-                      label: 'Brand / Sponsor'
-                    },
-                    {
-                      value: 'organizer',
-                      label: 'Event Organizer'
-                    }
+                    { value: 'brand', label: 'Brand / Sponsor' },
+                    { value: 'organizer', label: 'Event Organizer' }
                   ]}
                   required
                   value={formData.type}
@@ -179,9 +165,7 @@ export function CommunityRegistration() {
                         />
                         <button
                           type='button'
-                          onClick={() => {
-                            setLogoPreview(null)
-                          }}
+                          onClick={() => setLogoPreview(null)}
                           className='absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1'
                           title='Remove image'
                         >
@@ -202,9 +186,7 @@ export function CommunityRegistration() {
                       </div>
                     ) : (
                       <div className='h-20 w-20 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50'>
-                        <span className='text-gray-400 text-xs text-center'>
-                          No logo
-                        </span>
+                        <span className='text-gray-400 text-xs text-center'>No logo</span>
                       </div>
                     )}
                   </div>
@@ -229,9 +211,7 @@ export function CommunityRegistration() {
                           </label>
                           <p className='pl-1'>or drag and drop</p>
                         </div>
-                        <p className='text-xs text-gray-500'>
-                          PNG, JPG, GIF up to 2MB
-                        </p>
+                        <p className='text-xs text-gray-500'>PNG, JPG, GIF up to 2MB</p>
                       </div>
                     </div>
                   </div>
