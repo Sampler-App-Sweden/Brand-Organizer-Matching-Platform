@@ -9,12 +9,20 @@ export const ProtectedRoute = ({
   children: React.ReactNode
   requiredType?: 'brand' | 'organizer' | 'admin'
 }) => {
-  const { currentUser } = useAuth()
-  
+  const { currentUser, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className='flex min-h-[200px] items-center justify-center'>
+        <div className='inline-block h-10 w-10 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600'></div>
+      </div>
+    )
+  }
+
   if (!currentUser) {
     return <Navigate to='/login' replace />
   }
-  
+
   if (requiredType && currentUser.type !== requiredType) {
     if (currentUser.type === 'brand') {
       return <Navigate to='/dashboard/brand' replace />
@@ -24,6 +32,6 @@ export const ProtectedRoute = ({
       return <Navigate to='/admin' replace />
     }
   }
-  
+
   return <>{children}</>
 }
