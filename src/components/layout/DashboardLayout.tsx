@@ -40,15 +40,18 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
               <nav className='space-y-1'>
                 {currentSidebarItems.map((item) => {
                   const itemPath = item.path ?? ''
+                  const isActive = item.matchExact
+                    ? location.pathname === itemPath
+                    : location.pathname === itemPath ||
+                      (itemPath !== '' &&
+                        itemPath !== '/' &&
+                        location.pathname.startsWith(`${itemPath}/`))
                   return (
                     <Link
                       key={item.path ?? item.label}
                       to={itemPath}
                       className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors ${
-                        location.pathname === itemPath ||
-                        (itemPath !== '' &&
-                          itemPath !== '/' &&
-                          location.pathname.startsWith(itemPath))
+                        isActive
                           ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 pl-3'
                           : ''
                       }`}

@@ -15,6 +15,7 @@ export interface SidebarItem {
   icon: ReactElement
   path?: string
   action?: SidebarAction
+  matchExact?: boolean
 }
 
 export type SidebarCollection = {
@@ -30,7 +31,8 @@ export const sidebarItems: SidebarCollection = {
     {
       label: 'Dashboard',
       icon: createElement(HomeIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/brand'
+      path: '/dashboard/brand',
+      matchExact: true
     },
     {
       label: 'Sponsorships',
@@ -62,7 +64,8 @@ export const sidebarItems: SidebarCollection = {
     {
       label: 'Dashboard',
       icon: createElement(HomeIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/organizer'
+      path: '/dashboard/organizer',
+      matchExact: true
     },
     {
       label: 'Sponsorships',
@@ -89,7 +92,8 @@ export const sidebarItems: SidebarCollection = {
     {
       label: 'Dashboard',
       icon: createElement(HomeIcon, { className: 'h-5 w-5' }),
-      path: '/admin'
+      path: '/admin',
+      matchExact: true
     },
     {
       label: 'Brands',
