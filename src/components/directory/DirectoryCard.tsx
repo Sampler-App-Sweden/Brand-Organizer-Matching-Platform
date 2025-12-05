@@ -1,25 +1,140 @@
-import { BadgeDollarSign, PackageIcon, UsersIcon } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import {
+  BadgeDollarSign,
+  BookmarkIcon,
+  PackageIcon,
+  UsersIcon
+} from 'lucide-react'
+import { MouseEvent, useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import { useAuth } from '../../context/AuthContext'
 import { ProfileOverview } from '../../services/profileService'
+import {
+  isProfileSaved,
+  toggleSavedProfile
+} from '../../services/savedProfilesService'
 
 interface DirectoryCardProps {
   profile: ProfileOverview
+  initialSaved?: boolean
+  showSaveAction?: boolean
 }
 
-export function DirectoryCard({ profile }: DirectoryCardProps) {
+export function DirectoryCard({
+  profile,
+  initialSaved,
+  showSaveAction = true
+}: DirectoryCardProps) {
+  const { currentUser } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const userId = currentUser?.id ?? null
   const isBrand = profile.role === 'Brand'
   const sponsorshipTypes = profile.whatTheySeek?.sponsorshipTypes ?? []
   const eventOrAudience = isBrand
     ? profile.whatTheySeek?.audienceTags ?? []
     : profile.whatTheySeek?.eventTypes ?? []
+  const [isSaved, setIsSaved] = useState<boolean>(initialSaved ?? false)
+  const [isCheckingSaved, setIsCheckingSaved] = useState<boolean>(
+    showSaveAction && initialSaved === undefined && Boolean(userId)
+  )
+  const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    if (!showSaveAction) {
+      return
+    }
+
+    if (!userId) {
+      setIsSaved(false)
+      setIsCheckingSaved(false)
+      return
+    }
+
+    if (initialSaved !== undefined) {
+      setIsSaved(initialSaved)
+      setIsCheckingSaved(false)
+      return
+    }
+
+    let isMounted = true
+    setIsCheckingSaved(true)
+
+    isProfileSaved(userId, profile.id)
+      .then((saved) => {
+        if (isMounted) {
+          setIsSaved(saved)
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to load saved state', error)
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsCheckingSaved(false)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [userId, profile.id, initialSaved, showSaveAction])
+
+  const handleToggleSave = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (!showSaveAction) {
+      return
+    }
+
+    if (!currentUser) {
+      navigate('/login', {
+        state: { returnUrl: `${location.pathname}${location.search}` }
+      })
+      return
+    }
+
+    try {
+      setIsSaving(true)
+      const nextState = await toggleSavedProfile(currentUser.id, profile.id)
+      setIsSaved(nextState)
+    } catch (error) {
+      console.error('Failed to toggle saved profile', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <Link
       to={`/profiles/${profile.id}`}
       className='group block rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white'
     >
-      <article className='bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 transition-all group-hover:shadow-md group-hover:border-indigo-100'>
+      <article className='relative bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 transition-all group-hover:shadow-md group-hover:border-indigo-100'>
+        {showSaveAction && (
+          <button
+            type='button'
+            onClick={handleToggleSave}
+            disabled={isCheckingSaved || isSaving}
+            aria-pressed={isSaved}
+            className='absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-sm border border-gray-200 hover:text-indigo-600 hover:border-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
+            title={isSaved ? 'Unsave profile' : 'Save profile'}
+          >
+            {isCheckingSaved ? (
+              <span className='h-4 w-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin'></span>
+            ) : (
+              <BookmarkIcon
+                className={`h-4 w-4 ${
+                  isSaved ? 'fill-indigo-500 text-indigo-500' : 'text-gray-500'
+                }`}
+              />
+            )}
+            <span className='sr-only'>
+              {isSaved ? 'Unsave profile' : 'Save profile'}
+            </span>
+          </button>
+        )}
         <div className='p-6 space-y-4'>
           <div className='flex items-start'>
             <div className='relative h-16 w-16 mr-4 flex-shrink-0'>

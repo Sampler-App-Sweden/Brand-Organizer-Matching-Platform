@@ -1,4 +1,12 @@
-import { Bookmark, HandshakeIcon, HomeIcon, LogOut, MessageSquareIcon, Package, UsersIcon } from 'lucide-react'
+import {
+  Bookmark,
+  HandshakeIcon,
+  HomeIcon,
+  LogOut,
+  MessageSquareIcon,
+  Package,
+  UsersIcon
+} from 'lucide-react'
 import { createElement, ReactElement } from 'react'
 
 export type SidebarAction = 'logout'
@@ -70,6 +78,11 @@ export const sidebarItems: SidebarCollection = {
       label: 'Messages',
       icon: createElement(MessageSquareIcon, { className: 'h-5 w-5' }),
       path: '/dashboard/messages'
+    },
+    {
+      label: 'Saved',
+      icon: createElement(Bookmark, { className: 'h-5 w-5' }),
+      path: '/dashboard/saved'
     }
   ],
   admin: [

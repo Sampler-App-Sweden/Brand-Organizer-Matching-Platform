@@ -5,35 +5,13 @@ import { DirectoryCard } from '../../components/directory/DirectoryCard'
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import { getSavedCollaborations } from '../../services/collaborationService'
-import { getSavedMembers } from '../../services/communityService'
+import { getSavedProfiles } from '../../services/savedProfilesService'
 import { ProfileOverview } from '../../services/profileService'
 import { Collaboration } from '../../types/collaboration'
-import { CommunityMember } from '../../types/community'
-
-const mapMemberToProfileOverview = (
-  member: CommunityMember
-): ProfileOverview => ({
-  id: member.id,
-  role: member.type === 'brand' ? 'Brand' : 'Organizer',
-  name: member.name,
-  email: member.email,
-  logoURL: member.logoUrl,
-  description: member.description || member.shortDescription,
-  created_at: member.dateRegistered,
-  updated_at: member.dateRegistered,
-  whatTheySeek: {
-    sponsorshipTypes: [],
-    budgetRange: null,
-    quantity: null,
-    eventTypes: member.type === 'organizer' ? [] : undefined,
-    audienceTags: member.type === 'brand' ? [] : undefined,
-    notes: member.shortDescription || member.description
-  }
-})
 
 export function SavedItemsPage() {
   const { currentUser } = useAuth()
-  const [savedMembers, setSavedMembers] = useState<CommunityMember[]>([])
+  const [savedProfiles, setSavedProfiles] = useState<ProfileOverview[]>([])
   const [savedCollaborations, setSavedCollaborations] = useState<
     Collaboration[]
   >([])
@@ -44,14 +22,19 @@ export function SavedItemsPage() {
 
   useEffect(() => {
     const fetchSavedItems = async () => {
-      if (!currentUser) return
+      if (!currentUser) {
+        setSavedProfiles([])
+        setSavedCollaborations([])
+        setLoading(false)
+        return
+      }
       setLoading(true)
       try {
-        const [members, collaborations] = await Promise.all([
-          getSavedMembers(currentUser.id),
+        const [profiles, collaborations] = await Promise.all([
+          getSavedProfiles(currentUser.id),
           getSavedCollaborations(currentUser.id)
         ])
-        setSavedMembers(members)
+        setSavedProfiles(profiles)
         setSavedCollaborations(collaborations)
       } catch (error) {
         console.error('Failed to fetch saved items:', error)
@@ -63,12 +46,11 @@ export function SavedItemsPage() {
     fetchSavedItems()
   }, [currentUser])
 
-  const filteredMembers =
+  const filteredProfiles =
     activeTab === 'all'
-      ? savedMembers
-      : savedMembers.filter(
-          (member) =>
-            member.type === (activeTab === 'brands' ? 'brand' : 'organizer')
+      ? savedProfiles
+      : savedProfiles.filter((profile) =>
+          profile.role === (activeTab === 'brands' ? 'Brand' : 'Organizer')
         )
 
   const showMemberSection = activeTab !== 'inspiration'
@@ -76,10 +58,10 @@ export function SavedItemsPage() {
     activeTab === 'all' || activeTab === 'inspiration'
   const isEmpty =
     activeTab === 'all'
-      ? savedMembers.length + savedCollaborations.length === 0
+      ? savedProfiles.length + savedCollaborations.length === 0
       : activeTab === 'inspiration'
       ? savedCollaborations.length === 0
-      : filteredMembers.length === 0
+        : filteredProfiles.length === 0
 
   const userType = currentUser?.type as 'brand' | 'organizer'
 
@@ -149,12 +131,13 @@ export function SavedItemsPage() {
         </div>
       ) : (
         <div className='space-y-6'>
-          {showMemberSection && filteredMembers.length > 0 && (
+          {showMemberSection && filteredProfiles.length > 0 && (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {filteredMembers.map((member) => (
+              {filteredProfiles.map((profile) => (
                 <DirectoryCard
-                  key={member.id}
-                  profile={mapMemberToProfileOverview(member)}
+                  key={profile.id}
+                  profile={profile}
+                  initialSaved
                 />
               ))}
             </div>

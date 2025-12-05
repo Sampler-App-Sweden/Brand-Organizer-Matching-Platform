@@ -302,6 +302,22 @@ CREATE POLICY "Allow users to manage saved members"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+-- Saved profiles (brand/organizer favorites)
+CREATE TABLE IF NOT EXISTS public.saved_profiles (
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  profile_id UUID REFERENCES public.profiles ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  PRIMARY KEY (user_id, profile_id)
+);
+ALTER TABLE public.saved_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow users to manage saved profiles" ON public.saved_profiles;
+CREATE POLICY "Allow users to manage saved profiles"
+  ON public.saved_profiles
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 -- Conversations table
 CREATE TABLE IF NOT EXISTS public.conversations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

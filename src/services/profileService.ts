@@ -198,6 +198,55 @@ export async function getProfileOverviewById(
   return data ? mapRowToProfile(data) : null
 }
 
+export async function getProfilesByIds(
+  ids: string[]
+): Promise<ProfileOverview[]> {
+  if (!ids || ids.length === 0) {
+    return []
+  }
+
+  const { data, error } = await supabase
+    .from('profile_overview')
+    .select('*')
+    .in('id', ids)
+
+  if (error) {
+    console.error('Error fetching profiles by ids:', error)
+    throw new Error(`Error fetching profiles: ${error.message}`)
+  }
+
+  const rows = (data as ProfileOverviewRow[]) || []
+  const orderMap = new Map<string, number>()
+  ids.forEach((profileId, index) => orderMap.set(profileId, index))
+
+  return rows
+    .map(mapRowToProfile)
+    .sort(
+      (a, b) => (orderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (orderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER)
+    )
+}
+
+export async function getProfileOverviewByName(
+  name: string
+): Promise<ProfileOverview | null> {
+  if (!name) {
+    return null
+  }
+
+  const { data, error } = await supabase
+    .from('profile_overview')
+    .select('*')
+    .ilike('name', name)
+    .maybeSingle<ProfileOverviewRow>()
+
+  if (error) {
+    console.error('Error fetching profile by name:', error)
+    throw new Error(`Error fetching profile: ${error.message}`)
+  }
+
+  return data ? mapRowToProfile(data) : null
+}
+
 // Get profile by ID
 export async function getProfileById(id: string) {
   const { data, error } = await supabase

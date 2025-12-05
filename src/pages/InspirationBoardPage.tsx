@@ -1,5 +1,11 @@
-import { ExternalLinkIcon, FilterIcon, StarIcon, XIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import {
+  BookmarkIcon,
+  ExternalLinkIcon,
+  FilterIcon,
+  StarIcon,
+  XIcon
+} from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { DashboardLayout } from '../components/layout'
 import { useAuth } from '../context/AuthContext'
@@ -8,6 +14,11 @@ import {
   getSavedCollaborations,
   toggleSavedCollaboration
 } from '../services/collaborationService'
+import { getProfileOverviewByName } from '../services/profileService'
+import {
+  getSavedProfileIds,
+  toggleSavedProfile
+} from '../services/savedProfilesService'
 import { Collaboration } from '../types/collaboration'
 
 export function InspirationBoardPage() {
@@ -17,6 +28,15 @@ export function InspirationBoardPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'saved'>('all')
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [savedProfileMap, setSavedProfileMap] = useState<
+    Record<string, boolean>
+  >({})
+  const [profileLookupCache, setProfileLookupCache] = useState<
+    Record<string, string | null>
+  >({})
+  const [profileSaveLoading, setProfileSaveLoading] = useState<
+    Record<string, boolean>
+  >({})
   useEffect(() => {
     const fetchCollaborations = async () => {
       if (!currentUser) return
@@ -37,6 +57,110 @@ export function InspirationBoardPage() {
     }
     fetchCollaborations()
   }, [currentUser, activeTab])
+
+  useEffect(() => {
+    const loadSavedProfiles = async () => {
+      if (!currentUser) {
+        setSavedProfileMap({})
+        return
+      }
+      try {
+        const ids = await getSavedProfileIds(currentUser.id)
+        const map = ids.reduce<Record<string, boolean>>((acc, id) => {
+          acc[id] = true
+          return acc
+        }, {})
+        setSavedProfileMap(map)
+      } catch (error) {
+        console.error('Failed to load saved profiles:', error)
+      }
+    }
+    loadSavedProfiles()
+  }, [currentUser])
+
+  const resolveProfileId = useCallback(
+    async (name: string) => {
+      if (!name) {
+        return null
+      }
+      if (profileLookupCache[name] !== undefined) {
+        return profileLookupCache[name]
+      }
+      try {
+        const profile = await getProfileOverviewByName(name)
+        const id = profile?.id ?? null
+        setProfileLookupCache((prev) => ({ ...prev, [name]: id }))
+        return id
+      } catch (error) {
+        console.error('Failed to resolve profile by name:', { name, error })
+        setProfileLookupCache((prev) => ({ ...prev, [name]: null }))
+        return null
+      }
+    },
+    [profileLookupCache]
+  )
+
+  useEffect(() => {
+    if (!currentUser || collaborations.length === 0) {
+      return
+    }
+
+    const preloadProfiles = async () => {
+      const uniqueNames = Array.from(
+        new Set(
+          collaborations.flatMap((collab) => [
+            collab.brandName,
+            collab.organizerName
+          ])
+        )
+      )
+      const missingNames = uniqueNames.filter(
+        (name) => profileLookupCache[name] === undefined
+      )
+      if (!missingNames.length) {
+        return
+      }
+      await Promise.all(missingNames.map((name) => resolveProfileId(name)))
+    }
+
+    preloadProfiles()
+  }, [collaborations, currentUser, profileLookupCache, resolveProfileId])
+
+  const handleSaveProfile = useCallback(
+    async (name: string) => {
+      if (!currentUser || !name) {
+        return
+      }
+      setProfileSaveLoading((prev) => ({ ...prev, [name]: true }))
+      try {
+        const profileId = await resolveProfileId(name)
+        if (!profileId) {
+          console.warn('No profile found to save for inspiration entry', name)
+          return
+        }
+        const saved = await toggleSavedProfile(currentUser.id, profileId)
+        setSavedProfileMap((prev) => ({ ...prev, [profileId]: saved }))
+      } catch (error) {
+        console.error('Failed to save profile from inspiration card:', error)
+      } finally {
+        setProfileSaveLoading((prev) => ({ ...prev, [name]: false }))
+      }
+    },
+    [currentUser, resolveProfileId]
+  )
+
+  const getProfileSaveMeta = useCallback(
+    (name: string) => {
+      const resolvedId = profileLookupCache[name]
+      return {
+        saved: resolvedId ? Boolean(savedProfileMap[resolvedId]) : false,
+        available: resolvedId !== null,
+        resolving: resolvedId === undefined,
+        loading: Boolean(profileSaveLoading[name])
+      }
+    },
+    [profileLookupCache, profileSaveLoading, savedProfileMap]
+  )
   const handleSaveToggle = (collaborationId: string) => {
     if (!currentUser) return
     toggleSavedCollaboration(currentUser.id, collaborationId)
@@ -190,6 +314,12 @@ export function InspirationBoardPage() {
               key={collab.id}
               collaboration={collab}
               onSaveToggle={handleSaveToggle}
+              onSaveBrandProfile={() => handleSaveProfile(collab.brandName)}
+              onSaveOrganizerProfile={() =>
+                handleSaveProfile(collab.organizerName)
+              }
+              brandProfileMeta={getProfileSaveMeta(collab.brandName)}
+              organizerProfileMeta={getProfileSaveMeta(collab.organizerName)}
             />
           ))}
         </div>
@@ -197,14 +327,58 @@ export function InspirationBoardPage() {
     </DashboardLayout>
   )
 }
+interface ProfileSaveMeta {
+  saved: boolean
+  available: boolean
+  resolving: boolean
+  loading: boolean
+}
+
 interface CollaborationCardProps {
   collaboration: Collaboration
   onSaveToggle: (id: string) => void
+  onSaveBrandProfile: () => void | Promise<void>
+  onSaveOrganizerProfile: () => void | Promise<void>
+  brandProfileMeta: ProfileSaveMeta
+  organizerProfileMeta: ProfileSaveMeta
 }
+
 function CollaborationCard({
   collaboration,
-  onSaveToggle
+  onSaveToggle,
+  onSaveBrandProfile,
+  onSaveOrganizerProfile,
+  brandProfileMeta,
+  organizerProfileMeta
 }: CollaborationCardProps) {
+  const renderProfileAction = (
+    label: string,
+    meta: ProfileSaveMeta,
+    handler: () => void
+  ) => (
+    <button
+      type='button'
+      onClick={handler}
+      disabled={!meta.available || meta.loading || meta.resolving}
+      className={`inline-flex items-center px-3 py-1.5 rounded-full border text-xs font-medium transition-colors ${
+        meta.saved
+          ? 'bg-indigo-600 text-white border-indigo-600'
+          : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+      } ${
+        !meta.available || meta.resolving ? 'opacity-60 cursor-not-allowed' : ''
+      }`}
+    >
+      {meta.loading || meta.resolving ? (
+        <span className='mr-2 h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin'></span>
+      ) : (
+        <BookmarkIcon
+          className={`h-4 w-4 mr-1 ${meta.saved ? 'fill-current' : ''}`}
+        />
+      )}
+      {meta.saved ? `${label} Saved` : `Save ${label}`}
+    </button>
+  )
+
   return (
     <div className='bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all group relative'>
       {/* Save button */}
@@ -282,6 +456,18 @@ function CollaborationCard({
             <div className='font-medium text-gray-700'>Samples</div>
             <div className='text-gray-900'>{collaboration.metrics.samples}</div>
           </div>
+        </div>
+        <div className='mb-4 flex flex-wrap gap-2 text-xs'>
+          {renderProfileAction(
+            'Brand Profile',
+            brandProfileMeta,
+            onSaveBrandProfile
+          )}
+          {renderProfileAction(
+            'Organizer Profile',
+            organizerProfileMeta,
+            onSaveOrganizerProfile
+          )}
         </div>
         <a
           href={`/inspiration/${collaboration.id}`}
