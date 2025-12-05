@@ -318,6 +318,24 @@ CREATE POLICY "Allow users to manage saved profiles"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+-- Match preferences (saved/dismissed matches)
+CREATE TABLE IF NOT EXISTS public.match_preferences (
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  match_id UUID REFERENCES public.matches ON DELETE CASCADE,
+  status TEXT NOT NULL CHECK (status IN ('saved', 'dismissed')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  PRIMARY KEY (user_id, match_id)
+);
+ALTER TABLE public.match_preferences ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow users to manage match preferences" ON public.match_preferences;
+CREATE POLICY "Allow users to manage match preferences"
+  ON public.match_preferences
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 -- Conversations table
 CREATE TABLE IF NOT EXISTS public.conversations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

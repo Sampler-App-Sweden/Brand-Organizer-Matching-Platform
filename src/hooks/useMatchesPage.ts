@@ -1,6 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { getBrandById, getBrandByUserId, getMatchesForBrand, getMatchesForOrganizer, getOrganizerById, getOrganizerByUserId } from '../services/dataService'
+import {
+  getBrandById,
+  getBrandByUserId,
+  getMatchesForBrand,
+  getMatchesForOrganizer,
+  getOrganizerById,
+  getOrganizerByUserId
+} from '../services/dataService'
+import {
+  deleteMatchPreference,
+  getMatchPreferences,
+  upsertMatchPreference
+} from '../services/matchPreferencesService'
 import { DisplayMode, EnhancedMatch, MatchView } from '../types/matches'
 
 interface UseMatchesPageOptions {
@@ -18,9 +30,9 @@ interface UseMatchesPageResult {
   searchTerm: string
   setSearchTerm: (value: string) => void
   filteredMatches: EnhancedMatch[]
-  handleSaveSuggestion: (matchId: string) => void
-  handleDismissSuggestion: (matchId: string) => void
-  removeSavedSuggestion: (matchId: string) => void
+  handleSaveSuggestion: (matchId: string) => Promise<void>
+  handleDismissSuggestion: (matchId: string) => Promise<void>
+  removeSavedSuggestion: (matchId: string) => Promise<void>
   savedSuggestions: string[]
 }
 
@@ -34,9 +46,9 @@ export function useMatchesPage({
   userId,
   userType
 }: UseMatchesPageOptions): UseMatchesPageResult {
-  const [resolvedUserType, setResolvedUserType] = useState<'brand' | 'organizer'>(
-    'brand'
-  )
+  const [resolvedUserType, setResolvedUserType] = useState<
+    'brand' | 'organizer'
+  >('brand')
   const [matches, setMatches] = useState<EnhancedMatch[]>([])
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<MatchView>('confirmed')
@@ -118,75 +130,85 @@ export function useMatchesPage({
       return
     }
 
-    const savedItems = JSON.parse(
-      localStorage.getItem(`user_${userId}_savedMatches`) || '[]'
-    )
-    const dismissedItems = JSON.parse(
-      localStorage.getItem(`user_${userId}_dismissedMatches`) || '[]'
-    )
-    setSavedSuggestions(savedItems)
-    setDismissedSuggestions(dismissedItems)
+    let isMounted = true
+    const loadPreferences = async () => {
+      try {
+        const preferences = await getMatchPreferences(userId)
+        if (!isMounted) return
+        setSavedSuggestions(preferences.saved)
+        setDismissedSuggestions(preferences.dismissed)
+      } catch (error) {
+        console.error('Failed to load match preferences:', error)
+      }
+    }
+
+    loadPreferences()
+
+    return () => {
+      isMounted = false
+    }
   }, [userId])
 
-  const persistSavedSuggestions = useCallback(
-    (items: string[]) => {
-      if (!userId) return
-      localStorage.setItem(
-        `user_${userId}_savedMatches`,
-        JSON.stringify(items)
-      )
-    },
-    [userId]
-  )
-
-  const persistDismissedSuggestions = useCallback(
-    (items: string[]) => {
-      if (!userId) return
-      localStorage.setItem(
-        `user_${userId}_dismissedMatches`,
-        JSON.stringify(items)
-      )
-    },
-    [userId]
-  )
-
   const handleSaveSuggestion = useCallback(
-    (matchId: string) => {
-      setSavedSuggestions((prev) => {
-        if (prev.includes(matchId)) {
-          return prev
-        }
-        const updated = [...prev, matchId]
-        persistSavedSuggestions(updated)
-        return updated
-      })
+    async (matchId: string) => {
+      if (!userId) {
+        return
+      }
+
+      setSavedSuggestions((prev) =>
+        prev.includes(matchId) ? prev : [...prev, matchId]
+      )
+      setDismissedSuggestions((prev) => prev.filter((id) => id !== matchId))
+
+      try {
+        await upsertMatchPreference(userId, matchId, 'saved')
+      } catch (error) {
+        console.error('Failed to save match preference:', error)
+        setSavedSuggestions((prev) => prev.filter((id) => id !== matchId))
+      }
     },
-    [persistSavedSuggestions]
+    [userId]
   )
 
   const handleDismissSuggestion = useCallback(
-    (matchId: string) => {
-      setDismissedSuggestions((prev) => {
-        if (prev.includes(matchId)) {
-          return prev
-        }
-        const updated = [...prev, matchId]
-        persistDismissedSuggestions(updated)
-        return updated
-      })
+    async (matchId: string) => {
+      if (!userId) {
+        return
+      }
+
+      setDismissedSuggestions((prev) =>
+        prev.includes(matchId) ? prev : [...prev, matchId]
+      )
+      setSavedSuggestions((prev) => prev.filter((id) => id !== matchId))
+
+      try {
+        await upsertMatchPreference(userId, matchId, 'dismissed')
+      } catch (error) {
+        console.error('Failed to dismiss match preference:', error)
+        setDismissedSuggestions((prev) => prev.filter((id) => id !== matchId))
+      }
     },
-    [persistDismissedSuggestions]
+    [userId]
   )
 
   const removeSavedSuggestion = useCallback(
-    (matchId: string) => {
-      setSavedSuggestions((prev) => {
-        const updated = prev.filter((id) => id !== matchId)
-        persistSavedSuggestions(updated)
-        return updated
-      })
+    async (matchId: string) => {
+      if (!userId) {
+        return
+      }
+
+      setSavedSuggestions((prev) => prev.filter((id) => id !== matchId))
+
+      try {
+        await deleteMatchPreference(userId, matchId)
+      } catch (error) {
+        console.error('Failed to remove saved match preference:', error)
+        setSavedSuggestions((prev) =>
+          prev.includes(matchId) ? prev : [...prev, matchId]
+        )
+      }
     },
-    [persistSavedSuggestions]
+    [userId]
   )
 
   const filteredMatches = useMemo(() => {

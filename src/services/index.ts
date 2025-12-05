@@ -28,6 +28,7 @@ export { initEmailJS, sendDataByEmail } from './emailService'
 // Matching & Experiments
 export * from './matchingService'
 export * from './experimentService'
+export * from './matchPreferencesService'
 
 // Supabase Client
 export { supabase } from './supabaseClient'
