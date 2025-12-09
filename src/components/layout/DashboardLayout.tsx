@@ -8,9 +8,16 @@ import { SidebarItem, sidebarItems } from './sidebarItems'
 interface DashboardLayoutProps {
   children: React.ReactNode
   userType: 'brand' | 'organizer' | 'admin'
+  mainPaddingClassName?: string
+  contentPaddingClassName?: string
 }
 
-export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
+export function DashboardLayout({
+  children,
+  userType,
+  mainPaddingClassName = 'p-0',
+  contentPaddingClassName = 'p-6'
+}: DashboardLayoutProps) {
   const location = useLocation()
   const currentSidebarItems: SidebarItem[] = sidebarItems[userType]
   const commonItems = sidebarItems.common
@@ -103,8 +110,12 @@ export function DashboardLayout({ children, userType }: DashboardLayoutProps) {
         </div>
 
         {/* Main Content */}
-        <main className='flex-1 overflow-auto p-6 relative md:ml-64'>
-          <div className='bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 p-6'>
+        <main
+          className={`flex flex-col flex-1 overflow-hidden relative md:ml-64 ${mainPaddingClassName}`}
+        >
+          <div
+            className={`flex flex-col flex-1 bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 ${contentPaddingClassName}`}
+          >
             {children}
           </div>
         </main>
