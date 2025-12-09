@@ -6,6 +6,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { RegistrationDebugHelper } from './components/RegistrationDebugHelper'
 import { AuthProvider } from './context/AuthContext'
 import { DraftProfileProvider } from './context/DraftProfileContext'
+import { NotificationsProvider } from './context'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
@@ -155,12 +156,14 @@ export function App() {
     >
       <AuthProvider>
         <DraftProfileProvider>
-          <AppRoutes />
-          <HelpChat />
-          {typeof process !== 'undefined' &&
-            process.env?.NODE_ENV === 'development' && (
-              <RegistrationDebugHelper />
-            )}
+          <NotificationsProvider>
+            <AppRoutes />
+            <HelpChat />
+            {typeof process !== 'undefined' &&
+              process.env?.NODE_ENV === 'development' && (
+                <RegistrationDebugHelper />
+              )}
+          </NotificationsProvider>
         </DraftProfileProvider>
       </AuthProvider>
     </BrowserRouter>
