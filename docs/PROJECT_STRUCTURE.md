@@ -45,138 +45,145 @@ Brand-Organizer-Matching-Platform/
 └── src/                      # Source code
     ├── index.tsx             # Application entry point
     ├── App.tsx               # Root component with routing
-    │
+│
     ├── components/           # React components
-    │   ├── index.ts          # Barrel exports for all components
-    │   │
-    │   ├── ui/               # Basic UI components
-    │   │   ├── index.ts
-    │   │   ├── Button.tsx
-    │   │   ├── FormField.tsx
-    │   │   ├── Toast.tsx
-    │   │   ├── StepIndicator.tsx
-    │   │   └── SelectionCard.tsx
-    │   │
-    │   ├── layout/           # Layout & navigation components
-    │   │   ├── index.ts
-    │   │   ├── Layout.tsx
-    │   │   ├── Navbar.tsx
-    │   │   ├── DashboardLayout.tsx
-    │   │   ├── Footer.tsx
-    │   │   └── DashboardListingsBar.tsx
-    │   │
-    │   ├── landing/          # Landing page specific components
-    │   │   ├── index.ts
-    │   │   ├── TechHero.tsx
-    │   │   ├── TechCard.tsx
-    │   │   └── TechFeatureSection.tsx
-    │   │
-    │   ├── effects/          # Visual effects & animations
-    │   │   ├── index.ts
-    │   │   └── TechEffects.tsx
-    │   │
-    │   ├── ai-assistant/     # AI onboarding components
-    │   │   ├── index.ts
-    │   │   ├── AIOnboardingAssistant.tsx
-    │   │   ├── ConversationalInput.tsx
-    │   │   ├── DynamicSuggestions.tsx
-    │   │   ├── ProfileSummary.tsx
-    │   │   └── ProgressIndicator.tsx
-    │   │
-    │   ├── community/        # Community feature components
-    │   │   ├── index.ts
-    │   │   ├── AdminToggle.tsx
-    │   │   ├── CommunityCard.tsx
-    │   │   ├── CommunityDropdown.tsx
-    │   │   ├── CommunityShowcase.tsx
-    │   │   ├── HomeCommunityCTA.tsx
-    │   │   └── InterestOfferWizard.tsx
-    │   │
-    │   ├── directory/        # Directory listing components
-    │   │   ├── index.ts
-    │   │   ├── DirectoryCard.tsx
-    │   │   ├── DirectoryFilters.tsx
-    │   │   ├── DirectoryGrid.tsx
-    │   │   └── Pagination.tsx
-    │   │
-    │   ├── sponsorship/      # Sponsorship management
-    │   │   ├── index.ts
-    │   │   ├── BrandSponsorshipPanel.tsx
-    │   │   ├── OrganizerSponsorshipPanel.tsx
-    │   │   └── ProductSponsorshipManager.tsx
-    │   │
-    │   ├── ErrorBoundary.tsx
-    │   ├── HelpChat.tsx
-    │   ├── ContractForm.tsx
-    │   └── RegistrationDebugHelper.tsx
-    │
+│   ├── index.ts          # Barrel exports for all components
+│   │
+│   ├── ui/               # Basic UI components
+│   │   ├── index.ts
+│   │   ├── Button.tsx
+│   │   ├── FormField.tsx
+│   │   ├── Toast.tsx
+│   │   ├── StepIndicator.tsx
+│   │   └── SelectionCard.tsx
+│   │
+│   ├── layout/           # Layout & navigation components
+│   │   ├── index.ts
+│   │   ├── Layout.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── DashboardLayout.tsx
+│   │   ├── Footer.tsx
+│   │   ├── DashboardListingsBar.tsx
+│   │   └── sidebarItems.ts
+│   │
+│   ├── landing/          # Landing page specific components
+│   │   ├── index.ts
+│   │   ├── TechHero.tsx
+│   │   ├── TechCard.tsx
+│   │   └── TechFeatureSection.tsx
+│   │
+│   ├── effects/          # Visual effects & animations
+│   │   ├── index.ts
+│   │   └── TechEffects.tsx
+│   │
+│   ├── ai-assistant/     # AI onboarding components
+│   │   ├── index.ts
+│   │   ├── AIOnboardingAssistant.tsx
+│   │   ├── ConversationalInput.tsx
+│   │   ├── DynamicSuggestions.tsx
+│   │   ├── ProfileSummary.tsx
+│   │   └── ProgressIndicator.tsx
+│   │
+│   ├── community/        # Community feature components
+│   │   ├── index.ts
+│   │   ├── AdminToggle.tsx
+│   │   ├── CommunityCard.tsx
+│   │   ├── CommunityDropdown.tsx
+│   │   ├── CommunityShowcase.tsx
+│   │   ├── HomeCommunityCTA.tsx
+│   │   └── InterestOfferWizard.tsx
+│   │
+│   ├── directory/        # Directory listing components
+│   │   ├── index.ts
+│   │   ├── DirectoryCard.tsx
+│   │   ├── DirectoryFilters.tsx
+│   │   ├── DirectoryGrid.tsx
+│   │   └── Pagination.tsx
+│   │
+│   ├── sponsorship/      # Sponsorship management
+│   │   ├── index.ts
+│   │   ├── BrandSponsorshipPanel.tsx
+│   │   ├── OrganizerSponsorshipPanel.tsx
+│   │   └── ProductSponsorshipManager.tsx
+│   │
+│   ├── ErrorBoundary.tsx
+│   ├── HelpChat.tsx
+│   ├── ContractForm.tsx
+│   ├── RegistrationDebugHelper.tsx
+│   └── dashboard/         # Dashboard-specific widgets
+│       └── matches/        # Matches feature components
+│           ├── MatchCard.tsx
+│           ├── MatchesFilters.tsx
+│           └── MatchesEmptyState.tsx
+│
     ├── pages/                # Page components
-    │   ├── Home.tsx
-    │   ├── Login.tsx
-    │   ├── Register.tsx
-    │   ├── AiOnboarding.tsx
-    │   ├── BrandForm.tsx
-    │   ├── OrganizerForm.tsx
-    │   ├── CommunityPage.tsx
-    │   ├── CommunityRegistration.tsx
-    │   ├── CommunityMemberDetail.tsx
-    │   ├── BrandsDirectoryPage.tsx
-    │   ├── OrganizersDirectoryPage.tsx
-    │   ├── ProfilesExplorer.tsx
-    │   ├── LoginTroubleshooting.tsx
-    │   │
-    │   ├── dashboard/        # Dashboard pages
-    │   │   ├── BrandDashboard.tsx
-    │   │   ├── OrganizerDashboard.tsx
-    │   │   ├── MatchDetails.tsx
-    │   │   ├── MatchesPage.tsx
-    │   │   ├── MessagesPage.tsx
-    │   │   ├── SavedItemsPage.tsx
-    │   │   └── InspirationBoardPage.tsx
-    │   │
-    │   └── admin/            # Admin pages
-    │       └── AdminDashboard.tsx
-    │
+│   ├── Home.tsx
+│   ├── Login.tsx
+│   ├── Register.tsx
+│   ├── AiOnboarding.tsx
+│   ├── BrandForm.tsx
+│   ├── OrganizerForm.tsx
+│   ├── CommunityPage.tsx
+│   ├── CommunityRegistration.tsx
+│   ├── CommunityMemberDetail.tsx
+│   ├── BrandsDirectoryPage.tsx
+│   ├── OrganizersDirectoryPage.tsx
+│   ├── ProfilesExplorer.tsx
+│   ├── LoginTroubleshooting.tsx
+│   │
+│   ├── dashboard/        # Dashboard pages
+│   │   ├── BrandDashboard.tsx
+│   │   ├── OrganizerDashboard.tsx
+│   │   ├── MatchDetails.tsx
+│   │   ├── MatchesPage.tsx
+│   │   ├── MessagesPage.tsx
+│   │   ├── SavedItemsPage.tsx
+│   │   └── InspirationBoardPage.tsx
+│   │
+│   └── admin/            # Admin pages
+│       └── AdminDashboard.tsx
+│
     ├── context/              # React Context providers
-    │   ├── index.ts
-    │   ├── AuthContext.tsx
-    │   └── DraftProfileContext.tsx
-    │
+│   ├── index.ts
+│   ├── AuthContext.tsx
+│   └── DraftProfileContext.tsx
+│
     ├── hooks/                # Custom React hooks (ready for use)
-    │   └── (future custom hooks)
-    │
+│   ├── useInspirationBoard.ts
+│   └── useMatchesPage.ts
+│
     ├── services/             # Business logic & API calls
-    │   ├── index.ts
-    │   ├── aiService.ts
-    │   ├── analyticsService.ts
-    │   ├── authService.ts
-    │   ├── chatService.ts
-    │   ├── collaborationService.ts
-    │   ├── communityService.ts
-    │   ├── dataService.ts
-    │   ├── draftService.ts
-    │   ├── emailService.ts
-    │   ├── experimentService.ts
-    │   ├── matchingService.ts
-    │   ├── profileService.ts
-    │   ├── supabaseAuthService.ts
-    │   └── supabaseClient.ts
-    │
+│   ├── index.ts
+│   ├── aiService.ts
+│   ├── analyticsService.ts
+│   ├── authService.ts
+│   ├── chatService.ts
+│   ├── collaborationService.ts
+│   ├── communityService.ts
+│   ├── dataService.ts
+│   ├── draftService.ts
+│   ├── emailService.ts
+│   ├── experimentService.ts
+│   ├── matchingService.ts
+│   ├── profileService.ts
+│   ├── supabaseAuthService.ts
+│   └── supabaseClient.ts
+│
     ├── types/                # TypeScript type definitions
-    │   ├── index.ts
-    │   ├── profile.ts
-    │   ├── community.ts
-    │   └── collaboration.ts
-    │
+│   ├── index.ts
+│   ├── profile.ts
+│   ├── community.ts
+│   └── collaboration.ts
+│
     ├── utils/                # Utility functions
-    │   ├── index.ts
-    │   ├── constants.ts      # App-wide constants
-    │   ├── formatting.ts     # Formatting helpers
-    │   └── validation.ts     # Validation functions
-    │
+│   ├── index.ts
+│   ├── constants.ts      # App-wide constants
+│   ├── formatting.ts     # Formatting helpers
+│   └── validation.ts     # Validation functions
+│
     ├── lib/                  # Third-party library configs
-    │   └── index.ts
-    │
+│   └── index.ts
+│
     └── styles/               # Global styles
         └── tech-effects.css
 ```
@@ -362,5 +369,5 @@ import { unique, sortBy } from '@/utils'
 
 ---
 
-**Last Updated**: November 27, 2025
+**Last Updated**: December 9, 2025
 **Maintained By**: Development Team
