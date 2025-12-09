@@ -1,4 +1,4 @@
-import { BookmarkIcon, ExternalLinkIcon, StarIcon } from 'lucide-react'
+import { BookmarkIcon, ExternalLinkIcon } from 'lucide-react'
 
 import { Collaboration } from '../../types/collaboration'
 import { ProfileSaveMeta } from '../../types/inspiration'
@@ -64,9 +64,9 @@ export function CollaborationCard({
         }
       >
         {collaboration.saved ? (
-          <StarIcon className='h-5 w-5 text-yellow-500 fill-current' />
+          <BookmarkIcon className='h-4 w-4 text-indigo-600 fill-current' />
         ) : (
-          <StarIcon className='h-5 w-5 text-gray-400 hover:text-yellow-500' />
+          <BookmarkIcon className='h-4 w-4 text-gray-400 hover:text-indigo-600' />
         )}
       </button>
       <div className='h-48 overflow-hidden'>

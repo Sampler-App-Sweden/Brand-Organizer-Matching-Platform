@@ -1,23 +1,14 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useState
 } from 'react'
-
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from './AuthContext'
-
-interface Notification {
-  id: string
-  title: string
-  message: string
-  read: boolean
-  createdAt: Date
-  type: 'match' | 'message' | 'system' | 'profile_update'
-  relatedId?: string // ID of related match, message, etc.
-}
+import type { Notification } from '../types'
 
 interface NotificationsContextType {
   notifications: Notification[]
@@ -39,14 +30,17 @@ const NotificationsContext = createContext<
 
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const { currentUser } = useAuth()
+  const userId = currentUser?.id ?? null
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
   // Fetch notifications from Supabase
-  const fetchNotifications = async () => {
-    if (!currentUser) {
+  const fetchNotifications = useCallback(async () => {
+    setLoading(true)
+
+    if (!userId) {
       setNotifications([])
       setLoading(false)
       return
@@ -56,13 +50,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(50)
 
       if (error) throw error
 
-      const formattedNotifications: Notification[] = data.map((n) => ({
+      const formattedNotifications: Notification[] = (data ?? []).map((n) => ({
         id: n.id,
         title: n.title,
         message: n.message,
@@ -78,7 +72,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId])
 
   // Mark a single notification as read
   const markAsRead = async (id: string) => {
@@ -100,13 +94,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   // Mark all notifications as read
   const markAllAsRead = async () => {
-    if (!currentUser) return
+    if (!userId) return
 
     try {
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .eq('read', false)
 
       if (error) throw error
@@ -135,13 +129,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   // Clear all notifications
   const clearAllNotifications = async () => {
-    if (!currentUser) return
+    if (!userId) return
 
     try {
       const { error } = await supabase
         .from('notifications')
         .delete()
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
 
       if (error) throw error
 
@@ -160,13 +154,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const createNotification = async (
     notification: Omit<Notification, 'id' | 'createdAt' | 'read'>
   ) => {
-    if (!currentUser) return
+    if (!userId) return
 
     try {
       const { data, error } = await supabase
         .from('notifications')
         .insert({
-          user_id: currentUser.id,
+          user_id: userId,
           title: notification.title,
           message: notification.message,
           type: notification.type,
@@ -197,21 +191,21 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   // Fetch notifications on mount and when user changes
   useEffect(() => {
     fetchNotifications()
-  }, [currentUser?.id])
+  }, [fetchNotifications])
 
   // Subscribe to real-time notification updates
   useEffect(() => {
-    if (!currentUser) return
+    if (!userId) return
 
     const channel = supabase
-      .channel('notifications')
+      .channel(`notifications-${userId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${currentUser.id}`
+          filter: `user_id=eq.${userId}`
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
@@ -224,7 +218,12 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
               type: payload.new.type,
               relatedId: payload.new.related_id
             }
-            setNotifications((prev) => [newNotification, ...prev])
+            setNotifications((prev) => {
+              const withoutDuplicate = prev.filter(
+                (n) => n.id !== newNotification.id
+              )
+              return [newNotification, ...withoutDuplicate]
+            })
           } else if (payload.eventType === 'UPDATE') {
             setNotifications((prev) =>
               prev.map((n) =>
@@ -250,7 +249,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [currentUser?.id])
+  }, [userId])
 
   return (
     <NotificationsContext.Provider
@@ -271,6 +270,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useNotifications() {
   const context = useContext(NotificationsContext)
   if (!context) {

@@ -14,11 +14,29 @@ import { Link, useLocation } from 'react-router-dom'
 
 import { useAuth } from '../../context/AuthContext'
 import { logoutAndRedirect } from '../../services/logoutService'
+import { useEffect, useRef } from 'react'
+import { useNotifications } from '../../context'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
+  // Close user menu when clicking outside
+  useEffect(() => {
+    if (!showUserMenu) return
+    function handleClick(e: MouseEvent) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowUserMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showUserMenu])
   const { currentUser } = useAuth()
+  const { unreadCount } = useNotifications()
   const location = useLocation()
   const isOnDashboard = location.pathname.startsWith('/dashboard')
   const isAuthenticated = Boolean(currentUser)
@@ -88,13 +106,13 @@ export function Navbar() {
   const showDashboardActions = isAuthenticated && isOnDashboard
 
   const navLinkBaseClass =
-    'px-3 py-2 rounded-md text-sm font-medium flex items-center relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-blue-600 after:transition-all hover:after:w-full transition-colors'
+    'px-3 py-2 rounded-md text-sm font-medium flex items-center relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full transition-colors'
 
   const getLinkClass = (path: string) =>
     `${navLinkBaseClass} ${
       location.pathname === path
-        ? 'text-blue-600'
-        : 'text-gray-700 hover:text-blue-600'
+        ? 'text-indigo-200 bg-indigo-700'
+        : 'text-white hover:text-indigo-200 hover:bg-indigo-700'
     }`
 
   const handleLogout = async () => {
@@ -107,14 +125,14 @@ export function Navbar() {
   }
 
   return (
-    <header className='bg-white bg-opacity-90 backdrop-blur-sm shadow-sm border-b border-gray-100 relative z-30'>
+    <header className='bg-indigo-800 backdrop-blur-sm shadow-sm border-b border-gray-100 sticky top-0 z-30'>
       <div className='container mx-auto px-4'>
         <div className='flex justify-between items-center h-16'>
           <Link to='/' className='flex items-center space-x-2 group'>
-            <div className='bg-blue-600 p-2 rounded-md relative overflow-hidden tech-pulse'>
+            <div className='bg-indigo-600 p-2 rounded-md relative overflow-hidden tech-pulse'>
               <HandshakeIcon className='h-6 w-6 text-white relative z-10' />
             </div>
-            <span className='text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors'>
+            <span className='text-xl font-semibold text-white group-hover:text-indigo-400 transition-colors'>
               SponsrAI
             </span>
           </Link>
@@ -132,26 +150,34 @@ export function Navbar() {
 
             {showDashboardActions ? (
               <div className='flex items-center space-x-4'>
-                <button className='relative text-gray-500 hover:text-gray-700 transition-colors'>
+                {/* Notifications */}
+                <button className='relative text-white hover:text-indigo-200 transition-colors'>
                   <BellIcon className='h-5 w-5' />
-                  <span className='absolute top-0 right-0 h-2 w-2 bg-blue-600 rounded-full'></span>
+                  {unreadCount > 0 && (
+                    <span className='absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-semibold'>
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
                 </button>
 
                 <div className='relative flex items-center space-x-2'>
-                  <span className='hidden sm:block text-sm font-medium text-gray-700'>
+                  <span className='hidden sm:block text-sm font-medium text-white'>
                     {currentUser?.name || 'User'}
                   </span>
                   <button
                     onClick={() => setShowUserMenu((prev) => !prev)}
-                    className='text-gray-700 hover:text-blue-600 transition-colors'
+                    className='text-gray-700 hover:text-indigo-400 transition-colors'
                   >
-                    <div className='bg-blue-100 text-blue-800 rounded-full h-8 w-8 flex items-center justify-center font-semibold'>
+                    <div className='bg-indigo-100 text-indigo-800 rounded-full h-8 w-8 flex items-center justify-center font-semibold'>
                       {currentUser?.name?.charAt(0).toUpperCase() || '?'}
                     </div>
                   </button>
 
                   {showUserMenu && (
-                    <div className='absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1'>
+                    <div
+                      ref={userMenuRef}
+                      className='absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1'
+                    >
                       <Link
                         to='/dashboard/edit-profile'
                         className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50'
@@ -172,7 +198,7 @@ export function Navbar() {
             ) : isAuthenticated ? (
               <Link
                 to={getDashboardLink()}
-                className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center relative overflow-hidden group'
+                className='bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center relative overflow-hidden group'
               >
                 <span className='relative z-10 flex items-center'>
                   Dashboard
@@ -182,7 +208,7 @@ export function Navbar() {
             ) : (
               <Link
                 to='/login'
-                className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center relative overflow-hidden group'
+                className='bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center relative overflow-hidden group'
               >
                 <span className='relative z-10 flex items-center'>
                   <LogIn className='h-4 w-4 mr-1' />
