@@ -4,20 +4,24 @@ import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import {
   getBrandByUserId,
-  getMatchesForBrand
+  getMatchesForBrand,
+  getOrganizersByIds
 } from '../../services/dataService'
 import { Match } from '../../services/matchingService'
 import { TrendingUpIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
 import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
-import { Brand } from '../../types'
+import { Brand, Organizer } from '../../types'
 import { MatchRow } from '../dashboard/MatchRow'
 
 export function BrandDashboard() {
   const { currentUser } = useAuth()
   const [brand, setBrand] = useState<Brand | null>(null)
   const [matches, setMatches] = useState<Match[]>([])
+  const [organizersById, setOrganizersById] = useState<
+    Record<string, Organizer>
+  >({})
   const [loading, setLoading] = useState(true)
   useEffect(() => {
     const loadData = async () => {
@@ -28,8 +32,34 @@ export function BrandDashboard() {
           if (brandData) {
             const matchData = await getMatchesForBrand(brandData.id)
             setMatches(matchData)
+
+            const organizerIds = Array.from(
+              new Set(matchData.map((m) => m.organizerId))
+            )
+            if (organizerIds.length) {
+              try {
+                const organizers = await getOrganizersByIds(organizerIds)
+                const map = organizers.reduce<Record<string, Organizer>>(
+                  (acc, org) => {
+                    acc[org.id] = org
+                    return acc
+                  },
+                  {}
+                )
+                setOrganizersById(map)
+              } catch (organizerError) {
+                console.error(
+                  'Failed to load organizers for matches:',
+                  organizerError
+                )
+                setOrganizersById({})
+              }
+            } else {
+              setOrganizersById({})
+            }
           } else {
             setMatches([])
+            setOrganizersById({})
           }
         } catch (error) {
           console.error('Failed to load brand dashboard data:', error)
@@ -182,7 +212,11 @@ export function BrandDashboard() {
               </thead>
               <tbody className='bg-white divide-y divide-gray-200'>
                 {matches.slice(0, 5).map((match) => (
-                  <MatchRow key={match.id} match={match} />
+                  <MatchRow
+                    key={match.id}
+                    match={match}
+                    organizer={organizersById[match.organizerId]}
+                  />
                 ))}
               </tbody>
             </table>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
-import { getBrandById } from '../../services/dataService'
+import { getBrandById, getBrandsByIds } from '../../services/dataService'
 import { Brand } from '../../types'
 import { Match } from '../../services/matchingService'
 import {
@@ -19,6 +19,30 @@ export function OrganizerDashboard() {
   const { currentUser } = useAuth()
   const { organizer, matches, pendingMatches, acceptedMatches, loading } =
     useOrganizerDashboard(currentUser?.id)
+  const [brandsById, setBrandsById] = useState<Record<string, Brand>>({})
+
+  useEffect(() => {
+    const loadBrands = async () => {
+      const brandIds = Array.from(new Set(matches.map((m) => m.brandId)))
+      if (!brandIds.length) {
+        setBrandsById({})
+        return
+      }
+      try {
+        const brands = await getBrandsByIds(brandIds)
+        const map = brands.reduce<Record<string, Brand>>((acc, brand) => {
+          acc[brand.id] = brand
+          return acc
+        }, {})
+        setBrandsById(map)
+      } catch (error) {
+        console.error('Failed to load brands for matches:', error)
+        setBrandsById({})
+      }
+    }
+
+    loadBrands()
+  }, [matches])
 
   if (loading) {
     return (
@@ -233,7 +257,11 @@ export function OrganizerDashboard() {
               </thead>
               <tbody className='bg-white divide-y divide-gray-200'>
                 {matches.slice(0, 5).map((match) => (
-                  <MatchRow key={match.id} match={match} />
+                  <MatchRow
+                    key={match.id}
+                    match={match}
+                    brand={brandsById[match.brandId]}
+                  />
                 ))}
               </tbody>
             </table>
@@ -245,31 +273,76 @@ export function OrganizerDashboard() {
 }
 
 // Component to display a single match row
-function MatchRow({ match }: { match: Match }) {
-  const [brand, setBrand] = useState<Brand | null>(null)
+function MatchRow({
+  match,
+  brand: brandProp
+}: {
+  match: Match
+  brand?: Brand
+}) {
+  const [brand, setBrand] = useState<Brand | null>(brandProp ?? null)
+  const [isLoading, setIsLoading] = useState(!brandProp)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let isMounted = true
-    const loadBrand = async () => {
-      try {
-        const brandData = await getBrandById(match.brandId)
-        if (isMounted) {
-          setBrand(brandData || null)
-        }
-      } catch (error) {
-        console.error('Failed to load brand for match', match.id, error)
-        if (isMounted) {
-          setBrand(null)
-        }
-      }
+    if (brandProp) {
+      setBrand(brandProp)
+      setIsLoading(false)
+      setError(null)
+      return
     }
-    loadBrand()
+
+    let isMounted = true
+    setIsLoading(true)
+    setError(null)
+
+    getBrandById(match.brandId)
+      .then((brandData) => {
+        if (!isMounted) return
+        if (!brandData) {
+          setError('Brand not found')
+          setBrand(null)
+          return
+        }
+        setBrand(brandData)
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return
+        const message =
+          err instanceof Error ? err.message : 'Unable to load brand'
+        setError(message)
+        setBrand(null)
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      })
+
     return () => {
       isMounted = false
     }
-  }, [match.brandId, match.id])
+  }, [brandProp, match.brandId, match.id])
 
-  if (!brand) return null
+  if (isLoading) {
+    return (
+      <tr>
+        <td className='px-6 py-4 text-sm text-gray-500' colSpan={4}>
+          Loading match...
+        </td>
+      </tr>
+    )
+  }
+
+  if (error || !brand) {
+    return (
+      <tr>
+        <td className='px-6 py-4 text-sm text-red-600' colSpan={4}>
+          {error ?? 'Brand details unavailable'}
+        </td>
+      </tr>
+    )
+  }
   return (
     <tr>
       <td className='px-6 py-4 whitespace-nowrap'>

@@ -6,11 +6,11 @@ export default {
     extend: {
       colors: {
         brand: {
-          primary: '#2563eb', // blue-600
-          secondary: '#4f46e5', // indigo-600
-          accent: '#38bdf8', // sky-400
-          dark: '#1e3a8a', // blue-900
-          light: '#eff6ff' // blue-50
+          primary: '#4f46e5', // indigo-600
+          secondary: '#4338ca', // indigo-700
+          accent: '#818cf8', // indigo-400
+          dark: '#312e81', // indigo-900
+          light: '#eef2ff' // indigo-50
         },
         surface: {
           base: '#ffffff',
@@ -41,7 +41,7 @@ export default {
       },
       backgroundImage: {
         'brand-gradient':
-          'linear-gradient(135deg, rgba(37,99,235,1) 0%, rgba(79,70,229,1) 50%, rgba(14,165,233,1) 100%)'
+          'linear-gradient(135deg, rgba(79,70,229,1) 0%, rgba(67,56,202,1) 50%, rgba(129,140,248,1) 100%)'
       }
     }
   }

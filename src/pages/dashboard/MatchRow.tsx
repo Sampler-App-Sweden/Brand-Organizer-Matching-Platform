@@ -1,29 +1,100 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Match } from '../../services/matchingService'
+import { getOrganizerById } from '../../services/dataService'
+import { Organizer } from '../../types'
 
-// Component to render a single match row
-export function MatchRow({ match }: { match: Match }) {
-  const [organizer, setOrganizer] = useState<any>(null)
+export function MatchRow({
+  match,
+  organizer: organizerProp
+}: {
+  match: Match
+  organizer?: Organizer
+}) {
+  const [organizer, setOrganizer] = useState<Organizer | null>(
+    organizerProp ?? null
+  )
+  const [isLoading, setIsLoading] = useState(!organizerProp)
+  const [error, setError] = useState<string | null>(null)
+
   useEffect(() => {
-    // In a real app, this would be an API call
-    const organizerData = JSON.parse(localStorage.getItem('organizers') || '[]')
-    const found = organizerData.find((o: any) => o.id === match.organizerId)
-    setOrganizer(found || null)
-  }, [match])
-  if (!organizer) return null
+    if (organizerProp) {
+      setOrganizer(organizerProp)
+      setIsLoading(false)
+      setError(null)
+      return
+    }
+
+    let isMounted = true
+    setIsLoading(true)
+    setError(null)
+
+    getOrganizerById(match.organizerId)
+      .then((data) => {
+        if (!isMounted) return
+        if (!data) {
+          setError('Organizer not found')
+          setOrganizer(null)
+          return
+        }
+        setOrganizer(data)
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return
+        const message =
+          err instanceof Error ? err.message : 'Unable to load organizer'
+        setError(message)
+        setOrganizer(null)
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [match.organizerId, organizerProp])
+
+  const scoreTone = useMemo(() => {
+    if (match.score >= 80) return 'bg-green-100 text-green-800'
+    if (match.score >= 60) return 'bg-yellow-100 text-yellow-800'
+    return 'bg-gray-100 text-gray-800'
+  }, [match.score])
+
+  const statusTone = useMemo(() => {
+    if (match.status === 'accepted') return 'bg-green-100 text-green-800'
+    if (match.status === 'rejected') return 'bg-red-100 text-red-800'
+    return 'bg-yellow-100 text-yellow-800'
+  }, [match.status])
+
+  if (isLoading) {
+    return (
+      <tr>
+        <td className='px-6 py-4 text-sm text-gray-500' colSpan={4}>
+          Loading match...
+        </td>
+      </tr>
+    )
+  }
+
+  if (error || !organizer) {
+    return (
+      <tr>
+        <td className='px-6 py-4 text-sm text-red-600' colSpan={4}>
+          {error ?? 'Organizer details unavailable'}
+        </td>
+      </tr>
+    )
+  }
+
   return (
     <tr>
       <td className='px-6 py-4 whitespace-nowrap'>
         <div className='flex items-center'>
           <div
-            className={`h-8 w-8 rounded-full flex items-center justify-center ${
-              match.score >= 80
-                ? 'bg-green-100 text-green-800'
-                : match.score >= 60
-                ? 'bg-yellow-100 text-yellow-800'
-                : 'bg-gray-100 text-gray-800'
-            }`}
+            className={`h-8 w-8 rounded-full flex items-center justify-center ${scoreTone}`}
           >
             {match.score}%
           </div>
@@ -31,19 +102,15 @@ export function MatchRow({ match }: { match: Match }) {
       </td>
       <td className='px-6 py-4 whitespace-nowrap'>
         <div className='text-sm font-medium text-gray-900'>
-          {organizer.eventName}
+          {organizer.eventName || 'Untitled event'}
         </div>
-        <div className='text-sm text-gray-500'>{organizer.eventType}</div>
+        <div className='text-sm text-gray-500'>
+          {organizer.eventType || 'Unknown type'}
+        </div>
       </td>
       <td className='px-6 py-4 whitespace-nowrap'>
         <span
-          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            match.status === 'accepted'
-              ? 'bg-green-100 text-green-800'
-              : match.status === 'rejected'
-              ? 'bg-red-100 text-red-800'
-              : 'bg-yellow-100 text-yellow-800'
-          }`}
+          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusTone}`}
         >
           {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
         </span>

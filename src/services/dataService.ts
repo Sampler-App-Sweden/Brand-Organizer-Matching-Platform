@@ -517,3 +517,35 @@ export const getOrganizerById = async (
 
   return data ? mapOrganizerRowToOrganizer(data as OrganizerRow) : null
 }
+
+export const getOrganizersByIds = async (
+  organizerIds: string[]
+): Promise<Organizer[]> => {
+  if (!organizerIds.length) return []
+
+  const { data, error } = await supabase
+    .from('organizers')
+    .select('*')
+    .in('id', organizerIds)
+
+  if (error) {
+    throw new Error(`Failed to load organizers: ${error.message}`)
+  }
+
+  return (data as OrganizerRow[] | null)?.map(mapOrganizerRowToOrganizer) ?? []
+}
+
+export const getBrandsByIds = async (brandIds: string[]): Promise<Brand[]> => {
+  if (!brandIds.length) return []
+
+  const { data, error } = await supabase
+    .from('brands')
+    .select('*')
+    .in('id', brandIds)
+
+  if (error) {
+    throw new Error(`Failed to load brands: ${error.message}`)
+  }
+
+  return (data as BrandRow[] | null)?.map(mapBrandRowToBrand) ?? []
+}

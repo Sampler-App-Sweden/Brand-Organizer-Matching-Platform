@@ -84,11 +84,12 @@ export function Home() {
               <div className='flex flex-col sm:flex-row'>
                 <div className='relative flex-grow mb-3 sm:mb-0'>
                   <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <SparklesIcon className='h-5 w-5 text-blue-500' />
+                    <SparklesIcon className='h-5 w-5 text-brand-primary' />
                   </div>
                   <input
                     type='text'
-                    className='block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg sm:rounded-r-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-500'
+                    className='block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg sm:rounded-r-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:to-brand-primary text-gray-900 placeholder-gray-500'
+                    style={{ textIndent: '1.5rem' }}
                     placeholder='I want to launch my new drink at events...'
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
@@ -96,7 +97,7 @@ export function Home() {
                 </div>
                 <button
                   type='submit'
-                  className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg sm:rounded-l-none font-medium transition-colors flex items-center justify-center'
+                  className='bg-brand-primary hover:bg-brand-secondary text-white px-6 py-3 rounded-lg sm:rounded-l-none font-medium transition-colors flex items-center justify-center'
                 >
                   <SearchIcon className='h-5 w-5 mr-1' />
                   Search

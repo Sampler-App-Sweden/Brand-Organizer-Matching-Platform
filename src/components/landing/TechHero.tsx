@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { SparklesIcon, ArrowRightIcon } from 'lucide-react'
 import { TechCircuitLines } from '../effects'
@@ -26,7 +25,7 @@ export function TechHero({
       </div>
       <div className='container mx-auto px-4 py-16 md:py-24 relative z-10'>
         <div className='max-w-3xl mx-auto text-center'>
-          <div className='inline-block mb-3 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium animate-pulse'>
+          <div className='inline-block mb-3 bg-blue-100 text-brand-secondary px-3 py-1 rounded-full text-sm font-medium animate-pulse'>
             AI-Powered Matching Technology
           </div>
           <h1 className='text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight relative'>
@@ -92,7 +91,7 @@ export function TechHero({
           <div className='flex flex-col sm:flex-row justify-center gap-4'>
             <Link
               to={ctaLink}
-              className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium flex items-center justify-center transition-colors relative overflow-hidden group tech-pulse'
+              className='bg-brand-primary hover:bg-brand-secondary text-white px-6 py-3 rounded-md font-medium flex items-center justify-center transition-colors relative overflow-hidden group tech-pulse'
             >
               <span className='relative z-10 flex items-center'>
                 <SparklesIcon className='h-5 w-5 mr-2' />
@@ -112,9 +111,11 @@ export function TechHero({
           </div>
         </div>
       </div>
+
       {/* Animated tech pattern */}
       <div className='h-16 bg-gray-50 relative overflow-hidden'>
         <div className='absolute inset-0 tech-grid opacity-20'></div>
+
         {/* Animated data points */}
         <div className='absolute inset-0'>
           {[...Array(20)].map((_, i) => (
@@ -134,21 +135,23 @@ export function TechHero({
             ></div>
           ))}
         </div>
+
         {/* Horizontal data lines */}
-        <div className='absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent top-4 animate-pulse'></div>
+        <div className='absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-accent to-transparent top-4 animate-pulse'></div>
         <div
-          className='absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent top-8 animate-pulse'
+          className='absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-accent to-transparent top-8 animate-pulse'
           style={{
             animationDelay: '0.5s'
           }}
         ></div>
         <div
-          className='absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent top-12 animate-pulse'
+          className='absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-accent to-transparent top-12 animate-pulse'
           style={{
             animationDelay: '1s'
           }}
         ></div>
       </div>
+
       {/* CSS for animations */}
       <style>{`
         @keyframes pulse-data {
