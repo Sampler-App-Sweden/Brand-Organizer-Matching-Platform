@@ -1,30 +1,25 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { TechLayout } from '../components/layout'
-import { TechHero, TechFeatureSection, TechCard } from '../components/landing'
 import {
+  ArrowRightIcon,
+  BarChartIcon,
+  CalendarIcon,
+  MessageSquareIcon,
   PackageIcon,
-  UsersIcon,
   SparklesIcon,
   TrendingUpIcon,
-  MessageSquareIcon,
-  SearchIcon,
-  ArrowRightIcon,
-  CalendarIcon,
-  BarChartIcon,
+  UsersIcon,
   ZapIcon
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
+
+import {
+  Search,
+  TechCard,
+  TechFeatureSection,
+  TechHero
+} from '../components/landing'
+import { TechLayout } from '../components/layout'
 
 export function Home() {
-  const navigate = useNavigate()
-  const [searchInput, setSearchInput] = useState('')
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchInput.trim()) {
-      // Navigate to AI onboarding with the search query
-      navigate(`/onboarding?q=${encodeURIComponent(searchInput)}`)
-    }
-  }
   const features = [
     {
       icon: <SparklesIcon className='h-6 w-6' />,
@@ -73,44 +68,10 @@ export function Home() {
         secondaryCtaText='Explore Community'
         secondaryCtaLink='/community'
       />
+
       {/* Search Section */}
-      <div className='bg-gray-50 py-12'>
-        <div className='container mx-auto px-4'>
-          <div className='max-w-3xl mx-auto'>
-            <h2 className='text-2xl font-bold text-gray-900 mb-6 text-center'>
-              Tell us what you're looking to achieve
-            </h2>
-            <form onSubmit={handleSearchSubmit} className='relative'>
-              <div className='flex flex-col sm:flex-row'>
-                <div className='relative flex-grow mb-3 sm:mb-0'>
-                  <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                    <SparklesIcon className='h-5 w-5 text-brand-primary' />
-                  </div>
-                  <input
-                    type='text'
-                    className='block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg sm:rounded-r-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:to-brand-primary text-gray-900 placeholder-gray-500'
-                    style={{ textIndent: '1.5rem' }}
-                    placeholder='I want to launch my new drink at events...'
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                  />
-                </div>
-                <button
-                  type='submit'
-                  className='bg-brand-primary hover:bg-brand-secondary text-white px-6 py-3 rounded-lg sm:rounded-l-none font-medium transition-colors flex items-center justify-center'
-                >
-                  <SearchIcon className='h-5 w-5 mr-1' />
-                  Search
-                </button>
-              </div>
-              <p className='text-sm text-gray-500 mt-2'>
-                Try: "I need sponsors for my tech conference" or "Looking for
-                food festivals to showcase our products"
-              </p>
-            </form>
-          </div>
-        </div>
-      </div>
+      {/* <Search /> */}
+
       {/* Features Section */}
       <TechFeatureSection
         title='Platform Benefits'
@@ -174,7 +135,7 @@ export function Home() {
                 <div>
                   <ol className='space-y-2 mb-4'>
                     <li className='flex items-start'>
-                      <span className='bg-blue-100 text-blue-800 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5'>
+                      <span className='bg-blue-100 text-indigo-800 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5'>
                         1
                       </span>
                       <span className='text-gray-700'>
@@ -182,7 +143,7 @@ export function Home() {
                       </span>
                     </li>
                     <li className='flex items-start'>
-                      <span className='bg-blue-100 text-blue-800 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5'>
+                      <span className='bg-blue-100 text-indigo-800 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5'>
                         2
                       </span>
                       <span className='text-gray-700'>
@@ -190,7 +151,7 @@ export function Home() {
                       </span>
                     </li>
                     <li className='flex items-start'>
-                      <span className='bg-blue-100 text-blue-800 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5'>
+                      <span className='bg-blue-100 text-indigo-800 rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5'>
                         3
                       </span>
                       <span className='text-gray-700'>
@@ -200,7 +161,7 @@ export function Home() {
                   </ol>
                   <Link
                     to='/onboarding'
-                    className='text-blue-600 font-medium hover:text-blue-800 flex items-center'
+                    className='text-blue-600 font-medium hover:text-indigo-800 flex items-center'
                   >
                     Get Started
                     <ArrowRightIcon className='h-4 w-4 ml-1' />
@@ -211,8 +172,9 @@ export function Home() {
           </div>
         </div>
       </div>
+
       {/* CTA Section */}
-      <div className='bg-blue-600 py-16'>
+      <div className='bg-indigo-900 py-16'>
         <div className='container mx-auto px-4 text-center'>
           <h2 className='text-3xl font-bold text-white mb-4'>
             Ready to transform your sponsorship strategy?
@@ -224,13 +186,13 @@ export function Home() {
           <div className='flex flex-col sm:flex-row justify-center gap-4'>
             <Link
               to='/register'
-              className='bg-white text-blue-600 hover:bg-gray-100 px-6 py-3 rounded-md font-medium transition-colors'
+              className='bg-white text-indigo-700 hover:bg-gray-200 px-6 py-3 rounded-md font-medium transition-colors'
             >
               Create Account
             </Link>
             <Link
               to='/login'
-              className='bg-blue-700 text-white hover:bg-blue-800 px-6 py-3 rounded-md font-medium transition-colors'
+              className='bg-brand-primary text-white hover:bg-indigo-800 px-6 py-3 rounded-md font-medium transition-colors'
             >
               Sign In
             </Link>
