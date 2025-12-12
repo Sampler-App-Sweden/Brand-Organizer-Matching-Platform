@@ -1,4 +1,5 @@
 import {
+  BellIcon,
   Bookmark,
   HandshakeIcon,
   HomeIcon,
@@ -112,6 +113,11 @@ export const sidebarItems: SidebarCollection = {
     }
   ],
   common: [
+    {
+      label: 'Notifications',
+      icon: createElement(BellIcon, { className: 'h-5 w-5' }),
+      path: '/dashboard/notifications'
+    },
     {
       label: 'Profile',
       icon: createElement(UsersIcon, { className: 'h-5 w-5' }),

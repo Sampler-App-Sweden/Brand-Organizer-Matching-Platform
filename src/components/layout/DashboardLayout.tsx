@@ -59,7 +59,7 @@ export function DashboardLayout({
                       to={itemPath}
                       className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors ${
                         isActive
-                          ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 pl-3'
+                          ? 'bg-blue-50 text-indigo-700 border-l-4 border-indigo-600 pl-3'
                           : ''
                       }`}
                     >

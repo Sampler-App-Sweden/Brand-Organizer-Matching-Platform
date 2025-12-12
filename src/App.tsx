@@ -11,6 +11,7 @@ import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
 import { ContactPage } from './pages/ContactPage'
+import { NotificationsPage } from './pages/dashboard/NotificationsPage'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
 import { CommunityMemberDetail, CommunityPage } from './pages/community'
 import { BrandDashboard, OrganizerDashboard } from './pages/dashboard'
@@ -135,6 +136,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <MatchesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/dashboard/notifications'
+        element={
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         }
       />

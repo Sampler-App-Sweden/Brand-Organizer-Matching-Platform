@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/AuthContext'
+import { useNotifications } from '../../context'
 
 export function DashboardNavbar() {
   const { currentUser, logout } = useAuth()
@@ -18,6 +19,7 @@ export function DashboardNavbar() {
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const { unreadCount } = useNotifications()
 
   const handleLogout = () => {
     logout()
@@ -67,8 +69,8 @@ export function DashboardNavbar() {
                 to={item.path}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   location.pathname === item.path
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                    ? 'bg-blue-50 text-indigo-600'
+                    : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'
                 }`}
               >
                 {item.icon}
@@ -78,17 +80,25 @@ export function DashboardNavbar() {
           </nav>
 
           <div className='flex items-center space-x-4'>
-            <button className='relative text-gray-500 hover:text-gray-700 transition-colors'>
+            <button
+              className='relative text-gray-500 hover:text-gray-700 transition-colors'
+              onClick={() => navigate('/dashboard/notifications')}
+              aria-label='View notifications'
+            >
               <BellIcon className='h-6 w-6' />
-              <span className='absolute top-0 right-0 h-2 w-2 bg-blue-600 rounded-full'></span>
+              {unreadCount > 0 && (
+                <span className='absolute -top-1 -right-1 min-h-[1rem] min-w-[1rem] rounded-full bg-indigo-600 text-white text-[10px] font-semibold flex items-center justify-center px-1'>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
 
             <div className='relative'>
               <button
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className='flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors'
+                className='flex items-center space-x-2 text-gray-700 hover:text-indigo-600 transition-colors'
               >
-                <div className='bg-blue-100 text-blue-800 rounded-full h-8 w-8 flex items-center justify-center font-semibold'>
+                <div className='bg-blue-100 text-indigo-800 rounded-full h-8 w-8 flex items-center justify-center font-semibold'>
                   {currentUser?.name?.charAt(0).toUpperCase() || '?'}
                 </div>
                 <span className='hidden sm:block text-sm font-medium'>
