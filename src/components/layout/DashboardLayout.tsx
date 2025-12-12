@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 
 import { logoutAndRedirect } from '../../services/logoutService'
-import { TechBackground } from '../effects'
 import { Navbar } from '../layout'
 import { SidebarItem, sidebarItems } from './sidebarItems'
 
@@ -16,7 +15,7 @@ export function DashboardLayout({
   children,
   userType,
   mainPaddingClassName = 'p-0',
-  contentPaddingClassName = 'p-0'
+  contentPaddingClassName = 'p-4'
 }: DashboardLayoutProps) {
   const location = useLocation()
   const currentSidebarItems: SidebarItem[] = sidebarItems[userType]
@@ -28,11 +27,6 @@ export function DashboardLayout({
 
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col relative overflow-hidden'>
-      {/* Tech background */}
-      <div className='absolute inset-0 z-0'>
-        <TechBackground />
-      </div>
-
       <Navbar />
 
       {/* Dashboard Content Area with Sidebar */}
