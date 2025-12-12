@@ -32,7 +32,7 @@ export function Layout({ children }: LayoutProps) {
           )}
         </div>
         <main className='flex-grow relative'>
-          <div className='w-full py-6'>{children}</div>
+          <div className='w-full py-0'>{children}</div>
         </main>
         <Footer className='bg-opacity-90 backdrop-blur-sm relative z-10' />
       </div>

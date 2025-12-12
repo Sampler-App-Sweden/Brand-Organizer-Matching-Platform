@@ -21,6 +21,7 @@ export function OrganizerDashboard() {
     useOrganizerDashboard(currentUser?.id)
   const [brandsById, setBrandsById] = useState<Record<string, Brand>>({})
 
+  // Load brand details for all matches
   useEffect(() => {
     const loadBrands = async () => {
       const brandIds = Array.from(new Set(matches.map((m) => m.brandId)))
