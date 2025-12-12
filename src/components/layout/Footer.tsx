@@ -8,7 +8,7 @@ interface FooterProps {
 export function Footer({ className = '' }: FooterProps) {
   return (
     <footer
-      className={`bg-white border-t border-gray-100 py-8 ${className}`.trim()}
+      className={`bg-white border-t border-gray-100 py-4 ${className}`.trim()}
     >
       <div className='container mx-auto px-4'>
         <div className='flex flex-col md:flex-row justify-between items-center'>

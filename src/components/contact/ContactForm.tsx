@@ -42,10 +42,10 @@ export function ContactForm() {
 
   return (
     <form
-      className='max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md'
+      className='w-full p-0 bg-white border-none shadow-none rounded-none sm:p-6 sm:shadow-md sm:border sm:rounded-lg'
       onSubmit={handleSubmit}
     >
-      <h2 className='text-2xl font-bold mb-6 text-center'>Contact Us</h2>
+      <h2 className='text-2xl font-bold mb-6 text-left'>Send us an email</h2>
       <div className='mb-4'>
         <label htmlFor='name' className='block text-gray-700 font-medium mb-2'>
           Name
