@@ -89,9 +89,6 @@ export function OrganizerDashboard() {
             sponsorship opportunities.
           </p>
         </div>
-        <Link to='/dashboard/edit-profile'>
-          <Button variant='outline'>Edit Profile</Button>
-        </Link>
       </div>
 
       {/* Stats */}
