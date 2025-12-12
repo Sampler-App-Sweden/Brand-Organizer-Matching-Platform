@@ -68,7 +68,16 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
       setNotifications(formattedNotifications)
     } catch (error) {
-      console.error('Error fetching notifications:', error)
+      // If the notifications table is missing in this environment, fail soft and warn once.
+      const code = (error as { code?: string })?.code
+      if (code === 'PGRST205' || code === '404') {
+        console.warn(
+          'Notifications table not found in Supabase. Add the table or disable notifications for this environment.'
+        )
+        setNotifications([])
+      } else {
+        console.error('Error fetching notifications:', error)
+      }
     } finally {
       setLoading(false)
     }

@@ -198,6 +198,70 @@ CREATE TABLE IF NOT EXISTS public.matches (
 );
 -- Enable RLS
 ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
+
+-- Notifications table
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  type TEXT DEFAULT 'general',
+  related_id TEXT,
+  read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Enable RLS
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- RLS policies: users can see and manage their own notifications
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'notifications'
+      AND policyname = 'Allow select own notifications'
+  ) THEN
+    CREATE POLICY "Allow select own notifications"
+      ON public.notifications FOR SELECT
+      USING (auth.uid() = user_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'notifications'
+      AND policyname = 'Allow insert own notifications'
+  ) THEN
+    CREATE POLICY "Allow insert own notifications"
+      ON public.notifications FOR INSERT
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'notifications'
+      AND policyname = 'Allow update own notifications'
+  ) THEN
+    CREATE POLICY "Allow update own notifications"
+      ON public.notifications FOR UPDATE
+      USING (auth.uid() = user_id)
+      WITH CHECK (auth.uid() = user_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'notifications'
+      AND policyname = 'Allow delete own notifications'
+  ) THEN
+    CREATE POLICY "Allow delete own notifications"
+      ON public.notifications FOR DELETE
+      USING (auth.uid() = user_id);
+  END IF;
+END $$;
 -- Contracts table
 CREATE TABLE IF NOT EXISTS public.contracts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

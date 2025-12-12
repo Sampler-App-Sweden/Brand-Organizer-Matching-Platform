@@ -10,6 +10,7 @@ import { NotificationsProvider } from './context'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
+import { ContactPage } from './pages/ContactPage'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
 import { CommunityMemberDetail, CommunityPage } from './pages/community'
 import { BrandDashboard, OrganizerDashboard } from './pages/dashboard'
@@ -32,6 +33,9 @@ import { initEmailJS } from './services/emailService'
 
 import './styles/tech-effects.css'
 
+// Alias to avoid undefined references in route configs
+const Contact = ContactPage
+
 const AppRoutes = () => {
   useEffect(() => {
     // Initialize sample collaborations
@@ -48,6 +52,7 @@ const AppRoutes = () => {
       <Route path='/login' element={<Login />} />
       <Route path='/login/help' element={<LoginTroubleshooting />} />
       <Route path='/register' element={<Register />} />
+      <Route path='/contact' element={<Contact />} />
       {/* Directory pages */}
       <Route path='/brands' element={<BrandsDirectoryPage />} />
       <Route path='/organizers' element={<OrganizersDirectoryPage />} />
@@ -56,6 +61,7 @@ const AppRoutes = () => {
       <Route path='/community' element={<CommunityPage />} />
       <Route path='/community/:memberId' element={<CommunityMemberDetail />} />
       <Route path='/community/register' element={<CommunityRegistration />} />
+
       {/* Brand routes */}
       <Route
         path='/dashboard/brand'
