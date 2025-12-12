@@ -31,7 +31,11 @@ export function Layout({ children }: LayoutProps) {
             </div>
           )}
         </div>
-        <main className='flex-grow relative'>{children}</main>
+        <main className='flex-grow relative'>
+          <div className='max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6'>
+            {children}
+          </div>
+        </main>
         <Footer className='bg-opacity-90 backdrop-blur-sm relative z-10' />
       </div>
     </div>

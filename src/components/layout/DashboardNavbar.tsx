@@ -129,7 +129,7 @@ export function DashboardNavbar() {
             </div>
 
             <button
-              className='md:hidden text-gray-500 hover:text-gray-700'
+              className='md:hidden text-white hover:text-white'
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (

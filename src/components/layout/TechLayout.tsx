@@ -20,7 +20,11 @@ export function TechLayout({
       <TechBackground />
       <TechDataStream className='opacity-30' />
       {showHeader && <Navbar />}
-      <main className='flex-grow relative z-10'>{children}</main>
+      <main className='flex-grow relative z-10'>
+        <div className='max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6'>
+          {children}
+        </div>
+      </main>
       {showFooter && (
         <Footer className='bg-opacity-90 backdrop-blur-sm relative z-10' />
       )}
