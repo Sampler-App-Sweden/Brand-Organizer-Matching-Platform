@@ -151,7 +151,7 @@ export function DashboardNavbar() {
                 to={item.path}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium ${
                   location.pathname === item.path
-                    ? 'bg-blue-50 text-blue-600'
+                    ? 'bg-indigo-50 text-indigo-600'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
