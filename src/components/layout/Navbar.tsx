@@ -126,7 +126,7 @@ export function Navbar() {
 
   return (
     <header className='bg-indigo-800 backdrop-blur-sm shadow-sm border-b border-gray-100 sticky top-0 z-30'>
-      <div className='container mx-auto px-4'>
+      <div className='w-full'>
         <div className='flex justify-between items-center h-16'>
           <Link to='/' className='flex items-center space-x-2 group'>
             <div className='bg-indigo-600 p-2 rounded-md relative overflow-hidden tech-pulse'>

@@ -25,16 +25,14 @@ export function Layout({ children }: LayoutProps) {
           {/* Dashboard listings panel - shows when user is logged in */}
           {location.pathname.includes('/dashboard') && (
             <div className='bg-white border-b border-gray-200 py-2 bg-opacity-90 backdrop-blur-sm'>
-              <div className='container mx-auto px-4'>
+              <div className='w-full'>
                 <DashboardListingsBar />
               </div>
             </div>
           )}
         </div>
         <main className='flex-grow relative'>
-          <div className='max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6'>
-            {children}
-          </div>
+          <div className='w-full py-6'>{children}</div>
         </main>
         <Footer className='bg-opacity-90 backdrop-blur-sm relative z-10' />
       </div>

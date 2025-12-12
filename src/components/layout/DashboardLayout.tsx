@@ -15,8 +15,8 @@ interface DashboardLayoutProps {
 export function DashboardLayout({
   children,
   userType,
-  mainPaddingClassName = 'p-4 md:p-0',
-  contentPaddingClassName = 'p-4 md:p-6'
+  mainPaddingClassName = 'p-0',
+  contentPaddingClassName = 'p-0'
 }: DashboardLayoutProps) {
   const location = useLocation()
   const currentSidebarItems: SidebarItem[] = sidebarItems[userType]
