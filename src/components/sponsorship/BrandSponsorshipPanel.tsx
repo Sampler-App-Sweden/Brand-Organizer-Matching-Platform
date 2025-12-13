@@ -1,24 +1,10 @@
+import { DollarSignIcon, PackageIcon, PercentIcon, SaveIcon, SendIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import {
-  PackageIcon,
-  PercentIcon,
-  DollarSignIcon,
-  HelpCircleIcon,
-  SaveIcon,
-  SendIcon
-} from 'lucide-react'
+
+import { fetchSponsorshipOffer, saveSponsorshipOffer } from '../../services/sponsorshipService'
+import { OfferCustomMix, OfferDiscountDetails, OfferFinancialDetails, OfferProductDetails, SponsorshipTypeId } from '../../types/sponsorship'
 import { Button } from '../ui'
-import {
-  OfferCustomMix,
-  OfferDiscountDetails,
-  OfferFinancialDetails,
-  OfferProductDetails,
-  SponsorshipTypeId
-} from '../../types/sponsorship'
-import {
-  fetchSponsorshipOffer,
-  saveSponsorshipOffer
-} from '../../services/sponsorshipService'
+import { SponsorshipTypeCard } from './SponsorshipTypeCard'
 
 interface BrandSponsorshipPanelProps {
   brandId?: string
@@ -258,7 +244,7 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
 
   if (!brandId) {
     return (
-      <div className='bg-white rounded-lg shadow-sm p-6 border border-indigo-100'>
+      <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100'>
         <p className='text-gray-600'>
           Complete your brand profile to configure sponsorship offers.
         </p>
@@ -268,13 +254,13 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
 
   if (loading) {
     return (
-      <div className='bg-white rounded-lg shadow-sm p-6 border border-indigo-100'>
+      <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100'>
         <p className='text-gray-600'>Loading your sponsorship offer...</p>
       </div>
     )
   }
   return (
-    <div className='bg-white rounded-lg shadow-sm p-6 border border-indigo-100 relative overflow-hidden'>
+    <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100 relative overflow-hidden'>
       {/* Mystical background elements */}
       <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 opacity-70'></div>
       <div className='absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 opacity-50'></div>
@@ -311,54 +297,15 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
       )}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         {sponsorshipTypes.map((type) => (
-          <div
+          <SponsorshipTypeCard
             key={type.id}
-            className={`relative rounded-lg p-5 cursor-pointer transition-all duration-300 ${
-              selectedTypes.includes(type.id)
-                ? 'bg-indigo-50 border-2 border-indigo-300'
-                : 'bg-white border border-gray-200 hover:border-indigo-200'
-            }`}
-            onClick={() => handleTypeToggle(type.id)}
-          >
-            <div className='absolute top-3 right-3'>
-              <div
-                className={`h-5 w-5 rounded-full ${
-                  selectedTypes.includes(type.id)
-                    ? 'bg-indigo-500'
-                    : 'bg-gray-200'
-                } flex items-center justify-center`}
-              >
-                {selectedTypes.includes(type.id) && (
-                  <div className='h-2 w-2 bg-white rounded-full'></div>
-                )}
-              </div>
-            </div>
-            <div className='flex items-start'>
-              <div
-                className={`p-3 rounded-full ${
-                  selectedTypes.includes(type.id)
-                    ? 'bg-indigo-100 text-indigo-600'
-                    : 'bg-gray-100 text-gray-500'
-                } mr-4`}
-              >
-                {type.icon}
-              </div>
-              <div>
-                <h3 className='font-medium text-gray-900 mb-1 flex items-center'>
-                  {type.name}
-                  <div className='relative group ml-2'>
-                    <HelpCircleIcon className='h-4 w-4 text-gray-400' />
-                    <div className='absolute left-0 bottom-full mb-2 w-60 bg-gray-900 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none'>
-                      {type.description}
-                    </div>
-                  </div>
-                </h3>
-                <p className='text-sm text-gray-500'>{type.description}</p>
-              </div>
-            </div>
-            {/* Arcane border */}
-            <div className='absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-200 to-transparent opacity-50'></div>
-          </div>
+            id={type.id}
+            title={type.name}
+            description={type.description}
+            icon={type.icon}
+            selected={selectedTypes.includes(type.id)}
+            onToggle={handleTypeToggle}
+          />
         ))}
       </div>
       {/* Input fields for selected sponsorship types */}

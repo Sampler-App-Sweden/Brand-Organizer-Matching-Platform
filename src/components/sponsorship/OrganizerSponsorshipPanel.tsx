@@ -1,7 +1,16 @@
-import { DollarSignIcon, HelpCircleIcon, KeyIcon, MegaphoneIcon, PackageIcon, PercentIcon, SaveIcon, SendIcon, StarIcon } from 'lucide-react'
+import {
+  DollarSignIcon,
+  MegaphoneIcon,
+  PackageIcon,
+  PercentIcon,
+  SaveIcon,
+  SendIcon,
+  StarIcon
+} from 'lucide-react'
 import React, { useState } from 'react'
 
 import { Button } from '../ui'
+import { SponsorshipTypeCard } from './SponsorshipTypeCard'
 
 interface SponsorshipRequest {
   id: 'product' | 'discount' | 'financial' | 'media' | 'any'
@@ -157,7 +166,7 @@ export function OrganizerSponsorshipPanel() {
     return items.join(', ')
   }
   return (
-    <div className='bg-white rounded-lg shadow-sm p-6 border border-indigo-100 relative overflow-hidden'>
+    <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100 relative overflow-hidden'>
       {/* Mystical background elements */}
       <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 opacity-70'></div>
       <div className='absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50'></div>
@@ -177,49 +186,21 @@ export function OrganizerSponsorshipPanel() {
           />
         ))}
       </div>
-      <h2 className='text-xl font-semibold text-gray-900 mb-6 flex items-center'>
+      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
         <span className='mr-2 text-2xl'>✧</span>
         What Sponsorship Do You Seek?
       </h2>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         {sponsorshipRequests.map((type) => (
-          <div
+          <SponsorshipTypeCard
             key={type.id}
-            className={`relative rounded-lg p-5 cursor-pointer transition-all duration-300 ${
-              selectedTypes.includes(type.id)
-                ? 'bg-blue-50 border-2 border-blue-300 shadow-sm'
-                : 'bg-white border border-gray-200 hover:border-blue-200'
-            }`}
-            onClick={() => handleTypeToggle(type.id)}
-          >
-            <div className='flex items-start'>
-              <div
-                className={`p-3 rounded-full ${
-                  selectedTypes.includes(type.id)
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-500'
-                } mr-4`}
-              >
-                {type.icon}
-              </div>
-              <div>
-                <h3 className='font-medium text-gray-900 mb-1 flex items-center'>
-                  {type.name}
-                  <div className='relative group ml-2'>
-                    <HelpCircleIcon className='h-4 w-4 text-gray-400' />
-                    <div className='absolute left-0 bottom-full mb-2 w-60 bg-gray-900 text-white text-xs p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none'>
-                      {type.description}
-                    </div>
-                  </div>
-                </h3>
-                <p className='text-sm text-gray-500'>{type.description}</p>
-              </div>
-            </div>
-            {/* Mystical key icon for each option */}
-            <div className='absolute bottom-3 right-3 text-blue-200 opacity-30'>
-              <KeyIcon className='h-5 w-5' />
-            </div>
-          </div>
+            id={type.id}
+            title={type.name}
+            description={type.description}
+            icon={type.icon}
+            selected={selectedTypes.includes(type.id)}
+            onToggle={handleTypeToggle}
+          />
         ))}
       </div>
       {/* Input fields for selected sponsorship types */}
@@ -320,7 +301,7 @@ export function OrganizerSponsorshipPanel() {
           {selectedTypes.includes('financial') && (
             <div className='bg-gray-50 p-4 sm:p-6 rounded-lg border border-gray-200 relative'>
               <div className='absolute -top-3 -left-3 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center'>
-                <DollarSignIcon className='h-3 w-3 text-blue-600' />
+                <DollarSignIcon className='h-3 w-3 text-indigo-600' />
               </div>
               <h3 className='text-lg font-medium text-gray-900 mb-4'>
                 Financial Sponsorship Request
