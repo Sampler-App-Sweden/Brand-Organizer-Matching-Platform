@@ -94,7 +94,7 @@ export function OrganizerDashboard() {
 
       {/* Stats */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-6'>
-        <div className='bg-white rounded-lg shadow-sm p-6'>
+        <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6'>
           <div className='flex items-center'>
             <div className='bg-indigo-100 rounded-md p-3'>
               <TrendingUpIcon className='h-6 w-6 text-indigo-600' />
@@ -109,7 +109,7 @@ export function OrganizerDashboard() {
             </div>
           </div>
         </div>
-        <div className='bg-white rounded-lg shadow-sm p-6'>
+        <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6'>
           <div className='flex items-center'>
             <div className='bg-yellow-100 rounded-md p-3'>
               <AlertCircleIcon className='h-6 w-6 text-yellow-600' />
@@ -122,7 +122,7 @@ export function OrganizerDashboard() {
             </div>
           </div>
         </div>
-        <div className='bg-white rounded-lg shadow-sm p-6'>
+        <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6'>
           <div className='flex items-center'>
             <div className='bg-green-100 rounded-md p-3'>
               <CheckCircleIcon className='h-6 w-6 text-green-600' />
