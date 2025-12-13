@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 
 import { logoutAndRedirect } from '../../services/logoutService'
-import { Navbar } from '../layout'
+import { DashboardNavbar } from '../layout'
 import { SidebarItem, sidebarItems } from './sidebarItems'
 
 interface DashboardLayoutProps {
@@ -27,7 +27,7 @@ export function DashboardLayout({
 
   return (
     <div className='min-h-screen bg-gray-50 flex flex-col relative overflow-hidden'>
-      <Navbar />
+      <DashboardNavbar />
 
       {/* Dashboard Content Area with Sidebar */}
       <div className='flex-1 flex relative z-10'>

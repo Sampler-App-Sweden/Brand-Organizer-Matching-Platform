@@ -10,8 +10,8 @@ import {
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
-import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context'
+import { useAuth } from '../../context/AuthContext'
 
 export function DashboardNavbar() {
   const { currentUser, logout } = useAuth()
@@ -52,34 +52,39 @@ export function DashboardNavbar() {
   return (
     <header className='bg-white bg-opacity-95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50'>
       <div className='w-full'>
-        <div className='flex justify-between items-center h-16'>
+        <div className='flex items-center h-16 px-4'>
+          {/* Left: Logo */}
           <Link to='/' className='flex items-center space-x-2 group'>
-            <div className='bg-blue-600 p-2 rounded-md relative overflow-hidden tech-pulse'>
+            <div className='bg-brand-primary p-2 rounded-md relative overflow-hidden tech-pulse'>
               <HandshakeIcon className='h-6 w-6 text-white relative z-10' />
             </div>
-            <span className='text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors'>
+            <span className='text-xl font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors'>
               SponsrAI
             </span>
           </Link>
 
-          <nav className='hidden md:flex items-center space-x-1'>
-            {mainNavItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  location.pathname === item.path
-                    ? 'bg-blue-50 text-indigo-600'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'
-                }`}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
+          {/* Center: Nav */}
+          <div className='flex-1 flex justify-center'>
+            <nav className='hidden md:flex items-center space-x-1'>
+              {mainNavItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    location.pathname === item.path
+                      ? 'bg-blue-50 text-indigo-600'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </Link>
+              ))}
+            </nav>
+          </div>
 
-          <div className='flex items-center space-x-4'>
+          {/* Right: Bell & Avatar */}
+          <div className='flex items-center space-x-3'>
             <button
               className='relative text-gray-500 hover:text-gray-700 transition-colors'
               onClick={() => navigate('/dashboard/notifications')}
@@ -101,9 +106,6 @@ export function DashboardNavbar() {
                 <div className='bg-blue-100 text-indigo-800 rounded-full h-8 w-8 flex items-center justify-center font-semibold'>
                   {currentUser?.name?.charAt(0).toUpperCase() || '?'}
                 </div>
-                <span className='hidden sm:block text-sm font-medium'>
-                  {currentUser?.name || 'User'}
-                </span>
               </button>
 
               {showUserMenu && (
@@ -128,8 +130,9 @@ export function DashboardNavbar() {
               )}
             </div>
 
+            {/* Mobile Menu Button */}
             <button
-              className='md:hidden text-white hover:text-white'
+              className='md:hidden text-gray-700 hover:text-indigo-600 transition-colors'
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? (
