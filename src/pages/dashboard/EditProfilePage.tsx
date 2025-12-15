@@ -5,6 +5,7 @@ import { DashboardLayout } from '../../components/layout'
 import { FormField } from '../../components/ui'
 import { Button } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
+import { ImageUpload } from '../../components/media/ImageUpload'
 import {
   getBrandByUserId,
   getOrganizerByUserId
@@ -12,6 +13,7 @@ import {
 import { supabase } from '../../services/supabaseClient'
 
 import type { Brand, Organizer } from '../../types'
+import type { ProductImage } from '../../types/sponsorship'
 
 export function EditProfilePage() {
   const { currentUser, refreshUser } = useAuth()
@@ -25,6 +27,7 @@ export function EditProfilePage() {
     description: '',
     logo_url: ''
   })
+  const [logoImages, setLogoImages] = useState<ProductImage[]>([])
   const [contactInfo, setContactInfo] = useState({
     person: '',
     email: ''
@@ -108,6 +111,17 @@ export function EditProfilePage() {
         description: data?.description || fallbackProfile?.description || '',
         logo_url: data?.logo_url || fallbackProfile?.logo_url || ''
       })
+      const effectiveLogo = data?.logo_url || fallbackProfile?.logo_url || ''
+      setLogoImages(
+        effectiveLogo
+          ? [
+              {
+                id: 'logo_existing',
+                url: effectiveLogo
+              }
+            ]
+          : []
+      )
 
       const contactDefaults = (() => {
         if (currentUser.type === 'brand' && brandRecord) {
@@ -142,11 +156,40 @@ export function EditProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser])
 
+  const uploadLogoIfNeeded = async (): Promise<string> => {
+    if (!currentUser?.id) return ''
+    const currentImage = logoImages[0]
+    if (!currentImage) return ''
+
+    // Reuse existing URL when no new file is added
+    if (!currentImage.file) return currentImage.url
+
+    const file = currentImage.file
+    const fileExt = file.name.split('.').pop() || 'png'
+    const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('profiles')
+      .upload(filePath, file, {
+        upsert: true,
+        contentType: file.type || 'application/octet-stream'
+      })
+
+    if (uploadError) {
+      throw new Error(`Failed to upload logo: ${uploadError.message}`)
+    }
+
+    const { data } = supabase.storage.from('profiles').getPublicUrl(filePath)
+    return data.publicUrl
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
 
     try {
+      const logoUrl = logoImages.length ? await uploadLogoIfNeeded() : ''
+
       const { error } = await supabase.from('profiles').upsert({
         id: currentUser?.id,
         role:
@@ -159,7 +202,7 @@ export function EditProfilePage() {
         email: profile.email,
         phone: profile.phone,
         description: profile.description,
-        logo_url: profile.logo_url,
+        logo_url: logoUrl,
         updated_at: new Date().toISOString()
       })
 
@@ -304,16 +347,16 @@ export function EditProfilePage() {
               />
             </div>
 
-            <FormField
-              label='Logo/Photo URL'
-              id='logo_url'
-              type='url'
-              value={profile.logo_url}
-              onChange={(e) =>
-                setProfile({ ...profile, logo_url: e.target.value })
-              }
-              placeholder='https://example.com/logo.png'
-            />
+            <div className='space-y-2'>
+              <label className='block text-sm font-medium text-gray-700'>
+                Logo / Photo
+              </label>
+              <ImageUpload
+                images={logoImages}
+                onImagesChange={setLogoImages}
+                maxImages={1}
+              />
+            </div>
 
             <div className='flex gap-4'>
               <Button
