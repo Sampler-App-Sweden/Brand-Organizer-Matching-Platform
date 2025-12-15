@@ -36,9 +36,9 @@ export const sidebarItems: SidebarCollection = {
       matchExact: true
     },
     {
-      label: 'Sponsorships',
+      label: 'Collaborations',
       icon: createElement(HandshakeIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/sponsorships'
+      path: '/dashboard/collaborations'
     },
     {
       label: 'Matches',
@@ -69,9 +69,14 @@ export const sidebarItems: SidebarCollection = {
       matchExact: true
     },
     {
-      label: 'Sponsorships',
+      label: 'Collaborations',
       icon: createElement(HandshakeIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/sponsorships'
+      path: '/dashboard/collaborations'
+    },
+    {
+      label: 'Events',
+      icon: createElement(Package, { className: 'h-5 w-5' }),
+      path: '/dashboard/events'
     },
     {
       label: 'Matches',
