@@ -139,7 +139,7 @@ export function OrganizerDashboard() {
 
       {/* Organizer Sponsorship Panel */}
       <div className='mb-8'>
-        <OrganizerSponsorshipPanel />
+        <OrganizerSponsorshipPanel organizerId={organizer.id} />
       </div>
 
       {/* Event details */}

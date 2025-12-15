@@ -49,3 +49,11 @@ export function validateRequiredFields(
 export function sanitizeInput(input: string): string {
   return input.replace(/<[^>]*>/g, '').trim()
 }
+
+/** Clamp a number within a specified range
+ */
+export function clampNumber(value: string, min = 0): string {
+  const numeric = Number(value)
+  if (Number.isNaN(numeric)) return ''
+  return Math.max(min, numeric).toString()
+}

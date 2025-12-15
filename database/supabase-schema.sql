@@ -331,6 +331,35 @@ BEGIN
 END $$;
 
 ALTER TABLE public.sponsorship_offers ENABLE ROW LEVEL SECURITY;
+
+-- Organizer sponsorship requests table
+CREATE TABLE IF NOT EXISTS public.organizer_sponsorship_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  organizer_id UUID REFERENCES public.organizers ON DELETE CASCADE,
+  selected_types TEXT[] NOT NULL DEFAULT '{}',
+  product_details JSONB,
+  discount_details JSONB,
+  financial_details JSONB,
+  allocation JSONB,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+      FROM pg_constraint
+     WHERE conname = 'organizer_sponsorship_requests_organizer_unique'
+       AND conrelid = 'public.organizer_sponsorship_requests'::regclass
+  ) THEN
+    ALTER TABLE public.organizer_sponsorship_requests
+      ADD CONSTRAINT organizer_sponsorship_requests_organizer_unique UNIQUE (organizer_id);
+  END IF;
+END $$;
+
+ALTER TABLE public.organizer_sponsorship_requests ENABLE ROW LEVEL SECURITY;
 -- Community members table
 CREATE TABLE IF NOT EXISTS public.community_members (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -801,6 +830,51 @@ CREATE POLICY "Allow brands to update sponsorship offers"
     EXISTS (
       SELECT 1 FROM public.brands
       WHERE id = brand_id AND user_id = auth.uid()
+    )
+  );
+
+-- Organizer sponsorship requests policies
+DROP POLICY IF EXISTS "Allow public to view organizer requests" ON public.organizer_sponsorship_requests;
+CREATE POLICY "Allow public to view organizer requests"
+  ON public.organizer_sponsorship_requests FOR SELECT
+  USING (true);
+
+DROP POLICY IF EXISTS "Allow organizers to insert sponsorship requests" ON public.organizer_sponsorship_requests;
+CREATE POLICY "Allow organizers to insert sponsorship requests"
+  ON public.organizer_sponsorship_requests FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.organizers
+      WHERE id = organizer_id AND user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow organizers to view own sponsorship requests" ON public.organizer_sponsorship_requests;
+CREATE POLICY "Allow organizers to view own sponsorship requests"
+  ON public.organizer_sponsorship_requests FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.organizers
+      WHERE id = organizer_id AND user_id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow organizers to update sponsorship requests" ON public.organizer_sponsorship_requests;
+CREATE POLICY "Allow organizers to update sponsorship requests"
+  ON public.organizer_sponsorship_requests FOR UPDATE
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.organizers
+      WHERE id = organizer_id AND user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.organizers
+      WHERE id = organizer_id AND user_id = auth.uid()
     )
   );
 

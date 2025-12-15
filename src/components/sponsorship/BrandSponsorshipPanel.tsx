@@ -1,246 +1,41 @@
-import { DollarSignIcon, PackageIcon, PercentIcon, SaveIcon, SendIcon } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import {
+  DollarSignIcon,
+  PackageIcon,
+  PercentIcon,
+  SaveIcon,
+  SendIcon
+} from 'lucide-react'
 
-import { fetchSponsorshipOffer, saveSponsorshipOffer } from '../../services/sponsorshipService'
-import { OfferCustomMix, OfferDiscountDetails, OfferFinancialDetails, OfferProductDetails, SponsorshipTypeId } from '../../types/sponsorship'
 import { Button } from '../ui'
+import { useBrandSponsorship } from '../../hooks/useBrandSponsorship'
+import { type SponsorshipTypeId } from '../../types/sponsorship'
+import { clampNumber } from '../../utils/validation'
 import { SponsorshipTypeCard } from './SponsorshipTypeCard'
 
 interface BrandSponsorshipPanelProps {
   brandId?: string
 }
 
-interface SponsorshipType {
-  id: SponsorshipTypeId
-  name: string
-  description: string
-  icon: React.ReactNode
-  percentage: number
-}
-
-const SPONSORSHIP_TYPE_IDS: SponsorshipTypeId[] = [
-  'product',
-  'discount',
-  'financial',
-  'custom'
-]
-
-const createDefaultProductDetails = (): OfferProductDetails => ({
-  name: '',
-  description: '',
-  quantity: ''
-})
-
-const createDefaultDiscountDetails = (): OfferDiscountDetails => ({
-  code: '',
-  value: '',
-  validFrom: '',
-  validTo: ''
-})
-
-const createDefaultFinancialDetails = (): OfferFinancialDetails => ({
-  amount: '',
-  terms: 'upfront'
-})
-
-const createDefaultCustomMix = (): OfferCustomMix => ({
-  product: 33,
-  discount: 33,
-  financial: 34
-})
-
 export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
-  const [selectedTypes, setSelectedTypes] = useState<SponsorshipTypeId[]>([])
-  const [productDetails, setProductDetails] = useState<OfferProductDetails>(
-    () => createDefaultProductDetails()
-  )
-  const [discountDetails, setDiscountDetails] = useState<OfferDiscountDetails>(
-    () => createDefaultDiscountDetails()
-  )
-  const [financialDetails, setFinancialDetails] =
-    useState<OfferFinancialDetails>(() => createDefaultFinancialDetails())
-  const [customMix, setCustomMix] = useState<OfferCustomMix>(() =>
-    createDefaultCustomMix()
-  )
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [status, setStatus] = useState<'draft' | 'published' | null>(null)
-  const [updatedAt, setUpdatedAt] = useState<string | null>(null)
-  const [feedback, setFeedback] = useState<{
-    type: 'success' | 'error'
-    message: string
-  } | null>(null)
-
-  useEffect(() => {
-    if (!brandId) {
-      setSelectedTypes([])
-      setProductDetails(createDefaultProductDetails())
-      setDiscountDetails(createDefaultDiscountDetails())
-      setFinancialDetails(createDefaultFinancialDetails())
-      setCustomMix(createDefaultCustomMix())
-      setStatus(null)
-      setUpdatedAt(null)
-      setLoading(false)
-      return
-    }
-
-    let isMounted = true
-
-    const loadOffer = async () => {
-      setLoading(true)
-      try {
-        const offer = await fetchSponsorshipOffer(brandId)
-        if (!isMounted) return
-        if (offer) {
-          const sanitizedTypes = offer.selectedTypes.filter(
-            (type): type is SponsorshipTypeId =>
-              SPONSORSHIP_TYPE_IDS.includes(type as SponsorshipTypeId)
-          )
-          setSelectedTypes(sanitizedTypes)
-          setProductDetails(offer.productDetails)
-          setDiscountDetails(offer.discountDetails)
-          setFinancialDetails(offer.financialDetails)
-          setCustomMix(offer.customMix)
-          setStatus(offer.status)
-          setUpdatedAt(offer.updatedAt)
-        } else {
-          setSelectedTypes([])
-          setProductDetails(createDefaultProductDetails())
-          setDiscountDetails(createDefaultDiscountDetails())
-          setFinancialDetails(createDefaultFinancialDetails())
-          setCustomMix(createDefaultCustomMix())
-          setStatus(null)
-          setUpdatedAt(null)
-        }
-        setFeedback(null)
-      } catch (error) {
-        console.error(error)
-        if (isMounted) {
-          setFeedback({
-            type: 'error',
-            message: 'Failed to load sponsorship offer. Please try again.'
-          })
-        }
-      } finally {
-        if (isMounted) setLoading(false)
-      }
-    }
-
-    loadOffer()
-    return () => {
-      isMounted = false
-    }
-  }, [brandId])
-
-  const sponsorshipTypes: SponsorshipType[] = [
-    {
-      id: 'product',
-      name: 'Product Sponsorship',
-      description: 'Provide in-kind items (e.g. coffee beans, merch)',
-      icon: <PackageIcon className='h-5 w-5' />,
-      percentage: customMix.product
-    },
-    {
-      id: 'discount',
-      name: 'Discount Sponsorship',
-      description: 'Issue promo codes or percentage discounts',
-      icon: <PercentIcon className='h-5 w-5' />,
-      percentage: customMix.discount
-    },
-    {
-      id: 'financial',
-      name: 'Financial Sponsorship',
-      description: 'Direct monetary support',
-      icon: <DollarSignIcon className='h-5 w-5' />,
-      percentage: customMix.financial
-    },
-    {
-      id: 'custom',
-      name: 'Custom Mix',
-      description: 'Allocate percentages across multiple sponsorship types',
-      icon: <div className='h-5 w-5' />,
-      percentage: 100
-    }
-  ]
-
-  const handleTypeToggle = (typeId: SponsorshipTypeId) => {
-    setFeedback(null)
-    setSelectedTypes((prev) =>
-      prev.includes(typeId)
-        ? prev.filter((id) => id !== typeId)
-        : [...prev, typeId]
-    )
-  }
-  const handleCustomMixChange = (
-    type: 'product' | 'discount' | 'financial',
-    value: number
-  ) => {
-    const clamped = Math.max(0, Math.min(100, value))
-    setCustomMix((prev) => {
-      const otherKeys = (['product', 'discount', 'financial'] as const).filter(
-        (key) => key !== type
-      )
-      const otherTotal = otherKeys.reduce((sum, key) => sum + prev[key], 0)
-      const ratios =
-        otherTotal === 0
-          ? otherKeys.map(() => 1 / otherKeys.length)
-          : otherKeys.map((key) => prev[key] / otherTotal)
-      const remaining = 100 - clamped
-      const firstValue = Math.round(remaining * ratios[0])
-      const secondValue = remaining - firstValue
-      const next: OfferCustomMix = {
-        product: prev.product,
-        discount: prev.discount,
-        financial: prev.financial
-      }
-      next[type] = clamped
-      next[otherKeys[0]] = firstValue
-      next[otherKeys[1]] = secondValue
-      return next
-    })
-  }
-
-  const handleSave = async (nextStatus: 'draft' | 'published') => {
-    if (!brandId || selectedTypes.length === 0) return
-    setIsSubmitting(true)
-    setFeedback(null)
-    try {
-      const payload = {
-        selectedTypes,
-        productDetails,
-        discountDetails,
-        financialDetails,
-        customMix
-      }
-      const offer = await saveSponsorshipOffer(brandId, payload, nextStatus)
-      const sanitizedTypes = offer.selectedTypes.filter(
-        (type): type is SponsorshipTypeId =>
-          SPONSORSHIP_TYPE_IDS.includes(type as SponsorshipTypeId)
-      )
-      setSelectedTypes(sanitizedTypes)
-      setProductDetails(offer.productDetails)
-      setDiscountDetails(offer.discountDetails)
-      setFinancialDetails(offer.financialDetails)
-      setCustomMix(offer.customMix)
-      setStatus(offer.status)
-      setUpdatedAt(offer.updatedAt)
-      setFeedback({
-        type: 'success',
-        message:
-          nextStatus === 'draft'
-            ? 'Draft saved successfully.'
-            : 'Offer published successfully.'
-      })
-    } catch (error) {
-      console.error(error)
-      setFeedback({
-        type: 'error',
-        message: 'Failed to save sponsorship offer. Please try again.'
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const {
+    customMix,
+    discountDetails,
+    feedback,
+    financialDetails,
+    handleCustomMixChange,
+    handleSave,
+    handleTypeToggle,
+    isSubmitting,
+    loading,
+    productDetails,
+    selectedTypes,
+    setDiscountDetails,
+    setFinancialDetails,
+    setProductDetails,
+    sponsorshipTypes,
+    status,
+    updatedAt
+  } = useBrandSponsorship(brandId)
 
   if (!brandId) {
     return (
@@ -284,17 +79,6 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
           {updatedAt && ` • Last saved ${new Date(updatedAt).toLocaleString()}`}
         </div>
       )}
-      {feedback && (
-        <div
-          className={`mb-4 rounded-md border px-4 py-2 text-sm ${
-            feedback.type === 'success'
-              ? 'border-green-200 bg-green-50 text-green-700'
-              : 'border-red-200 bg-red-50 text-red-700'
-          }`}
-        >
-          {feedback.message}
-        </div>
-      )}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         {sponsorshipTypes.map((type) => (
           <SponsorshipTypeCard
@@ -304,7 +88,7 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
             description={type.description}
             icon={type.icon}
             selected={selectedTypes.includes(type.id)}
-            onToggle={handleTypeToggle}
+            onToggle={(id) => handleTypeToggle(id as SponsorshipTypeId)}
           />
         ))}
       </div>
@@ -342,12 +126,13 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     className='block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
                     value={productDetails.quantity}
                     onChange={(e) =>
                       setProductDetails({
                         ...productDetails,
-                        quantity: e.target.value
+                        quantity: clampNumber(e.target.value)
                       })
                     }
                   />
@@ -402,12 +187,13 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     className='block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
                     value={discountDetails.value}
                     onChange={(e) =>
                       setDiscountDetails({
                         ...discountDetails,
-                        value: e.target.value
+                        value: clampNumber(e.target.value)
                       })
                     }
                   />
@@ -462,12 +248,13 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     className='block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
                     value={financialDetails.amount}
                     onChange={(e) =>
                       setFinancialDetails({
                         ...financialDetails,
-                        amount: e.target.value
+                        amount: clampNumber(e.target.value)
                       })
                     }
                   />
@@ -670,6 +457,17 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
           Publish Offer
         </Button>
       </div>
+      {feedback && (
+        <div
+          className={`mt-4 rounded-md border px-4 py-2 text-sm ${
+            feedback.type === 'success'
+              ? 'border-green-200 bg-green-50 text-green-700'
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {feedback.message}
+        </div>
+      )}
       {/* Mystical decorative elements */}
       <div className='absolute bottom-0 right-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 opacity-70'></div>
     </div>

@@ -6,6 +6,13 @@ import type {
   SponsorshipProduct,
   SponsorshipStatus,
   SponsorshipTypeId,
+  OrganizerAllocation,
+  OrganizerDiscountDetails,
+  OrganizerFinancialDetails,
+  OrganizerProductDetails,
+  OrganizerRequestPayload,
+  OrganizerSponsorshipRequest,
+  OrganizerRequestTypeId,
   OfferProductDetails,
   OfferDiscountDetails,
   OfferFinancialDetails,
@@ -40,6 +47,19 @@ interface SponsorshipOfferRow {
   updated_at: string
 }
 
+interface OrganizerSponsorshipRequestRow {
+  id: string
+  organizer_id: string
+  selected_types: string[] | null
+  product_details: Record<string, unknown> | null
+  discount_details: Record<string, unknown> | null
+  financial_details: Record<string, unknown> | null
+  allocation: Record<string, unknown> | null
+  status: 'draft' | 'published'
+  created_at: string
+  updated_at: string
+}
+
 const SPONSORSHIP_TYPE_VALUES: SponsorshipTypeId[] = [
   'product',
   'discount',
@@ -66,6 +86,36 @@ const defaultFinancialDetails: OfferFinancialDetails = {
 }
 
 const defaultCustomMix: OfferCustomMix = {
+  product: 33,
+  discount: 33,
+  financial: 34
+}
+
+const ORGANIZER_REQUEST_TYPE_VALUES: OrganizerRequestTypeId[] = [
+  'product',
+  'discount',
+  'financial',
+  'media',
+  'any'
+]
+
+const defaultOrganizerProductDetails: OrganizerProductDetails = {
+  items: '',
+  quantity: ''
+}
+
+const defaultOrganizerDiscountDetails: OrganizerDiscountDetails = {
+  targetLevel: '',
+  expectedVolume: ''
+}
+
+const defaultOrganizerFinancialDetails: OrganizerFinancialDetails = {
+  minAmount: '',
+  maxAmount: '',
+  paymentWindow: 'before'
+}
+
+const defaultOrganizerAllocation: OrganizerAllocation = {
   product: 33,
   discount: 33,
   financial: 34
@@ -139,6 +189,86 @@ const normalizeCustomMix = (
   }
 }
 
+const normalizeOrganizerTypes = (
+  types: string[] | null
+): OrganizerRequestTypeId[] => {
+  if (!Array.isArray(types)) return []
+  return types.filter((type): type is OrganizerRequestTypeId =>
+    ORGANIZER_REQUEST_TYPE_VALUES.includes(type as OrganizerRequestTypeId)
+  )
+}
+
+const normalizeOrganizerProductDetails = (
+  details: Record<string, unknown> | null
+): OrganizerProductDetails => {
+  if (!details) return { ...defaultOrganizerProductDetails }
+  return {
+    items:
+      typeof details.items === 'string'
+        ? details.items
+        : defaultOrganizerProductDetails.items,
+    quantity:
+      typeof details.quantity === 'string'
+        ? details.quantity
+        : defaultOrganizerProductDetails.quantity
+  }
+}
+
+const normalizeOrganizerDiscountDetails = (
+  details: Record<string, unknown> | null
+): OrganizerDiscountDetails => {
+  if (!details) return { ...defaultOrganizerDiscountDetails }
+  return {
+    targetLevel:
+      typeof details.targetLevel === 'string'
+        ? details.targetLevel
+        : defaultOrganizerDiscountDetails.targetLevel,
+    expectedVolume:
+      typeof details.expectedVolume === 'string'
+        ? details.expectedVolume
+        : defaultOrganizerDiscountDetails.expectedVolume
+  }
+}
+
+const normalizeOrganizerFinancialDetails = (
+  details: Record<string, unknown> | null
+): OrganizerFinancialDetails => {
+  if (!details) return { ...defaultOrganizerFinancialDetails }
+  return {
+    minAmount:
+      typeof details.minAmount === 'string'
+        ? details.minAmount
+        : defaultOrganizerFinancialDetails.minAmount,
+    maxAmount:
+      typeof details.maxAmount === 'string'
+        ? details.maxAmount
+        : defaultOrganizerFinancialDetails.maxAmount,
+    paymentWindow:
+      typeof details.paymentWindow === 'string'
+        ? details.paymentWindow
+        : defaultOrganizerFinancialDetails.paymentWindow
+  }
+}
+
+const normalizeOrganizerAllocation = (
+  allocation: Record<string, unknown> | null
+): OrganizerAllocation => {
+  if (!allocation) return { ...defaultOrganizerAllocation }
+  const product = allocation.product
+  const discount = allocation.discount
+  const financial = allocation.financial
+  return {
+    product:
+      typeof product === 'number' ? product : defaultOrganizerAllocation.product,
+    discount:
+      typeof discount === 'number' ? discount : defaultOrganizerAllocation.discount,
+    financial:
+      typeof financial === 'number'
+        ? financial
+        : defaultOrganizerAllocation.financial
+  }
+}
+
 const stripImageFiles = (images: ProductImage[]) =>
   images.map((image) => ({ id: image.id, url: image.url }))
 
@@ -162,6 +292,21 @@ const mapOfferRow = (row: SponsorshipOfferRow): SponsorshipOffer => ({
   discountDetails: normalizeDiscountDetails(row.discount_details),
   financialDetails: normalizeFinancialDetails(row.financial_details),
   customMix: normalizeCustomMix(row.custom_mix),
+  status: row.status,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at
+})
+
+const mapOrganizerRequestRow = (
+  row: OrganizerSponsorshipRequestRow
+): OrganizerSponsorshipRequest => ({
+  id: row.id,
+  organizerId: row.organizer_id,
+  selectedTypes: normalizeOrganizerTypes(row.selected_types),
+  productDetails: normalizeOrganizerProductDetails(row.product_details),
+  discountDetails: normalizeOrganizerDiscountDetails(row.discount_details),
+  financialDetails: normalizeOrganizerFinancialDetails(row.financial_details),
+  allocation: normalizeOrganizerAllocation(row.allocation),
   status: row.status,
   createdAt: row.created_at,
   updatedAt: row.updated_at
@@ -310,4 +455,48 @@ export async function saveSponsorshipOffer(
   }
 
   return mapOfferRow(data as SponsorshipOfferRow)
+}
+
+export async function fetchOrganizerSponsorshipRequest(
+  organizerId: string
+): Promise<OrganizerSponsorshipRequest | null> {
+  const { data, error } = await supabase
+    .from('organizer_sponsorship_requests')
+    .select('*')
+    .eq('organizer_id', organizerId)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(`Failed to load organizer sponsorship request: ${error.message}`)
+  }
+
+  return data ? mapOrganizerRequestRow(data as OrganizerSponsorshipRequestRow) : null
+}
+
+export async function saveOrganizerSponsorshipRequest(
+  organizerId: string,
+  payload: OrganizerRequestPayload,
+  status: 'draft' | 'published'
+): Promise<OrganizerSponsorshipRequest> {
+  const row = {
+    organizer_id: organizerId,
+    selected_types: payload.selectedTypes,
+    product_details: payload.productDetails,
+    discount_details: payload.discountDetails,
+    financial_details: payload.financialDetails,
+    allocation: payload.allocation,
+    status
+  }
+
+  const { data, error } = await supabase
+    .from('organizer_sponsorship_requests')
+    .upsert(row, { onConflict: 'organizer_id' })
+    .select('*')
+    .single()
+
+  if (error) {
+    throw new Error(`Failed to save organizer sponsorship request: ${error.message}`)
+  }
+
+  return mapOrganizerRequestRow(data as OrganizerSponsorshipRequestRow)
 }

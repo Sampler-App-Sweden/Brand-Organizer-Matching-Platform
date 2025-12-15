@@ -7,9 +7,12 @@ import {
   SendIcon,
   StarIcon
 } from 'lucide-react'
-import React, { useState } from 'react'
+import React from 'react'
 
 import { Button } from '../ui'
+import { useOrganizerSponsorship } from '../../hooks/useOrganizerSponsorship'
+import { type OrganizerRequestTypeId } from '../../types/sponsorship'
+import { clampNumber } from '../../utils/validation'
 import { SponsorshipTypeCard } from './SponsorshipTypeCard'
 
 interface SponsorshipRequest {
@@ -19,28 +22,34 @@ interface SponsorshipRequest {
   icon: React.ReactNode
   percentage: number
 }
-export function OrganizerSponsorshipPanel() {
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
-  const [productDetails, setProductDetails] = useState({
-    items: '',
-    quantity: ''
-  })
-  const [discountDetails, setDiscountDetails] = useState({
-    targetLevel: '',
-    expectedVolume: ''
-  })
-  const [financialDetails, setFinancialDetails] = useState({
-    minAmount: '',
-    maxAmount: '',
-    paymentWindow: 'before'
-  })
-  const [allocation, setAllocation] = useState({
-    product: 33,
-    discount: 33,
-    financial: 34
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isDraft, setIsDraft] = useState(false)
+
+interface OrganizerSponsorshipPanelProps {
+  organizerId?: string
+}
+
+export function OrganizerSponsorshipPanel({
+  organizerId
+}: OrganizerSponsorshipPanelProps) {
+  const {
+    selectedTypes,
+    productDetails,
+    discountDetails,
+    financialDetails,
+    allocation,
+    isSubmitting,
+    loading,
+    status,
+    updatedAt,
+    feedback,
+    setProductDetails,
+    setDiscountDetails,
+    setFinancialDetails,
+    setAllocation,
+    handleTypeToggle,
+    handleAllocationChange,
+    handleSave
+  } = useOrganizerSponsorship(organizerId)
+
   const sponsorshipRequests: SponsorshipRequest[] = [
     {
       id: 'product',
@@ -78,72 +87,6 @@ export function OrganizerSponsorshipPanel() {
       percentage: 100
     }
   ]
-  const handleTypeToggle = (typeId: string) => {
-    if (selectedTypes.includes(typeId)) {
-      setSelectedTypes(selectedTypes.filter((id) => id !== typeId))
-    } else {
-      setSelectedTypes([...selectedTypes, typeId])
-    }
-  }
-  const handleAllocationChange = (
-    type: 'product' | 'discount' | 'financial',
-    value: number
-  ) => {
-    const remaining = 100 - value
-    if (type === 'product') {
-      // Distribute remaining percentage between discount and financial
-      const discountShare = Math.round(
-        remaining *
-          (allocation.discount / (allocation.discount + allocation.financial))
-      )
-      setAllocation({
-        product: value,
-        discount: discountShare,
-        financial: remaining - discountShare
-      })
-    } else if (type === 'discount') {
-      // Distribute remaining percentage between product and financial
-      const productShare = Math.round(
-        remaining *
-          (allocation.product / (allocation.product + allocation.financial))
-      )
-      setAllocation({
-        product: productShare,
-        discount: value,
-        financial: remaining - productShare
-      })
-    } else {
-      // Distribute remaining percentage between product and discount
-      const productShare = Math.round(
-        remaining *
-          (allocation.product / (allocation.product + allocation.discount))
-      )
-      setAllocation({
-        product: productShare,
-        discount: remaining - productShare,
-        financial: value
-      })
-    }
-  }
-  const handleSaveDraft = () => {
-    setIsDraft(true)
-    setIsSubmitting(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
-      // Show success message
-    }, 1000)
-  }
-  const handlePublish = () => {
-    setIsDraft(false)
-    setIsSubmitting(true)
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
-      // Show success message
-    }, 1000)
-  }
-
   // Generate a mock match preview based on selected options
   const generateMatchPreview = () => {
     const items = []
@@ -167,6 +110,16 @@ export function OrganizerSponsorshipPanel() {
   }
   return (
     <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100 relative overflow-hidden'>
+      {!organizerId && (
+        <div className='text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4'>
+          Complete your organizer profile to configure sponsorship requests.
+        </div>
+      )}
+      {loading && (
+        <div className='text-sm text-gray-600'>
+          Loading your sponsorship request...
+        </div>
+      )}
       {/* Mystical background elements */}
       <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 opacity-70'></div>
       <div className='absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50'></div>
@@ -190,6 +143,21 @@ export function OrganizerSponsorshipPanel() {
         <span className='mr-2 text-2xl'>✧</span>
         What Sponsorship Do You Seek?
       </h2>
+      {status && (
+        <div className='mb-3 text-sm text-gray-600'>
+          Current status:{' '}
+          <span
+            className={
+              status === 'published'
+                ? 'text-green-600 font-medium'
+                : 'text-yellow-600 font-medium'
+            }
+          >
+            {status === 'published' ? 'Published' : 'Draft'}
+          </span>
+          {updatedAt && ` • Last saved ${new Date(updatedAt).toLocaleString()}`}
+        </div>
+      )}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         {sponsorshipRequests.map((type) => (
           <SponsorshipTypeCard
@@ -199,7 +167,7 @@ export function OrganizerSponsorshipPanel() {
             description={type.description}
             icon={type.icon}
             selected={selectedTypes.includes(type.id)}
-            onToggle={handleTypeToggle}
+            onToggle={(id) => handleTypeToggle(id as OrganizerRequestTypeId)}
           />
         ))}
       </div>
@@ -238,13 +206,14 @@ export function OrganizerSponsorshipPanel() {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                     placeholder='e.g. 200'
                     value={productDetails.quantity}
                     onChange={(e) =>
                       setProductDetails({
                         ...productDetails,
-                        quantity: e.target.value
+                        quantity: clampNumber(e.target.value)
                       })
                     }
                   />
@@ -267,13 +236,14 @@ export function OrganizerSponsorshipPanel() {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                     placeholder='e.g. 15'
                     value={discountDetails.targetLevel}
                     onChange={(e) =>
                       setDiscountDetails({
                         ...discountDetails,
-                        targetLevel: e.target.value
+                        targetLevel: clampNumber(e.target.value)
                       })
                     }
                   />
@@ -284,13 +254,14 @@ export function OrganizerSponsorshipPanel() {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                     placeholder='e.g. 500'
                     value={discountDetails.expectedVolume}
                     onChange={(e) =>
                       setDiscountDetails({
                         ...discountDetails,
-                        expectedVolume: e.target.value
+                        expectedVolume: clampNumber(e.target.value)
                       })
                     }
                   />
@@ -313,13 +284,14 @@ export function OrganizerSponsorshipPanel() {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                     placeholder='e.g. 500'
                     value={financialDetails.minAmount}
                     onChange={(e) =>
                       setFinancialDetails({
                         ...financialDetails,
-                        minAmount: e.target.value
+                        minAmount: clampNumber(e.target.value)
                       })
                     }
                   />
@@ -330,13 +302,14 @@ export function OrganizerSponsorshipPanel() {
                   </label>
                   <input
                     type='number'
+                    min={0}
                     className='block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
                     placeholder='e.g. 2000'
                     value={financialDetails.maxAmount}
                     onChange={(e) =>
                       setFinancialDetails({
                         ...financialDetails,
-                        maxAmount: e.target.value
+                        maxAmount: clampNumber(e.target.value)
                       })
                     }
                   />
@@ -522,8 +495,8 @@ export function OrganizerSponsorshipPanel() {
         <Button
           variant='outline'
           className='flex items-center hover:bg-indigo-50 transition-colors'
-          onClick={handleSaveDraft}
-          disabled={isSubmitting || selectedTypes.length === 0}
+          onClick={() => handleSave('draft')}
+          disabled={isSubmitting || selectedTypes.length === 0 || !organizerId}
         >
           <SaveIcon className='h-4 w-4 mr-2' />
           Save Draft
@@ -531,13 +504,24 @@ export function OrganizerSponsorshipPanel() {
         <Button
           variant='primary'
           className='flex items-center bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 border-0 shadow-md hover:shadow-lg transition-all'
-          onClick={handlePublish}
-          disabled={isSubmitting || selectedTypes.length === 0}
+          onClick={() => handleSave('published')}
+          disabled={isSubmitting || selectedTypes.length === 0 || !organizerId}
         >
           <SendIcon className='h-4 w-4 mr-2' />
           Publish Request
         </Button>
       </div>
+      {feedback && (
+        <div
+          className={`mt-4 rounded-md border px-4 py-2 text-sm ${
+            feedback.type === 'success'
+              ? 'border-green-200 bg-green-50 text-green-700'
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {feedback.message}
+        </div>
+      )}
       {/* Mystical decorative elements */}
       <div className='absolute bottom-0 right-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 opacity-70'></div>
     </div>

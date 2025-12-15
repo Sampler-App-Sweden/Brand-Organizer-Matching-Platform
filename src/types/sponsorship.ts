@@ -25,6 +25,13 @@ export interface ProductSponsorshipManagerProps {
 
 export type SponsorshipTypeId = 'product' | 'discount' | 'financial' | 'custom'
 
+export type OrganizerRequestTypeId =
+  | 'product'
+  | 'discount'
+  | 'financial'
+  | 'media'
+  | 'any'
+
 export interface OfferProductDetails {
   name: string
   description: string
@@ -60,6 +67,44 @@ export interface SponsorshipOfferPayload {
 export interface SponsorshipOffer extends SponsorshipOfferPayload {
   id: string
   brandId: string
+  status: 'draft' | 'published'
+  createdAt: string
+  updatedAt: string
+}
+
+export interface OrganizerProductDetails {
+  items: string
+  quantity: string
+}
+
+export interface OrganizerDiscountDetails {
+  targetLevel: string
+  expectedVolume: string
+}
+
+export interface OrganizerFinancialDetails {
+  minAmount: string
+  maxAmount: string
+  paymentWindow: string
+}
+
+export interface OrganizerAllocation {
+  product: number
+  discount: number
+  financial: number
+}
+
+export interface OrganizerRequestPayload {
+  selectedTypes: OrganizerRequestTypeId[]
+  productDetails: OrganizerProductDetails
+  discountDetails: OrganizerDiscountDetails
+  financialDetails: OrganizerFinancialDetails
+  allocation: OrganizerAllocation
+}
+
+export interface OrganizerSponsorshipRequest extends OrganizerRequestPayload {
+  id: string
+  organizerId: string
   status: 'draft' | 'published'
   createdAt: string
   updatedAt: string
