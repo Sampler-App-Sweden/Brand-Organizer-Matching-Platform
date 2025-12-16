@@ -2,8 +2,11 @@ import {
   ArrowLeftIcon,
   BadgeDollarSign,
   Building2Icon,
+  CalendarIcon,
+  ClockIcon,
   LinkIcon,
   MailIcon,
+  PackageIcon,
   SparklesIcon,
   UsersIcon
 } from 'lucide-react'
@@ -11,11 +14,21 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { Layout } from '../components/layout'
+import { EventDetailModal } from '../components/profile/EventDetailModal'
+import { EventDisplayCard } from '../components/profile/EventDisplayCard'
+import { ProductDetailModal } from '../components/profile/ProductDetailModal'
+import { ProductDisplayCard } from '../components/profile/ProductDisplayCard'
 import { Button } from '../components/ui/Button'
+import { getBrandByUserId, getOrganizerByUserId } from '../services/dataService'
+import { fetchOrganizerEvents } from '../services/eventsService'
 import {
   getProfileOverviewById,
   ProfileOverview
 } from '../services/profileService'
+import { fetchSponsorshipProducts } from '../services/sponsorshipService'
+import { Event } from '../types/event'
+import { SponsorshipProduct } from '../types/sponsorship'
+import { categorizeEventsByDate } from '../utils/eventUtils'
 
 export function ProfileDetailPage() {
   const { profileId } = useParams<{ profileId: string }>()
@@ -23,6 +36,13 @@ export function ProfileDetailPage() {
   const [profile, setProfile] = useState<ProfileOverview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [products, setProducts] = useState<SponsorshipProduct[]>([])
+  const [events, setEvents] = useState<Event[]>([])
+  const [loadingProducts, setLoadingProducts] = useState(false)
+  const [loadingEvents, setLoadingEvents] = useState(false)
+  const [selectedProduct, setSelectedProduct] =
+    useState<SponsorshipProduct | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -40,6 +60,44 @@ export function ProfileDetailPage() {
         } else {
           setProfile(data)
           setError(null)
+
+          // Fetch products for brands
+          if (data.role === 'Brand') {
+            try {
+              setLoadingProducts(true)
+              const brand = await getBrandByUserId(data.id)
+              if (brand) {
+                const allProducts = await fetchSponsorshipProducts(brand.id)
+                const onlineProducts = allProducts.filter(
+                  (p) => p.status === 'online'
+                )
+                setProducts(onlineProducts)
+              }
+            } catch (err) {
+              console.error('Failed to load products', err)
+            } finally {
+              setLoadingProducts(false)
+            }
+          }
+
+          // Fetch events for organizers
+          if (data.role === 'Organizer') {
+            try {
+              setLoadingEvents(true)
+              const organizer = await getOrganizerByUserId(data.id)
+              if (organizer) {
+                const allEvents = await fetchOrganizerEvents(organizer.id)
+                const publishedEvents = allEvents.filter(
+                  (e) => e.status === 'published'
+                )
+                setEvents(publishedEvents)
+              }
+            } catch (err) {
+              console.error('Failed to load events', err)
+            } finally {
+              setLoadingEvents(false)
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to load profile', err)
@@ -64,6 +122,11 @@ export function ProfileDetailPage() {
         : profile.whatTheySeek?.eventTypes ?? []
     return [sponsorship, tags].filter((section) => section?.length).flat()
   }, [profile])
+
+  const { upcoming, past } = useMemo(() => {
+    if (profile?.role !== 'Organizer') return { upcoming: [], past: [] }
+    return categorizeEventsByDate(events)
+  }, [events, profile?.role])
 
   const handleBack = () => {
     if (profile?.role === 'Brand') {
@@ -267,8 +330,109 @@ export function ProfileDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Products Section for Brands */}
+            {profile.role === 'Brand' && (
+              <div className='bg-white rounded-2xl shadow-sm border border-gray-100 p-6'>
+                <div className='flex items-center gap-2 mb-6'>
+                  <PackageIcon className='h-5 w-5 text-indigo-500' />
+                  <h2 className='text-xl font-semibold text-gray-900'>
+                    Products
+                  </h2>
+                </div>
+
+                {loadingProducts ? (
+                  <div className='flex justify-center py-8'>
+                    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500'></div>
+                  </div>
+                ) : products.length === 0 ? (
+                  <div className='text-center py-8 text-gray-500'>
+                    No products available yet.
+                  </div>
+                ) : (
+                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                    {products.map((product) => (
+                      <ProductDisplayCard
+                        key={product.id}
+                        product={product}
+                        onClick={() => setSelectedProduct(product)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Events Sections for Organizers */}
+            {profile.role === 'Organizer' && (
+              <>
+                {/* Upcoming Events */}
+                <div className='bg-white rounded-2xl shadow-sm border border-gray-100 p-6'>
+                  <div className='flex items-center gap-2 mb-6'>
+                    <CalendarIcon className='h-5 w-5 text-indigo-500' />
+                    <h2 className='text-xl font-semibold text-gray-900'>
+                      Upcoming Events
+                    </h2>
+                  </div>
+
+                  {loadingEvents ? (
+                    <div className='flex justify-center py-8'>
+                      <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500'></div>
+                    </div>
+                  ) : upcoming.length === 0 ? (
+                    <div className='text-center py-8 text-gray-500'>
+                      No upcoming events scheduled.
+                    </div>
+                  ) : (
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                      {upcoming.map((event) => (
+                        <EventDisplayCard
+                          key={event.id}
+                          event={event}
+                          onClick={() => setSelectedEvent(event)}
+                          label='Upcoming'
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Past Events */}
+                {past.length > 0 && (
+                  <div className='bg-white rounded-2xl shadow-sm border border-gray-100 p-6'>
+                    <div className='flex items-center gap-2 mb-6'>
+                      <ClockIcon className='h-5 w-5 text-gray-500' />
+                      <h2 className='text-xl font-semibold text-gray-900'>
+                        Past Events
+                      </h2>
+                    </div>
+
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                      {past.map((event) => (
+                        <EventDisplayCard
+                          key={event.id}
+                          event={event}
+                          onClick={() => setSelectedEvent(event)}
+                          label='Past'
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         ) : null}
+
+        {/* Modals */}
+        <ProductDetailModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+        <EventDetailModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+        />
       </div>
     </Layout>
   )
