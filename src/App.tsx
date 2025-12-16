@@ -16,6 +16,7 @@ import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
 import { CommunityMemberDetail, CommunityPage } from './pages/community'
 import { BrandDashboard, OrganizerDashboard } from './pages/dashboard'
 import { EditProfilePage } from './pages/dashboard/EditProfilePage'
+import { EventsPage } from './pages/dashboard/EventsPage'
 import { MatchDetails } from './pages/dashboard/MatchDetails'
 import { MatchesPage } from './pages/dashboard/MatchesPage'
 import { MessagesPage } from './pages/dashboard/MessagesPage'
@@ -94,6 +95,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredType='organizer'>
             <MatchDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/dashboard/events'
+        element={
+          <ProtectedRoute requiredType='organizer'>
+            <EventsPage />
           </ProtectedRoute>
         }
       />

@@ -1,4 +1,5 @@
 import { OrganizerRequestTypeId } from '../../../types/sponsorship'
+import { toTitleCase } from '../../../utils/formatting'
 
 import type { OrganizerProductDetails, OrganizerDiscountDetails, OrganizerFinancialDetails, OrganizerOtherDetails } from '../../../types/sponsorship';
 
@@ -27,9 +28,11 @@ export function generateMatchPreview(
     items.push('Media/PR placements')
   }
   if (selectedTypes.includes('other')) {
-    const truncatedTitle = otherDetails.title.length > 80
-      ? `${otherDetails.title.substring(0, 80)}...`
-      : otherDetails.title || 'Custom collaboration'
+    const title = otherDetails.title || 'Custom collaboration'
+    const formattedTitle = toTitleCase(title)
+    const truncatedTitle = formattedTitle.length > 80
+      ? `${formattedTitle.substring(0, 80)}...`
+      : formattedTitle
     items.push(truncatedTitle)
   }
   return items.join(', ')
