@@ -10,6 +10,7 @@ import type {
   OrganizerDiscountDetails,
   OrganizerFinancialDetails,
   OrganizerProductDetails,
+  OrganizerOtherDetails,
   OrganizerRequestPayload,
   OrganizerSponsorshipRequest,
   OrganizerRequestTypeId,
@@ -55,6 +56,7 @@ interface OrganizerSponsorshipRequestRow {
   discount_details: Record<string, unknown> | null
   financial_details: Record<string, unknown> | null
   allocation: Record<string, unknown> | null
+  other_details: Record<string, unknown> | null
   status: 'draft' | 'published'
   created_at: string
   updated_at: string
@@ -96,7 +98,7 @@ const ORGANIZER_REQUEST_TYPE_VALUES: OrganizerRequestTypeId[] = [
   'discount',
   'financial',
   'media',
-  'any'
+  'other'
 ]
 
 const defaultOrganizerProductDetails: OrganizerProductDetails = {
@@ -119,6 +121,11 @@ const defaultOrganizerAllocation: OrganizerAllocation = {
   product: 33,
   discount: 33,
   financial: 34
+}
+
+const defaultOrganizerOtherDetails: OrganizerOtherDetails = {
+  title: '',
+  description: ''
 }
 
 const normalizeSelectedTypes = (
@@ -269,6 +276,22 @@ const normalizeOrganizerAllocation = (
   }
 }
 
+const normalizeOrganizerOtherDetails = (
+  details: Record<string, unknown> | null
+): OrganizerOtherDetails => {
+  if (!details) return { ...defaultOrganizerOtherDetails }
+  return {
+    title:
+      typeof details.title === 'string'
+        ? details.title.slice(0, 100)
+        : defaultOrganizerOtherDetails.title,
+    description:
+      typeof details.description === 'string'
+        ? details.description.slice(0, 500)
+        : defaultOrganizerOtherDetails.description
+  }
+}
+
 const stripImageFiles = (images: ProductImage[]) =>
   images.map((image) => ({ id: image.id, url: image.url }))
 
@@ -307,6 +330,7 @@ const mapOrganizerRequestRow = (
   discountDetails: normalizeOrganizerDiscountDetails(row.discount_details),
   financialDetails: normalizeOrganizerFinancialDetails(row.financial_details),
   allocation: normalizeOrganizerAllocation(row.allocation),
+  otherDetails: normalizeOrganizerOtherDetails(row.other_details),
   status: row.status,
   createdAt: row.created_at,
   updatedAt: row.updated_at
@@ -485,6 +509,7 @@ export async function saveOrganizerSponsorshipRequest(
     discount_details: payload.discountDetails,
     financial_details: payload.financialDetails,
     allocation: payload.allocation,
+    other_details: payload.otherDetails,
     status
   }
 

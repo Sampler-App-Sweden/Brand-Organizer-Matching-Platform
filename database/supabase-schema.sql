@@ -341,6 +341,7 @@ CREATE TABLE IF NOT EXISTS public.organizer_sponsorship_requests (
   discount_details JSONB,
   financial_details JSONB,
   allocation JSONB,
+  other_details JSONB,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())

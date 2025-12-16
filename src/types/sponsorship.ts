@@ -30,7 +30,7 @@ export type OrganizerRequestTypeId =
   | 'discount'
   | 'financial'
   | 'media'
-  | 'any'
+  | 'other'
 
 export interface OfferProductDetails {
   name: string
@@ -88,6 +88,11 @@ export interface OrganizerFinancialDetails {
   paymentWindow: string
 }
 
+export interface OrganizerOtherDetails {
+  title: string
+  description: string
+}
+
 export interface OrganizerAllocation {
   product: number
   discount: number
@@ -100,6 +105,7 @@ export interface OrganizerRequestPayload {
   discountDetails: OrganizerDiscountDetails
   financialDetails: OrganizerFinancialDetails
   allocation: OrganizerAllocation
+  otherDetails: OrganizerOtherDetails
 }
 
 export interface OrganizerSponsorshipRequest extends OrganizerRequestPayload {

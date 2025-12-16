@@ -4,7 +4,7 @@ interface SponsorshipTypeCardProps {
   id: string
   title: string
   description: string
-  icon: React.ReactNode
+  icon: React.ComponentType<{ className?: string }>
   selected: boolean
   onToggle: (id: string) => void
   titleAccessory?: React.ReactNode
@@ -14,7 +14,7 @@ export function SponsorshipTypeCard({
   id,
   title,
   description,
-  icon,
+  icon: Icon,
   selected,
   onToggle,
   titleAccessory
@@ -44,7 +44,7 @@ export function SponsorshipTypeCard({
               : 'bg-gray-100 text-gray-500'
           } mr-4`}
         >
-          {icon}
+          <Icon className="h-5 w-5" />
         </div>
         <div>
           <h3 className='font-medium text-gray-900 mb-1 flex items-center gap-2'>

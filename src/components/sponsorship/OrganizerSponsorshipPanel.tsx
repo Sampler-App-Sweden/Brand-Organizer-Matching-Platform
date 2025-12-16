@@ -1,33 +1,26 @@
-import {
-  DollarSignIcon,
-  MegaphoneIcon,
-  PackageIcon,
-  PercentIcon,
-  SaveIcon,
-  SendIcon
-} from 'lucide-react'
+import { SaveIcon, SendIcon } from 'lucide-react'
 import React from 'react'
 
 import { useOrganizerSponsorship } from '../../hooks/useOrganizerSponsorship'
 import { OrganizerRequestTypeId } from '../../types/sponsorship'
 import { Button } from '../ui'
+import { baseSponsorshipRequests } from './constants/organizerSponsorshipRequests'
 import {
   DiscountSponsorshipInput,
   FinancialSponsorshipInput,
   MediaSponsorshipInput,
+  OtherSponsorshipInput,
   ProductSponsorshipInput
 } from './inputs'
-import { AnySponsorshipAllocationInput } from './inputs/AnySponsorshipAllocationInput'
 import { MatchPreview } from './MatchPreview'
 import { SponsorshipTypeCard } from './SponsorshipTypeCard'
 import { generateMatchPreview } from './utils/sponsorshipUtils'
-import { baseSponsorshipRequests } from './constants/organizerSponsorshipRequests'
 
 interface SponsorshipRequest {
-  id: 'product' | 'discount' | 'financial' | 'media' | 'any'
+  id: 'product' | 'discount' | 'financial' | 'media' | 'other'
   name: string
   description: string
-  icon: React.ReactNode
+  icon: React.ComponentType<{ className?: string }>
   percentage: number
 }
 
@@ -44,6 +37,7 @@ export function OrganizerSponsorshipPanel({
     discountDetails,
     financialDetails,
     allocation,
+    otherDetails,
     isSubmitting,
     loading,
     status,
@@ -52,9 +46,8 @@ export function OrganizerSponsorshipPanel({
     setProductDetails,
     setDiscountDetails,
     setFinancialDetails,
-    setAllocation,
+    setOtherDetails,
     handleTypeToggle,
-    handleAllocationChange,
     handleSave
   } = useOrganizerSponsorship(organizerId)
 
@@ -68,12 +61,9 @@ export function OrganizerSponsorshipPanel({
           ? allocation.discount
           : req.id === 'financial'
           ? allocation.financial
-          : req.id === 'media'
-          ? 0
-          : 100
+          : 0
     })
   )
-  // ...existing code...
   return (
     <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100 relative overflow-hidden'>
       {!organizerId && (
@@ -159,10 +149,10 @@ export function OrganizerSponsorshipPanel({
             />
           )}
           {selectedTypes.includes('media') && <MediaSponsorshipInput />}
-          {selectedTypes.includes('any') && (
-            <AnySponsorshipAllocationInput
-              allocation={allocation}
-              handleAllocationChange={handleAllocationChange}
+          {selectedTypes.includes('other') && (
+            <OtherSponsorshipInput
+              otherDetails={otherDetails}
+              setOtherDetails={setOtherDetails}
             />
           )}
         </div>
@@ -174,7 +164,8 @@ export function OrganizerSponsorshipPanel({
             selectedTypes,
             productDetails,
             discountDetails,
-            financialDetails
+            financialDetails,
+            otherDetails
           )}
         />
       )}

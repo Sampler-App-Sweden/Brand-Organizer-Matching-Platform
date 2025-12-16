@@ -1,5 +1,5 @@
-import { DollarSignIcon, PackageIcon, PercentIcon } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { DollarSignIcon, PackageIcon, PercentIcon, SlidersIcon } from 'lucide-react'
+import type { ComponentType } from 'react'
 
 import {
   OfferCustomMix,
@@ -13,7 +13,7 @@ export interface SponsorshipTypeConfig {
   id: SponsorshipTypeId
   name: string
   description: string
-  icon: ReactNode
+  icon: ComponentType<{ className?: string }>
 }
 
 export const SPONSORSHIP_TYPE_IDS: SponsorshipTypeId[] = [
@@ -28,25 +28,25 @@ export const SPONSORSHIP_TYPE_CONFIGS: SponsorshipTypeConfig[] = [
     id: 'product',
     name: 'Product Sponsorship',
     description: 'Provide in-kind items (e.g. coffee beans, merch)',
-    icon: <PackageIcon className='h-5 w-5' />
+    icon: PackageIcon
   },
   {
     id: 'discount',
     name: 'Discount Sponsorship',
     description: 'Issue promo codes or percentage discounts',
-    icon: <PercentIcon className='h-5 w-5' />
+    icon: PercentIcon
   },
   {
     id: 'financial',
     name: 'Financial Sponsorship',
     description: 'Direct monetary support',
-    icon: <DollarSignIcon className='h-5 w-5' />
+    icon: DollarSignIcon
   },
   {
     id: 'custom',
     name: 'Custom Mix',
     description: 'Allocate percentages across multiple sponsorship types',
-    icon: <div className='h-5 w-5' />
+    icon: SlidersIcon
   }
 ]
 

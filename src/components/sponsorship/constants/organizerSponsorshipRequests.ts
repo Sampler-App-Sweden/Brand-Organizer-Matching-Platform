@@ -1,6 +1,7 @@
 import {
   DollarSignIcon,
   MegaphoneIcon,
+  MoreHorizontalIcon,
   PackageIcon,
   PercentIcon
 } from 'lucide-react'
@@ -8,7 +9,7 @@ import {
 import type { ComponentType } from 'react'
 
 export interface BaseSponsorshipRequest {
-  id: 'product' | 'discount' | 'financial' | 'media' | 'any'
+  id: 'product' | 'discount' | 'financial' | 'media' | 'other'
   name: string
   description: string
   icon: ComponentType<{ className?: string }>
@@ -40,9 +41,9 @@ export const baseSponsorshipRequests: BaseSponsorshipRequest[] = [
     icon: MegaphoneIcon
   },
   {
-    id: 'any',
-    name: 'Any Combination',
-    description: 'Open to any type of sponsorship support',
-    icon: MegaphoneIcon
+    id: 'other',
+    name: 'Other Collaboration',
+    description: 'Describe a custom collaboration opportunity',
+    icon: MoreHorizontalIcon
   }
 ]

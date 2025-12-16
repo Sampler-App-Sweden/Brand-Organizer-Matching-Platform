@@ -37,3 +37,15 @@ dist-ssr
 docs/LOGIN_CREDENTIALS.txt
 *storybook.log
 storybook-static
+
+# Claude files
+.claude_config.json
+settings.local.json
+.claude_history.json
+.claude_temp/
+.claude_cache/
+.claude_exports/
+.claude_drafts/
+.claude_sessions/
+.claude_audio_recordings/
+.claude_debug.log

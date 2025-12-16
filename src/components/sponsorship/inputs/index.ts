@@ -1,5 +1,5 @@
-export * from './AnySponsorshipAllocationInput'
 export * from './DiscountSponsorshipInput'
 export * from './FinancialSponsorshipInput'
 export * from './MediaSponsorshipInput'
+export * from './OtherSponsorshipInput'
 export * from './ProductSponsorshipInput'

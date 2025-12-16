@@ -4,6 +4,7 @@ import {
   type OrganizerAllocation,
   type OrganizerDiscountDetails,
   type OrganizerFinancialDetails,
+  type OrganizerOtherDetails,
   type OrganizerProductDetails,
   type OrganizerRequestPayload,
   type OrganizerRequestTypeId,
@@ -36,6 +37,11 @@ const defaultAllocation: OrganizerAllocation = {
   financial: 34
 }
 
+const defaultOtherDetails: OrganizerOtherDetails = {
+  title: '',
+  description: ''
+}
+
 type FeedbackState = { type: 'success' | 'error'; message: string } | null
 
 export function useOrganizerSponsorship(organizerId?: string) {
@@ -51,6 +57,8 @@ export function useOrganizerSponsorship(organizerId?: string) {
     useState<OrganizerFinancialDetails>(defaultFinancialDetails)
   const [allocation, setAllocation] =
     useState<OrganizerAllocation>(defaultAllocation)
+  const [otherDetails, setOtherDetails] =
+    useState<OrganizerOtherDetails>(defaultOtherDetails)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [status, setStatus] = useState<'draft' | 'published' | null>(null)
@@ -104,6 +112,7 @@ export function useOrganizerSponsorship(organizerId?: string) {
     setDiscountDetails(defaultDiscountDetails)
     setFinancialDetails(defaultFinancialDetails)
     setAllocation(defaultAllocation)
+    setOtherDetails(defaultOtherDetails)
     setStatus(null)
     setUpdatedAt(null)
   }
@@ -114,6 +123,7 @@ export function useOrganizerSponsorship(organizerId?: string) {
     setDiscountDetails(request.discountDetails)
     setFinancialDetails(request.financialDetails)
     setAllocation(request.allocation)
+    setOtherDetails(request.otherDetails)
     setStatus(request.status)
     setUpdatedAt(request.updatedAt)
   }
@@ -176,7 +186,8 @@ export function useOrganizerSponsorship(organizerId?: string) {
       productDetails,
       discountDetails,
       financialDetails,
-      allocation
+      allocation,
+      otherDetails
     }
     try {
       const request = await saveOrganizerSponsorshipRequest(
@@ -209,6 +220,7 @@ export function useOrganizerSponsorship(organizerId?: string) {
     discountDetails,
     financialDetails,
     allocation,
+    otherDetails,
     isSubmitting,
     loading,
     status,
@@ -218,6 +230,7 @@ export function useOrganizerSponsorship(organizerId?: string) {
     setDiscountDetails,
     setFinancialDetails,
     setAllocation,
+    setOtherDetails,
     handleTypeToggle,
     handleAllocationChange,
     handleSave
