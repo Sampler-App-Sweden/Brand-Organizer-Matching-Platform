@@ -4,6 +4,7 @@ import {
   createDefaultCustomMix,
   createDefaultDiscountDetails,
   createDefaultFinancialDetails,
+  createDefaultOtherDetails,
   createDefaultProductDetails,
   SPONSORSHIP_TYPE_CONFIGS,
   SPONSORSHIP_TYPE_IDS,
@@ -17,6 +18,7 @@ import {
   type OfferCustomMix,
   type OfferDiscountDetails,
   type OfferFinancialDetails,
+  type OfferOtherDetails,
   type OfferProductDetails,
   type SponsorshipTypeId
 } from '../types/sponsorship'
@@ -34,6 +36,9 @@ export function useBrandSponsorship(brandId?: string) {
   )
   const [financialDetails, setFinancialDetails] =
     useState<OfferFinancialDetails>(() => createDefaultFinancialDetails())
+  const [otherDetails, setOtherDetails] = useState<OfferOtherDetails>(() =>
+    createDefaultOtherDetails()
+  )
   const [customMix, setCustomMix] = useState<OfferCustomMix>(() =>
     createDefaultCustomMix()
   )
@@ -49,6 +54,7 @@ export function useBrandSponsorship(brandId?: string) {
       setProductDetails(createDefaultProductDetails())
       setDiscountDetails(createDefaultDiscountDetails())
       setFinancialDetails(createDefaultFinancialDetails())
+      setOtherDetails(createDefaultOtherDetails())
       setCustomMix(createDefaultCustomMix())
       setStatus(null)
       setUpdatedAt(null)
@@ -72,6 +78,7 @@ export function useBrandSponsorship(brandId?: string) {
           setProductDetails(offer.productDetails)
           setDiscountDetails(offer.discountDetails)
           setFinancialDetails(offer.financialDetails)
+          setOtherDetails(offer.otherDetails)
           setCustomMix(offer.customMix)
           setStatus(offer.status)
           setUpdatedAt(offer.updatedAt)
@@ -80,6 +87,7 @@ export function useBrandSponsorship(brandId?: string) {
           setProductDetails(createDefaultProductDetails())
           setDiscountDetails(createDefaultDiscountDetails())
           setFinancialDetails(createDefaultFinancialDetails())
+          setOtherDetails(createDefaultOtherDetails())
           setCustomMix(createDefaultCustomMix())
           setStatus(null)
           setUpdatedAt(null)
@@ -109,7 +117,7 @@ export function useBrandSponsorship(brandId?: string) {
       SPONSORSHIP_TYPE_CONFIGS.map((config) => ({
         ...config,
         percentage:
-          config.id === 'custom'
+          config.id === 'other'
             ? 100
             : config.id in customMix
             ? customMix[config.id as keyof OfferCustomMix]
@@ -166,6 +174,7 @@ export function useBrandSponsorship(brandId?: string) {
         productDetails,
         discountDetails,
         financialDetails,
+        otherDetails,
         customMix
       }
       const offer = await saveSponsorshipOffer(brandId, payload, nextStatus)
@@ -177,6 +186,7 @@ export function useBrandSponsorship(brandId?: string) {
       setProductDetails(offer.productDetails)
       setDiscountDetails(offer.discountDetails)
       setFinancialDetails(offer.financialDetails)
+      setOtherDetails(offer.otherDetails)
       setCustomMix(offer.customMix)
       setStatus(offer.status)
       setUpdatedAt(offer.updatedAt)
@@ -208,10 +218,12 @@ export function useBrandSponsorship(brandId?: string) {
     handleTypeToggle,
     isSubmitting,
     loading,
+    otherDetails,
     productDetails,
     selectedTypes,
     setDiscountDetails,
     setFinancialDetails,
+    setOtherDetails,
     setProductDetails,
     sponsorshipTypes,
     status,

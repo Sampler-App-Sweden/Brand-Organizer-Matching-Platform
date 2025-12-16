@@ -23,7 +23,7 @@ export interface ProductSponsorshipManagerProps {
   onSave?: (products: SponsorshipProduct[]) => void
 }
 
-export type SponsorshipTypeId = 'product' | 'discount' | 'financial' | 'custom'
+export type SponsorshipTypeId = 'product' | 'discount' | 'financial' | 'other'
 
 export type OrganizerRequestTypeId =
   | 'product'
@@ -50,6 +50,11 @@ export interface OfferFinancialDetails {
   terms: string
 }
 
+export interface OfferOtherDetails {
+  title: string
+  description: string
+}
+
 export interface OfferCustomMix {
   product: number
   discount: number
@@ -62,6 +67,7 @@ export interface SponsorshipOfferPayload {
   discountDetails: OfferDiscountDetails
   financialDetails: OfferFinancialDetails
   customMix: OfferCustomMix
+  otherDetails: OfferOtherDetails
 }
 
 export interface SponsorshipOffer extends SponsorshipOfferPayload {

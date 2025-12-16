@@ -311,6 +311,7 @@ CREATE TABLE IF NOT EXISTS public.sponsorship_offers (
   product_details JSONB,
   discount_details JSONB,
   financial_details JSONB,
+  other_details JSONB,
   custom_mix JSONB,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),

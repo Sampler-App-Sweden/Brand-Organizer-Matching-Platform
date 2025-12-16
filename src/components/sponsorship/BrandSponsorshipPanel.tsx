@@ -2,6 +2,7 @@ import {
   DollarSignIcon,
   PackageIcon,
   PercentIcon,
+  PlusCircleIcon,
   SaveIcon,
   SendIcon
 } from 'lucide-react'
@@ -10,6 +11,7 @@ import { Button } from '../ui'
 import { useBrandSponsorship } from '../../hooks/useBrandSponsorship'
 import { type SponsorshipTypeId } from '../../types/sponsorship'
 import { clampNumber } from '../../utils/validation'
+import { toTitleCase } from '../../utils/formatting'
 import { SponsorshipTypeCard } from './SponsorshipTypeCard'
 
 interface BrandSponsorshipPanelProps {
@@ -18,19 +20,19 @@ interface BrandSponsorshipPanelProps {
 
 export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
   const {
-    customMix,
     discountDetails,
     feedback,
     financialDetails,
-    handleCustomMixChange,
     handleSave,
     handleTypeToggle,
     isSubmitting,
     loading,
+    otherDetails,
     productDetails,
     selectedTypes,
     setDiscountDetails,
     setFinancialDetails,
+    setOtherDetails,
     setProductDetails,
     sponsorshipTypes,
     status,
@@ -284,87 +286,48 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
               </div>
             </div>
           )}
-          {selectedTypes.includes('custom') && (
+          {selectedTypes.includes('other') && (
             <div className='bg-gray-50 p-6 rounded-lg border border-gray-200 relative'>
               <div className='absolute -top-3 -left-3 w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center'>
-                <div className='h-3 w-3 text-indigo-600' />
+                <PlusCircleIcon className='h-3 w-3 text-indigo-600' />
               </div>
               <h3 className='text-lg font-medium text-gray-900 mb-4'>
-                Custom Mix Allocation
+                Other Sponsorship Details
               </h3>
-              <p className='text-sm text-gray-500 mb-4'>
-                Adjust the sliders to allocate percentages across different
-                sponsorship types.
-              </p>
-              <div className='space-y-6'>
+              <div className='grid grid-cols-1 gap-4'>
                 <div>
-                  <div className='flex justify-between mb-1'>
-                    <label className='text-sm font-medium text-gray-700 flex items-center'>
-                      <PackageIcon className='h-4 w-4 mr-1 text-indigo-500' />{' '}
-                      Product Sponsorship
-                    </label>
-                    <span className='text-sm text-gray-500'>
-                      {customMix.product}%
-                    </span>
-                  </div>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    Sponsorship Title
+                  </label>
                   <input
-                    type='range'
-                    min='0'
-                    max='100'
-                    value={customMix.product}
+                    type='text'
+                    placeholder='e.g., Media Coverage, Venue Access, etc.'
+                    className='block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                    value={otherDetails.title}
                     onChange={(e) =>
-                      handleCustomMixChange('product', parseInt(e.target.value))
+                      setOtherDetails({
+                        ...otherDetails,
+                        title: e.target.value
+                      })
                     }
-                    className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer'
                   />
                 </div>
                 <div>
-                  <div className='flex justify-between mb-1'>
-                    <label className='text-sm font-medium text-gray-700 flex items-center'>
-                      <PercentIcon className='h-4 w-4 mr-1 text-indigo-500' />{' '}
-                      Discount Sponsorship
-                    </label>
-                    <span className='text-sm text-gray-500'>
-                      {customMix.discount}%
-                    </span>
-                  </div>
-                  <input
-                    type='range'
-                    min='0'
-                    max='100'
-                    value={customMix.discount}
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder='Describe what you are offering...'
+                    className='block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm'
+                    value={otherDetails.description}
                     onChange={(e) =>
-                      handleCustomMixChange(
-                        'discount',
-                        parseInt(e.target.value)
-                      )
+                      setOtherDetails({
+                        ...otherDetails,
+                        description: e.target.value
+                      })
                     }
-                    className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer'
-                  />
-                </div>
-                <div>
-                  <div className='flex justify-between mb-1'>
-                    <label className='text-sm font-medium text-gray-700 flex items-center'>
-                      <DollarSignIcon className='h-4 w-4 mr-1 text-indigo-500' />{' '}
-                      Financial Sponsorship
-                    </label>
-                    <span className='text-sm text-gray-500'>
-                      {customMix.financial}%
-                    </span>
-                  </div>
-                  <input
-                    type='range'
-                    min='0'
-                    max='100'
-                    value={customMix.financial}
-                    onChange={(e) =>
-                      handleCustomMixChange(
-                        'financial',
-                        parseInt(e.target.value)
-                      )
-                    }
-                    className='w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer'
-                  />
+                  ></textarea>
                 </div>
               </div>
             </div>
@@ -382,53 +345,54 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
           <div className='relative z-10'>
             <p className='text-gray-700 mb-4'>You're offering:</p>
             <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              {(selectedTypes.includes('product') ||
-                selectedTypes.includes('custom')) && (
+              {selectedTypes.includes('product') && (
                 <div className='bg-white p-4 rounded-lg shadow-sm border border-indigo-100'>
                   <div className='flex items-center mb-2'>
                     <PackageIcon className='h-5 w-5 text-indigo-500 mr-2' />
                     <span className='font-medium text-gray-900'>Product</span>
                   </div>
                   <div className='text-sm text-gray-500'>
-                    {selectedTypes.includes('custom')
-                      ? `${customMix.product}%`
-                      : '100%'}
-                    {productDetails.name && ` - ${productDetails.name}`}
+                    {productDetails.name && `${productDetails.name}`}
                     {productDetails.quantity &&
                       ` (${productDetails.quantity} units)`}
                   </div>
                 </div>
               )}
-              {(selectedTypes.includes('discount') ||
-                selectedTypes.includes('custom')) && (
+              {selectedTypes.includes('discount') && (
                 <div className='bg-white p-4 rounded-lg shadow-sm border border-indigo-100'>
                   <div className='flex items-center mb-2'>
                     <PercentIcon className='h-5 w-5 text-indigo-500 mr-2' />
                     <span className='font-medium text-gray-900'>Discount</span>
                   </div>
                   <div className='text-sm text-gray-500'>
-                    {selectedTypes.includes('custom')
-                      ? `${customMix.discount}%`
-                      : '100%'}
                     {discountDetails.value &&
-                      ` - ${discountDetails.value}% off`}
+                      `${discountDetails.value}% off`}
                     {discountDetails.code && ` (${discountDetails.code})`}
                   </div>
                 </div>
               )}
-              {(selectedTypes.includes('financial') ||
-                selectedTypes.includes('custom')) && (
+              {selectedTypes.includes('financial') && (
                 <div className='bg-white p-4 rounded-lg shadow-sm border border-indigo-100'>
                   <div className='flex items-center mb-2'>
                     <DollarSignIcon className='h-5 w-5 text-indigo-500 mr-2' />
                     <span className='font-medium text-gray-900'>Financial</span>
                   </div>
                   <div className='text-sm text-gray-500'>
-                    {selectedTypes.includes('custom')
-                      ? `${customMix.financial}%`
-                      : '100%'}
                     {financialDetails.amount &&
-                      ` - €${financialDetails.amount}`}
+                      `€${financialDetails.amount}`}
+                  </div>
+                </div>
+              )}
+              {selectedTypes.includes('other') && (
+                <div className='bg-white p-4 rounded-lg shadow-sm border border-indigo-100'>
+                  <div className='flex items-center mb-2'>
+                    <PlusCircleIcon className='h-5 w-5 text-indigo-500 mr-2' />
+                    <span className='font-medium text-gray-900'>
+                      {otherDetails.title ? toTitleCase(otherDetails.title) : 'Other'}
+                    </span>
+                  </div>
+                  <div className='text-sm text-gray-500'>
+                    {otherDetails.description || 'Custom sponsorship'}
                   </div>
                 </div>
               )}

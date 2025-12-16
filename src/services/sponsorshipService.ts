@@ -17,6 +17,7 @@ import type {
   OfferProductDetails,
   OfferDiscountDetails,
   OfferFinancialDetails,
+  OfferOtherDetails,
   OfferCustomMix
 } from '../types/sponsorship'
 
@@ -42,6 +43,7 @@ interface SponsorshipOfferRow {
   product_details: Record<string, unknown> | null
   discount_details: Record<string, unknown> | null
   financial_details: Record<string, unknown> | null
+  other_details: Record<string, unknown> | null
   custom_mix: Record<string, unknown> | null
   status: 'draft' | 'published'
   created_at: string
@@ -66,7 +68,7 @@ const SPONSORSHIP_TYPE_VALUES: SponsorshipTypeId[] = [
   'product',
   'discount',
   'financial',
-  'custom'
+  'other'
 ]
 
 const defaultProductDetails: OfferProductDetails = {
@@ -85,6 +87,11 @@ const defaultDiscountDetails: OfferDiscountDetails = {
 const defaultFinancialDetails: OfferFinancialDetails = {
   amount: '',
   terms: 'upfront'
+}
+
+const defaultOtherDetails: OfferOtherDetails = {
+  title: '',
+  description: ''
 }
 
 const defaultCustomMix: OfferCustomMix = {
@@ -179,6 +186,22 @@ const normalizeFinancialDetails = (
   return {
     amount: typeof details.amount === 'string' ? details.amount : defaultFinancialDetails.amount,
     terms: typeof details.terms === 'string' ? details.terms : defaultFinancialDetails.terms
+  }
+}
+
+const normalizeOtherDetails = (
+  details: Record<string, unknown> | null
+): OfferOtherDetails => {
+  if (!details) return { ...defaultOtherDetails }
+  return {
+    title:
+      typeof details.title === 'string'
+        ? details.title
+        : defaultOtherDetails.title,
+    description:
+      typeof details.description === 'string'
+        ? details.description
+        : defaultOtherDetails.description
   }
 }
 
@@ -314,6 +337,7 @@ const mapOfferRow = (row: SponsorshipOfferRow): SponsorshipOffer => ({
   productDetails: normalizeProductDetails(row.product_details),
   discountDetails: normalizeDiscountDetails(row.discount_details),
   financialDetails: normalizeFinancialDetails(row.financial_details),
+  otherDetails: normalizeOtherDetails(row.other_details),
   customMix: normalizeCustomMix(row.custom_mix),
   status: row.status,
   createdAt: row.created_at,
@@ -464,6 +488,7 @@ export async function saveSponsorshipOffer(
     product_details: payload.productDetails,
     discount_details: payload.discountDetails,
     financial_details: payload.financialDetails,
+    other_details: payload.otherDetails,
     custom_mix: payload.customMix,
     status
   }

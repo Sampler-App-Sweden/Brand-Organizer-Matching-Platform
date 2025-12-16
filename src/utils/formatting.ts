@@ -29,6 +29,21 @@ export function truncateText(text: string, maxLength: number): string {
 }
 
 /**
+ * Capitalize the first letter of each word in a string (Title Case)
+ * @example
+ * toTitleCase('hello world') // 'Hello World'
+ * toTitleCase('media coverage') // 'Media Coverage'
+ */
+export function toTitleCase(text: string): string {
+  if (!text) return text
+  return text
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+/**
  * Get initials from a name
  */
 export function getInitials(name: string): string {

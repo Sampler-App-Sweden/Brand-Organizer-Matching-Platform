@@ -1,10 +1,11 @@
-import { DollarSignIcon, PackageIcon, PercentIcon, SlidersIcon } from 'lucide-react'
+import { DollarSignIcon, PackageIcon, PercentIcon, PlusCircleIcon } from 'lucide-react'
 import type { ComponentType } from 'react'
 
 import {
   OfferCustomMix,
   OfferDiscountDetails,
   OfferFinancialDetails,
+  OfferOtherDetails,
   OfferProductDetails,
   SponsorshipTypeId
 } from '../types/sponsorship'
@@ -20,7 +21,7 @@ export const SPONSORSHIP_TYPE_IDS: SponsorshipTypeId[] = [
   'product',
   'discount',
   'financial',
-  'custom'
+  'other'
 ]
 
 export const SPONSORSHIP_TYPE_CONFIGS: SponsorshipTypeConfig[] = [
@@ -43,10 +44,10 @@ export const SPONSORSHIP_TYPE_CONFIGS: SponsorshipTypeConfig[] = [
     icon: DollarSignIcon
   },
   {
-    id: 'custom',
-    name: 'Custom Mix',
-    description: 'Allocate percentages across multiple sponsorship types',
-    icon: SlidersIcon
+    id: 'other',
+    name: 'Other',
+    description: 'Specify a custom sponsorship type',
+    icon: PlusCircleIcon
   }
 ]
 
@@ -66,6 +67,11 @@ export const createDefaultDiscountDetails = (): OfferDiscountDetails => ({
 export const createDefaultFinancialDetails = (): OfferFinancialDetails => ({
   amount: '',
   terms: 'upfront'
+})
+
+export const createDefaultOtherDetails = (): OfferOtherDetails => ({
+  title: '',
+  description: ''
 })
 
 export const createDefaultCustomMix = (): OfferCustomMix => ({
