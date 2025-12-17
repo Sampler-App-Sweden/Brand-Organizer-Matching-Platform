@@ -16,7 +16,7 @@ type ViewMode = 'list' | 'create' | 'edit'
 
 export function EventsPage() {
   const { currentUser } = useAuth()
-  const userType = currentUser?.userType
+  const userType = currentUser?.type
 
   // Fetch organizer.id from organizers table using auth user_id
   const [organizerId, setOrganizerId] = useState<string | undefined>()
