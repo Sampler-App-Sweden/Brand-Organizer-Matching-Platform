@@ -59,7 +59,7 @@ export interface ProcessPaymentResponse {
 
 export type AIAssistantType = 'detect-intent' | 'extract-profile' | 'generate-questions' | 'generate-suggestions'
 
-export type UserRole = 'brand' | 'organizer' | 'community'
+export type UserRole = 'brand' | 'organizer'
 
 export interface ConversationMessage {
   role: string

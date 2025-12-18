@@ -42,8 +42,7 @@ export function BasicRegistrationForm(props: VariantFormProps) {
           type='select'
           options={[
             { value: 'brand', label: 'Brand / Sponsor' },
-            { value: 'organizer', label: 'Event Organizer' },
-            { value: 'community', label: 'Community Member' }
+            { value: 'organizer', label: 'Event Organizer' }
           ]}
           value={props.userType}
           onChange={(e) => props.setUserType(e.target.value as UserType)}
@@ -153,8 +152,7 @@ export function PasswordStrengthRegistrationForm(props: VariantFormProps) {
           type='select'
           options={[
             { value: 'brand', label: 'Brand / Sponsor' },
-            { value: 'organizer', label: 'Event Organizer' },
-            { value: 'community', label: 'Community Member' }
+            { value: 'organizer', label: 'Event Organizer' }
           ]}
           value={props.userType}
           onChange={(e) => props.setUserType(e.target.value as UserType)}
@@ -362,8 +360,7 @@ export function EnhancedRegistrationForm(props: VariantFormProps) {
           type='select'
           options={[
             { value: 'brand', label: 'Brand / Sponsor' },
-            { value: 'organizer', label: 'Event Organizer' },
-            { value: 'community', label: 'Community Member' }
+            { value: 'organizer', label: 'Event Organizer' }
           ]}
           value={props.userType}
           onChange={(e) => {
@@ -392,16 +389,12 @@ export function EnhancedRegistrationForm(props: VariantFormProps) {
             <strong>
               {props.userType === 'brand'
                 ? 'Brand / Sponsor'
-                : props.userType === 'organizer'
-                ? 'Event Organizer'
-                : 'Community Member'}
+                : 'Event Organizer'}
             </strong>
             :
             {props.userType === 'brand'
               ? ' Perfect for companies looking to promote products or services through events.'
-              : props.userType === 'organizer'
-              ? ' Ideal for those organizing events and seeking brand partnerships.'
-              : ' Join our community to participate in events and test panels.'}
+              : ' Ideal for those organizing events and seeking brand partnerships.'}
           </p>
         </div>
         <FormField

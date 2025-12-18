@@ -1,4 +1,4 @@
-export type UserType = 'brand' | 'organizer' | 'community'
+export type UserType = 'brand' | 'organizer'
 export type ExperimentVariant = 'A' | 'B' | 'C'
 
 export interface PasswordErrors {

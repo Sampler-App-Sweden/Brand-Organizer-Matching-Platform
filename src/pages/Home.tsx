@@ -11,12 +11,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import {
-  Search,
-  TechCard,
-  TechFeatureSection,
-  TechHero
-} from '../components/landing'
+import { TechCard, TechFeatureSection, TechHero } from '../components/landing'
 import { TechLayout } from '../components/layout'
 
 export function Home() {
@@ -63,6 +58,7 @@ export function Home() {
       <TechHero
         title='Connect Brands with Event Organizers Effortlessly'
         subtitle='SponsrAI is the perfect platform for brands to find sampling opportunities and for event organizers to secure valuable sponsorships.'
+        videoSrc='./hero-video.mp4'
         ctaText='Get Started with AI'
         ctaLink='/onboarding'
         secondaryCtaText='Explore Community'

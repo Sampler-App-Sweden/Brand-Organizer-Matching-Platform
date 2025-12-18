@@ -1,4 +1,4 @@
-export type UserRole = 'brand' | 'organizer' | 'community'
+export type UserRole = 'brand' | 'organizer'
 // Generic draft profile that can contain fields from any role
 export interface DraftProfile {
   // Common fields

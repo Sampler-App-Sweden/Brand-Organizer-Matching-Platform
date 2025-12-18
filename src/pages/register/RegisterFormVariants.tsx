@@ -46,8 +46,7 @@ export function VariantAForm({
           type='select'
           options={[
             { value: 'brand', label: 'Brand / Sponsor' },
-            { value: 'organizer', label: 'Event Organizer' },
-            { value: 'community', label: 'Community Member' }
+            { value: 'organizer', label: 'Event Organizer' }
           ]}
           value={userType}
           onChange={(e) => setUserType(e.target.value as UserType)}

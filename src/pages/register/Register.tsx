@@ -53,7 +53,7 @@ export function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [userType, setUserType] = useState<'brand' | 'organizer' | 'community'>(
+  const [userType, setUserType] = useState<'brand' | 'organizer'>(
     'brand'
   )
   const [showPassword, setShowPassword] = useState(false)
@@ -92,13 +92,8 @@ export function Register() {
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const role = params.get('role')
-    if (
-      role === 'brand' ||
-      role === 'organizer' ||
-      role === 'community' ||
-      role === 'admin'
-    ) {
-      setUserType(role as 'brand' | 'organizer' | 'community')
+    if (role === 'brand' || role === 'organizer') {
+      setUserType(role as 'brand' | 'organizer')
     }
     // Pre-fill email from draft profile if available
     if (draftProfile?.email) {
@@ -386,50 +381,6 @@ export function Register() {
           isVisible={Object.keys(draftProfile).length > 0 && !verificationSent}
         />
         <LoginPrompt onNavigate={handleLoginNavigate} />
-        {/* Tech decoration elements */}
-        <div
-          className='absolute -top-6 -right-6 w-12 h-12 opacity-10 animate-spin-slow'
-          style={{
-            animationDuration: '15s'
-          }}
-        >
-          <svg
-            viewBox='0 0 100 100'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <circle
-              cx='50'
-              cy='50'
-              r='45'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeDasharray='10 5'
-            />
-          </svg>
-        </div>
-        <div
-          className='absolute -bottom-6 -left-6 w-12 h-12 opacity-10 animate-spin-slow'
-          style={{
-            animationDuration: '20s',
-            animationDirection: 'reverse'
-          }}
-        >
-          <svg
-            viewBox='0 0 100 100'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-          >
-            <circle
-              cx='50'
-              cy='50'
-              r='45'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeDasharray='8 4'
-            />
-          </svg>
-        </div>
       </div>
       <Toast
         type={toast.type}
