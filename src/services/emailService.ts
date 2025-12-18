@@ -1,5 +1,6 @@
 import emailjs from '@emailjs/browser'
 import type { EmailJSResponseStatus } from '@emailjs/browser'
+import { saveSupportTicket } from './supportTicketService'
 
 // EmailJS configuration - prefer environment variables to avoid hardcoding secrets
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'default_service'
@@ -47,6 +48,61 @@ export const sendContactEmail = async (params: {
     to_email: toEmail,
     timestamp: new Date().toLocaleString()
   }
+  return emailjs.send(
+    SERVICE_ID,
+    CONTACT_TEMPLATE_ID,
+    templateParams,
+    PUBLIC_KEY
+  )
+}
+
+/**
+ * Sends a support ticket email and saves it to Supabase
+ * @param params Support ticket parameters
+ * @returns Promise resolving to the EmailJS response
+ */
+export const sendSupportTicket = async (params: {
+  name: string
+  email: string
+  category: string
+  message: string
+  attachments?: string[]
+  userAgent?: string
+  timestamp?: string
+}): Promise<EmailJSResponseStatus> => {
+  const {
+    name,
+    email,
+    category,
+    message,
+    attachments = [],
+    userAgent = navigator.userAgent,
+    timestamp = new Date().toLocaleString()
+  } = params
+
+  // Save ticket to Supabase (don't await to avoid blocking email send)
+  saveSupportTicket({
+    name,
+    email,
+    category,
+    message,
+    attachments,
+    user_agent: userAgent
+  }).catch((error) => {
+    console.error('Failed to save support ticket to database:', error)
+  })
+
+  const templateParams = {
+    from_name: name,
+    reply_to: email,
+    category,
+    message,
+    attachments: attachments.length > 0 ? attachments.join('\n') : 'None',
+    user_agent: userAgent,
+    timestamp,
+    to_email: DEFAULT_CONTACT_RECIPIENT
+  }
+
   return emailjs.send(
     SERVICE_ID,
     CONTACT_TEMPLATE_ID,

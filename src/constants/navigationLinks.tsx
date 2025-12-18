@@ -1,4 +1,5 @@
 import {
+  BookOpenIcon,
   CalendarIcon,
   PackageIcon,
   SparklesIcon
@@ -23,6 +24,11 @@ export const MARKETING_NAV_LINKS: NavLink[] = [
   {
     label: 'Organizers',
     path: '/organizers'
+  },
+  {
+    label: 'Help',
+    path: '/help',
+    icon: <BookOpenIcon className='h-4 w-4 mr-0.5' />
   }
 ]
 
@@ -43,6 +49,11 @@ export const DASHBOARD_NAV_LINKS: NavLink[] = [
     label: 'Inspiration',
     path: '/dashboard/inspiration',
     icon: <SparklesIcon className='h-4 w-4 mr-0.5' />
+  },
+  {
+    label: 'Help',
+    path: '/help',
+    icon: <BookOpenIcon className='h-4 w-4 mr-0.5' />
   }
 ]
 
@@ -65,5 +76,10 @@ export const MAIN_NAV_ITEMS: NavLink[] = [
     label: 'Inspiration',
     path: '/dashboard/inspiration',
     icon: <SparklesIcon className='h-5 w-5' />
+  },
+  {
+    label: 'Help',
+    path: '/help',
+    icon: <BookOpenIcon className='h-5 w-5' />
   }
 ]

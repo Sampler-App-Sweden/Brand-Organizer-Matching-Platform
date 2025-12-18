@@ -7,7 +7,8 @@ import {
   MailIcon,
   PackageIcon,
   SearchIcon,
-  UsersIcon
+  UsersIcon,
+  LifeBuoyIcon
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -16,18 +17,25 @@ import { Button } from '../../components/ui'
 import { User } from '../../services/authService'
 import { sendDataByEmail } from '../../services/emailService'
 import { Match } from '../../services/matchingService'
+import {
+  getAllSupportTickets,
+  updateSupportTicketStatus,
+  updateSupportTicketPriority,
+  type SupportTicket
+} from '../../services/supportTicketService'
 
 export function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])
   const [brands, setBrands] = useState<any[]>([])
   const [organizers, setOrganizers] = useState<any[]>([])
   const [matches, setMatches] = useState<Match[]>([])
+  const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [activeTab, setActiveTab] = useState<
-    'users' | 'brands' | 'organizers' | 'matches'
+    'users' | 'brands' | 'organizers' | 'matches' | 'tickets'
   >('users')
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortField, setSortField] = useState<string>('createdAt')
+  const [sortField, setSortField] = useState<string>('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [isExporting, setIsExporting] = useState(false)
   const [exportFeedback, setExportFeedback] = useState<{
@@ -41,17 +49,19 @@ export function AdminDashboard() {
   })
   useEffect(() => {
     const loadData = async () => {
-      // Load all data from localStorage
+      // Load all data from localStorage and Supabase
       const usersData = JSON.parse(localStorage.getItem('users') || '[]')
       const brandsData = JSON.parse(localStorage.getItem('brands') || '[]')
       const organizersData = JSON.parse(
         localStorage.getItem('organizers') || '[]'
       )
       const matchesData = JSON.parse(localStorage.getItem('matches') || '[]')
+      const ticketsData = await getAllSupportTickets()
       setUsers(usersData)
       setBrands(brandsData)
       setOrganizers(organizersData)
       setMatches(matchesData)
+      setTickets(ticketsData)
       setLoading(false)
     }
     loadData()
@@ -105,7 +115,7 @@ export function AdminDashboard() {
     })
   }
   const exportData = (
-    dataType: 'users' | 'brands' | 'organizers' | 'matches'
+    dataType: 'users' | 'brands' | 'organizers' | 'matches' | 'tickets'
   ) => {
     let data
     let filename
@@ -126,6 +136,10 @@ export function AdminDashboard() {
         data = matches
         filename = 'matches.json'
         break
+      case 'tickets':
+        data = tickets
+        filename = 'support-tickets.json'
+        break
     }
     const jsonString = JSON.stringify(data, null, 2)
     const blob = new Blob([jsonString], {
@@ -141,7 +155,7 @@ export function AdminDashboard() {
     URL.revokeObjectURL(url)
   }
   const emailData = async (
-    dataType: 'users' | 'brands' | 'organizers' | 'matches'
+    dataType: 'users' | 'brands' | 'organizers' | 'matches' | 'tickets'
   ) => {
     setIsExporting(true)
     setExportFeedback({
@@ -167,6 +181,10 @@ export function AdminDashboard() {
       case 'matches':
         data = matches
         subject = 'SponsrAI Matches Data Export'
+        break
+      case 'tickets':
+        data = tickets
+        subject = 'SponsrAI Support Tickets Data Export'
         break
     }
     try {
@@ -229,7 +247,7 @@ export function AdminDashboard() {
         </p>
       </div>
       {/* Stats */}
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-6'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6'>
         <div
           className={`bg-white rounded-lg shadow-sm p-6 cursor-pointer ${
             activeTab === 'users' ? 'ring-2 ring-indigo-500' : ''
@@ -298,6 +316,24 @@ export function AdminDashboard() {
               <h3 className='text-lg font-semibold text-gray-900'>Matches</h3>
               <p className='text-2xl font-bold text-gray-900'>
                 {matches.length}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          className={`bg-white rounded-lg shadow-sm p-6 cursor-pointer ${
+            activeTab === 'tickets' ? 'ring-2 ring-indigo-500' : ''
+          }`}
+          onClick={() => setActiveTab('tickets')}
+        >
+          <div className='flex items-center'>
+            <div className='bg-orange-100 rounded-md p-3'>
+              <LifeBuoyIcon className='h-6 w-6 text-orange-600' />
+            </div>
+            <div className='ml-4'>
+              <h3 className='text-lg font-semibold text-gray-900'>Support Tickets</h3>
+              <p className='text-2xl font-bold text-gray-900'>
+                {tickets.length}
               </p>
             </div>
           </div>
@@ -785,6 +821,132 @@ export function AdminDashboard() {
                       className='px-6 py-4 text-center text-sm text-gray-500'
                     >
                       No matches found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {activeTab === 'tickets' && (
+          <div className='overflow-x-auto'>
+            <table className='min-w-full divide-y divide-gray-200'>
+              <thead className='bg-gray-50'>
+                <tr>
+                  <th
+                    className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                    onClick={() => handleSort('created_at')}
+                  >
+                    <div className='flex items-center'>
+                      Created {renderSortIcon('created_at')}
+                    </div>
+                  </th>
+                  <th
+                    className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                    onClick={() => handleSort('name')}
+                  >
+                    <div className='flex items-center'>
+                      Name {renderSortIcon('name')}
+                    </div>
+                  </th>
+                  <th
+                    className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                    onClick={() => handleSort('email')}
+                  >
+                    <div className='flex items-center'>
+                      Email {renderSortIcon('email')}
+                    </div>
+                  </th>
+                  <th
+                    className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                    onClick={() => handleSort('category')}
+                  >
+                    <div className='flex items-center'>
+                      Category {renderSortIcon('category')}
+                    </div>
+                  </th>
+                  <th
+                    className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                    onClick={() => handleSort('status')}
+                  >
+                    <div className='flex items-center'>
+                      Status {renderSortIcon('status')}
+                    </div>
+                  </th>
+                  <th
+                    className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
+                    onClick={() => handleSort('priority')}
+                  >
+                    <div className='flex items-center'>
+                      Priority {renderSortIcon('priority')}
+                    </div>
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                    Message
+                  </th>
+                </tr>
+              </thead>
+              <tbody className='bg-white divide-y divide-gray-200'>
+                {filterData(sortData(tickets)).map((ticket) => (
+                  <tr key={ticket.id} className='hover:bg-gray-50'>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                      {new Date(ticket.created_at).toLocaleString()}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
+                      {ticket.name}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                      {ticket.email}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                      <span className='px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800'>
+                        {ticket.category}
+                      </span>
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          ticket.status === 'open'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : ticket.status === 'in_progress'
+                            ? 'bg-blue-100 text-blue-800'
+                            : ticket.status === 'resolved'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {ticket.status === 'in_progress'
+                          ? 'In Progress'
+                          : ticket.status.charAt(0).toUpperCase() +
+                            ticket.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          ticket.priority === 'high'
+                            ? 'bg-red-100 text-red-800'
+                            : ticket.priority === 'medium'
+                            ? 'bg-orange-100 text-orange-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {ticket.priority.charAt(0).toUpperCase() +
+                          ticket.priority.slice(1)}
+                      </span>
+                    </td>
+                    <td className='px-6 py-4 text-sm text-gray-500 max-w-xs truncate'>
+                      {ticket.message}
+                    </td>
+                  </tr>
+                ))}
+                {filterData(sortData(tickets)).length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className='px-6 py-4 text-center text-sm text-gray-500'
+                    >
+                      No support tickets found
                     </td>
                   </tr>
                 )}

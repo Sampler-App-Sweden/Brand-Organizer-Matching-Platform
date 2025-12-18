@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { HelpChat } from './components/HelpChat'
+import { HelpCenter } from './components/HelpCenter'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { RegistrationDebugHelper } from './components/RegistrationDebugHelper'
 import { NotificationsProvider } from './context'
@@ -54,6 +55,7 @@ const AppRoutes = () => {
       <Route path='/login/help' element={<LoginTroubleshooting />} />
       <Route path='/register' element={<Register />} />
       <Route path='/contact' element={<Contact />} />
+      <Route path='/help' element={<HelpCenter />} />
       {/* Directory pages */}
       <Route path='/brands' element={<BrandsDirectoryPage />} />
       <Route path='/organizers' element={<OrganizersDirectoryPage />} />
