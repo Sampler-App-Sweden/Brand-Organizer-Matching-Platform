@@ -1,11 +1,26 @@
+import React from 'react'
+
+interface Organizer {
+  id: string
+  organizerName: string
+  eventName: string
+  eventType: string
+  eventDate: string
+  location: string
+  attendeeCount: string
+}
+
+interface OrganizersTableProps {
+  organizers: Organizer[]
+  handleSort: (field: string) => void
+  renderSortIcon: (field: string) => React.ReactNode
+}
+
 export function OrganizersTable({
   organizers,
-  sortField,
-  sortDirection,
   handleSort,
-  filterData,
   renderSortIcon
-}: any) {
+}: OrganizersTableProps) {
   return (
     <div className='overflow-x-auto'>
       <table className='min-w-full divide-y divide-gray-200'>
@@ -50,7 +65,7 @@ export function OrganizersTable({
           </tr>
         </thead>
         <tbody className='bg-white divide-y divide-gray-200'>
-          {filterData(organizers).map((organizer: any) => (
+          {organizers.map((organizer) => (
             <tr key={organizer.id}>
               <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
                 {organizer.organizerName}
@@ -72,7 +87,7 @@ export function OrganizersTable({
               </td>
             </tr>
           ))}
-          {filterData(organizers).length === 0 && (
+          {organizers.length === 0 && (
             <tr>
               <td
                 colSpan={6}

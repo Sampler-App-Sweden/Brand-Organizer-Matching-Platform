@@ -1,11 +1,26 @@
+import React from 'react'
+
+interface Ticket {
+  id: string
+  created_at: string
+  name: string
+  email: string
+  category: string
+  status: string
+  priority: string
+}
+
+interface TicketsTableProps {
+  tickets: Ticket[]
+  handleSort: (field: string) => void
+  renderSortIcon: (field: string) => React.ReactNode
+}
+
 export function TicketsTable({
   tickets,
-  sortField,
-  sortDirection,
   handleSort,
-  filterData,
   renderSortIcon
-}: any) {
+}: TicketsTableProps) {
   return (
     <div className='overflow-x-auto'>
       <table className='min-w-full divide-y divide-gray-200'>
@@ -44,7 +59,7 @@ export function TicketsTable({
           </tr>
         </thead>
         <tbody className='bg-white divide-y divide-gray-200'>
-          {filterData(tickets).map((ticket: any) => (
+          {tickets.map((ticket) => (
             <tr key={ticket.id}>
               <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
                 {new Date(ticket.created_at).toLocaleDateString()}
@@ -66,7 +81,7 @@ export function TicketsTable({
               </td>
             </tr>
           ))}
-          {filterData(tickets).length === 0 && (
+          {tickets.length === 0 && (
             <tr>
               <td
                 colSpan={6}

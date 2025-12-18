@@ -1,13 +1,16 @@
-import { Dispatch, SetStateAction } from 'react'
+
+type TabType = 'users' | 'brands' | 'organizers' | 'matches' | 'tickets';
+
+import { Dispatch, SetStateAction } from 'react';
 
 interface AdminDashboardStatsProps {
-  usersCount: number
-  brandsCount: number
-  organizersCount: number
-  matchesCount: number
-  ticketsCount: number
-  activeTab: string
-  setActiveTab: Dispatch<SetStateAction<string>>
+  usersCount: number;
+  brandsCount: number;
+  organizersCount: number;
+  matchesCount: number;
+  ticketsCount: number;
+  activeTab: TabType;
+  setActiveTab: Dispatch<SetStateAction<TabType>>;
 }
 
 export const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({

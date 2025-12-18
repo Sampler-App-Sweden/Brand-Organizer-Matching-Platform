@@ -28,8 +28,7 @@ export function AdminDashboard() {
     exportFeedback,
     exportData,
     emailData
-    // setExportFeedback (removed, unused)
-  } = useAdminDashboardData()
+  } = useAdminDashboardData();
 
   const renderSortIcon = (field: string) => {
     if (sortField !== field) return null
@@ -84,8 +83,6 @@ export function AdminDashboard() {
               sortField,
               sortDirection
             )}
-            sortField={sortField}
-            sortDirection={sortDirection}
             handleSort={handleSort}
             renderSortIcon={renderSortIcon}
           />
@@ -97,8 +94,6 @@ export function AdminDashboard() {
               sortField,
               sortDirection
             )}
-            sortField={sortField}
-            sortDirection={sortDirection}
             handleSort={handleSort}
             renderSortIcon={renderSortIcon}
           />
@@ -110,8 +105,6 @@ export function AdminDashboard() {
               sortField,
               sortDirection
             )}
-            sortField={sortField}
-            sortDirection={sortDirection}
             handleSort={handleSort}
             renderSortIcon={renderSortIcon}
           />
@@ -125,8 +118,6 @@ export function AdminDashboard() {
             )}
             brands={brands}
             organizers={organizers}
-            sortField={sortField}
-            sortDirection={sortDirection}
             handleSort={handleSort}
             renderSortIcon={renderSortIcon}
           />
@@ -138,8 +129,6 @@ export function AdminDashboard() {
               sortField,
               sortDirection
             )}
-            sortField={sortField}
-            sortDirection={sortDirection}
             handleSort={handleSort}
             renderSortIcon={renderSortIcon}
           />

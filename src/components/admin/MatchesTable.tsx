@@ -1,13 +1,37 @@
+import React from 'react'
+
+interface Brand {
+  id: string
+  companyName: string
+}
+interface Organizer {
+  id: string
+  organizerName: string
+}
+interface Match {
+  id: string
+  score: number
+  brandId: string
+  organizerId: string
+  status: string
+  createdAt: string
+}
+
+interface MatchesTableProps {
+  matches: Match[]
+  brands: Brand[]
+  organizers: Organizer[]
+  handleSort: (field: string) => void
+  renderSortIcon: (field: string) => React.ReactNode
+}
+
 export function MatchesTable({
   matches,
   brands,
   organizers,
-  sortField,
-  sortDirection,
   handleSort,
-  filterData,
   renderSortIcon
-}: any) {
+}: MatchesTableProps) {
   return (
     <div className='overflow-x-auto'>
       <table className='min-w-full divide-y divide-gray-200'>
@@ -52,11 +76,9 @@ export function MatchesTable({
           </tr>
         </thead>
         <tbody className='bg-white divide-y divide-gray-200'>
-          {filterData(matches).map((match: any) => {
-            const brand = brands.find((b: any) => b.id === match.brandId)
-            const organizer = organizers.find(
-              (o: any) => o.id === match.organizerId
-            )
+          {matches.map((match) => {
+            const brand = brands.find((b) => b.id === match.brandId)
+            const organizer = organizers.find((o) => o.id === match.organizerId)
             return (
               <tr key={match.id}>
                 <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
@@ -80,7 +102,7 @@ export function MatchesTable({
               </tr>
             )
           })}
-          {filterData(matches).length === 0 && (
+          {matches.length === 0 && (
             <tr>
               <td
                 colSpan={6}

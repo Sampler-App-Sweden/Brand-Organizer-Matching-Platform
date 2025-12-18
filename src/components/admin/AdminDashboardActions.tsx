@@ -1,13 +1,14 @@
 import React from 'react'
-
 import { Button } from '../../components/ui'
+
+type TabType = 'users' | 'brands' | 'organizers' | 'matches' | 'tickets'
 
 interface AdminDashboardActionsProps {
   searchTerm: string
   setSearchTerm: (term: string) => void
-  activeTab: string
-  exportData: (tab: string) => void
-  emailData: (tab: string) => void
+  activeTab: TabType
+  exportData: (tab: TabType) => void
+  emailData: (tab: TabType) => Promise<void>
   isExporting: boolean
   exportFeedback: { visible: boolean; type: string; message: string }
 }

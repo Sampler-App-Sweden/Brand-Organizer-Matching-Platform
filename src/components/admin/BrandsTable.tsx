@@ -1,11 +1,26 @@
+import React from 'react'
+
+interface Brand {
+  id: string
+  companyName: string
+  contactName: string
+  industry: string
+  productName: string
+  budget: string
+  createdAt: string
+}
+
+interface BrandsTableProps {
+  brands: Brand[]
+  handleSort: (field: string) => void
+  renderSortIcon: (field: string) => React.ReactNode
+}
+
 export function BrandsTable({
   brands,
-  sortField,
-  sortDirection,
   handleSort,
-  filterData,
   renderSortIcon
-}: any) {
+}: BrandsTableProps) {
   return (
     <div className='overflow-x-auto'>
       <table className='min-w-full divide-y divide-gray-200'>
@@ -50,7 +65,7 @@ export function BrandsTable({
           </tr>
         </thead>
         <tbody className='bg-white divide-y divide-gray-200'>
-          {filterData(brands).map((brand: any) => (
+          {brands.map((brand) => (
             <tr key={brand.id}>
               <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
                 {brand.companyName}
@@ -72,7 +87,7 @@ export function BrandsTable({
               </td>
             </tr>
           ))}
-          {filterData(brands).length === 0 && (
+          {brands.length === 0 && (
             <tr>
               <td
                 colSpan={6}

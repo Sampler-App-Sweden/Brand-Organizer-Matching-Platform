@@ -1,11 +1,24 @@
+import React from 'react'
+
+interface User {
+  id: string
+  name: string
+  email: string
+  type: string
+  createdAt: string
+}
+
+interface UsersTableProps {
+  users: User[]
+  handleSort: (field: string) => void
+  renderSortIcon: (field: string) => React.ReactNode
+}
+
 export function UsersTable({
   users,
-  sortField,
-  sortDirection,
   handleSort,
-  filterData,
   renderSortIcon
-}: any) {
+}: UsersTableProps) {
   return (
     <div className='overflow-x-auto'>
       <table className='min-w-full divide-y divide-gray-200'>
@@ -44,7 +57,7 @@ export function UsersTable({
           </tr>
         </thead>
         <tbody className='bg-white divide-y divide-gray-200'>
-          {filterData(users).map((user: any) => (
+          {users.map((user) => (
             <tr key={user.id}>
               <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
                 {user.name}
@@ -60,7 +73,7 @@ export function UsersTable({
               </td>
             </tr>
           ))}
-          {filterData(users).length === 0 && (
+          {users.length === 0 && (
             <tr>
               <td
                 colSpan={5}
