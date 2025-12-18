@@ -1,10 +1,12 @@
-import { AdminDashboardActions } from '../../components/admin/AdminDashboardActions'
-import { AdminDashboardStats } from '../../components/admin/AdminDashboardStats'
-import { BrandsTable } from '../../components/admin/BrandsTable'
-import { MatchesTable } from '../../components/admin/MatchesTable'
-import { OrganizersTable } from '../../components/admin/OrganizersTable'
-import { TicketsTable } from '../../components/admin/TicketsTable'
-import { UsersTable } from '../../components/admin/UsersTable'
+import {
+  AdminDashboardActions,
+  AdminDashboardStats,
+  BrandsTable,
+  MatchesTable,
+  OrganizersTable,
+  TicketsTable,
+  UsersTable
+} from '../../components/admin'
 import { DashboardLayout } from '../../components/layout'
 import { useAdminDashboardData } from '../../hooks/useAdminDashboardData'
 import { filterData, sortData } from '../../utils/adminDashboardUtils'
@@ -28,7 +30,7 @@ export function AdminDashboard() {
     exportFeedback,
     exportData,
     emailData
-  } = useAdminDashboardData();
+  } = useAdminDashboardData()
 
   const renderSortIcon = (field: string) => {
     if (sortField !== field) return null
@@ -93,7 +95,13 @@ export function AdminDashboard() {
               filterData(brands, searchTerm),
               sortField,
               sortDirection
-            )}
+            ).map((brand) => ({
+              ...brand,
+              createdAt:
+                typeof brand.createdAt === 'string'
+                  ? brand.createdAt
+                  : brand.createdAt.toISOString()
+            }))}
             handleSort={handleSort}
             renderSortIcon={renderSortIcon}
           />
@@ -115,7 +123,13 @@ export function AdminDashboard() {
               filterData(matches, searchTerm),
               sortField,
               sortDirection
-            )}
+            ).map((match) => ({
+              ...match,
+              createdAt:
+                typeof match.createdAt === 'string'
+                  ? match.createdAt
+                  : match.createdAt.toISOString()
+            }))}
             brands={brands}
             organizers={organizers}
             handleSort={handleSort}

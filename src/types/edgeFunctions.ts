@@ -197,7 +197,9 @@ export interface AdminOperationParams {
 export interface UserInfo {
   id: string
   email: string
+  name: string
   role: string
+  type: string
   createdAt: string
   lastLogin?: string
 }

@@ -1,16 +1,21 @@
-export function sortData<T extends Record<string, unknown>>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function sortData<T extends Record<string, any>>(
   data: T[],
   sortField: string,
   sortDirection: 'asc' | 'desc'
 ): T[] {
   if (!sortField) return data
   return [...data].sort((a, b) => {
-    let aValue: unknown = a[sortField]
-    let bValue: unknown = b[sortField]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let aValue: any = a[sortField]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let bValue: any = b[sortField]
     if (sortField.includes('.')) {
       const parts = sortField.split('.')
-      aValue = parts.reduce((obj: unknown, key: string) => (obj as Record<string, unknown>)?.[key], a as unknown)
-      bValue = parts.reduce((obj: unknown, key: string) => (obj as Record<string, unknown>)?.[key], b as unknown)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      aValue = parts.reduce((obj: any, key: string) => obj?.[key], a)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      bValue = parts.reduce((obj: any, key: string) => obj?.[key], b)
     }
     if (aValue instanceof Date && bValue instanceof Date) {
       return sortDirection === 'asc'
@@ -29,7 +34,8 @@ export function sortData<T extends Record<string, unknown>>(
   })
 }
 
-export function filterData<T extends Record<string, unknown>>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function filterData<T extends Record<string, any>>(
   data: T[],
   searchTerm: string
 ): T[] {
