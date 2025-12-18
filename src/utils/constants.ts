@@ -1,8 +1,8 @@
-import { Building, Calendar, Users, LucideIcon } from 'lucide-react'
+import { Building, Calendar, LucideIcon, Users } from 'lucide-react'
 
 // Constants
 export const APP_NAME = 'SponsrAI'
-export const ADMIN_EMAIL = 'preslavnikolov@outlook.com'
+export const ADMIN_EMAIL = 'info@sponsrai.se'
 
 // API Endpoints
 export const API_ENDPOINTS = {
