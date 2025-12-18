@@ -1,15 +1,12 @@
-import {
-  BellIcon,
-  HandshakeIcon,
-  LogIn,
-  Menu,
-  X
-} from 'lucide-react'
+import { BellIcon, HandshakeIcon, LogIn, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-import { DASHBOARD_NAV_LINKS, MARKETING_NAV_LINKS } from '../../constants/navigationLinks'
+import {
+  DASHBOARD_NAV_LINKS,
+  MARKETING_NAV_LINKS
+} from '../../constants/navigationLinks'
 import { useNotifications } from '../../context'
 import { useAuth } from '../../context/AuthContext'
 import { logoutAndRedirect } from '../../services/logoutService'
@@ -18,6 +15,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
+
   // Close user menu when clicking outside
   useEffect(() => {
     if (!showUserMenu) return
@@ -54,7 +52,10 @@ export function Navbar() {
         return '/dashboard/brand'
     }
   }
-  const linksToRender = isAuthenticated ? DASHBOARD_NAV_LINKS : MARKETING_NAV_LINKS
+
+  const linksToRender = isAuthenticated
+    ? DASHBOARD_NAV_LINKS
+    : MARKETING_NAV_LINKS
 
   const showDashboardActions = isAuthenticated && isOnDashboard
 

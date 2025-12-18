@@ -15,7 +15,7 @@ import { Button } from '../../components/ui'
 import { getCommunityMembers } from '../../services/communityService'
 import { CommunityMember, CommunityQueryParams } from '../../types/community'
 
-export function CommunityPage() {
+export function ExplorePage() {
   const [members, setMembers] = useState<CommunityMember[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)

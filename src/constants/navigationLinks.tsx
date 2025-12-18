@@ -1,8 +1,7 @@
 import {
   CalendarIcon,
   PackageIcon,
-  SparklesIcon,
-  UsersIcon
+  SparklesIcon
 } from 'lucide-react'
 import { ReactNode } from 'react'
 
@@ -18,19 +17,12 @@ export interface NavLink {
  */
 export const MARKETING_NAV_LINKS: NavLink[] = [
   {
-    label: 'Community',
-    path: '/community',
-    icon: <UsersIcon className='h-4 w-4 mr-1' />
-  },
-  {
     label: 'Brands',
-    path: '/brands',
-    icon: <PackageIcon className='h-4 w-4 mr-1' />
+    path: '/brands'
   },
   {
     label: 'Organizers',
-    path: '/organizers',
-    icon: <CalendarIcon className='h-4 w-4 mr-1' />
+    path: '/organizers'
   }
 ]
 
@@ -39,10 +31,6 @@ export const MARKETING_NAV_LINKS: NavLink[] = [
  * Icons are optional and can be added per-link if needed
  */
 export const DASHBOARD_NAV_LINKS: NavLink[] = [
-  {
-    label: 'Community',
-    path: '/community'
-  },
   {
     label: 'Brands',
     path: '/brands'
@@ -63,11 +51,6 @@ export const DASHBOARD_NAV_LINKS: NavLink[] = [
  * These use h-5 w-5 icons for better visibility in the dashboard layout
  */
 export const MAIN_NAV_ITEMS: NavLink[] = [
-  {
-    label: 'Community',
-    path: '/community',
-    icon: <UsersIcon className='h-5 w-5' />
-  },
   {
     label: 'Brands',
     path: '/brands',

@@ -1,4 +1,16 @@
-import { ArrowLeftIcon, CalendarIcon, ExternalLinkIcon, GlobeIcon, MailIcon, PackageIcon, PhoneIcon, SparklesIcon, StarIcon, TargetIcon, UsersIcon } from 'lucide-react'
+import {
+  ArrowLeftIcon,
+  CalendarIcon,
+  ExternalLinkIcon,
+  GlobeIcon,
+  MailIcon,
+  PackageIcon,
+  PhoneIcon,
+  SparklesIcon,
+  StarIcon,
+  TargetIcon,
+  UsersIcon
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
@@ -9,7 +21,7 @@ import { useAuth } from '../../context/AuthContext'
 import { getCommunityMemberById } from '../../services/communityService'
 import { CommunityMember } from '../../types/community'
 
-export function CommunityMemberDetail() {
+export function ExploreMemberDetail() {
   const { memberId } = useParams<{ memberId: string }>()
   const [member, setMember] = useState<CommunityMember | null>(null)
   const [loading, setLoading] = useState(true)

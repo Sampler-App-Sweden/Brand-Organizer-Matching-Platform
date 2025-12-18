@@ -4,23 +4,22 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { HelpChat } from './components/HelpChat'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { RegistrationDebugHelper } from './components/RegistrationDebugHelper'
+import { NotificationsProvider } from './context'
 import { AuthProvider } from './context/AuthContext'
 import { DraftProfileProvider } from './context/DraftProfileContext'
-import { NotificationsProvider } from './context'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
-import { ContactPage } from './pages/ContactPage'
-import { NotificationsPage } from './pages/dashboard/NotificationsPage'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
-import { CommunityMemberDetail, CommunityPage } from './pages/community'
+import { ContactPage } from './pages/ContactPage'
 import { BrandDashboard, OrganizerDashboard } from './pages/dashboard'
 import { EditProfilePage } from './pages/dashboard/EditProfilePage'
 import { EventsPage } from './pages/dashboard/EventsPage'
-import { ProductsPage } from './pages/dashboard/ProductsPage'
 import { MatchDetails } from './pages/dashboard/MatchDetails'
 import { MatchesPage } from './pages/dashboard/MatchesPage'
 import { MessagesPage } from './pages/dashboard/MessagesPage'
+import { NotificationsPage } from './pages/dashboard/NotificationsPage'
+import { ProductsPage } from './pages/dashboard/ProductsPage'
 import { SavedItemsPage } from './pages/dashboard/SavedItemsPage'
 import { Home } from './pages/Home'
 import { InspirationBoardPage } from './pages/InspirationBoardPage'
@@ -29,7 +28,6 @@ import { LoginTroubleshooting } from './pages/LoginTroubleshooting'
 import { OrganizerForm } from './pages/OrganizerForm'
 import { OrganizersDirectoryPage } from './pages/OrganizersDirectoryPage'
 import { ProfileDetailPage } from './pages/ProfileDetailPage'
-import { CommunityRegistration } from './pages/register/CommunityRegistration'
 import { Register } from './pages/register/Register'
 import { initializeCollaborations } from './services/collaborationService'
 import { initEmailJS } from './services/emailService'
@@ -60,10 +58,6 @@ const AppRoutes = () => {
       <Route path='/brands' element={<BrandsDirectoryPage />} />
       <Route path='/organizers' element={<OrganizersDirectoryPage />} />
       <Route path='/profiles/:profileId' element={<ProfileDetailPage />} />
-      {/* Community routes */}
-      <Route path='/community' element={<CommunityPage />} />
-      <Route path='/community/:memberId' element={<CommunityMemberDetail />} />
-      <Route path='/community/register' element={<CommunityRegistration />} />
 
       {/* Brand routes */}
       <Route
