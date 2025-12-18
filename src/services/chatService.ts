@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { notifyNewMessage } from './notificationService'
 
 // Chat service for AI-powered communication
 export interface Message {
@@ -175,6 +176,11 @@ export const sendMessage = async (
     .eq('id', conversationId)
 
   const message = mapMessageRow(data as MessageRow)
+
+  // Create notification for recipient (non-blocking)
+  notifyNewMessage(conversationId, senderId, content).catch((error) => {
+    console.error('Failed to create message notification:', error)
+  })
 
   if (shouldTriggerAIResponse(content)) {
     const conversation = await fetchConversationById(conversationId)

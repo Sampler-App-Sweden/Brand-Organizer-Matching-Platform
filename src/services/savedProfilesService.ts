@@ -1,5 +1,10 @@
-import { getProfilesByIds, ProfileOverview } from './profileService'
+import {
+  getProfilesByIds,
+  getProfileOverviewById,
+  ProfileOverview
+} from './profileService'
 import { supabase } from './supabaseClient'
+import { notifySystemEvent } from './notificationService'
 
 const SAVED_PROFILES_TABLE = 'saved_profiles'
 
@@ -88,6 +93,22 @@ export const toggleSavedProfile = async (
   if (insertError) {
     throw new Error(`Failed to save profile: ${insertError.message}`)
   }
+
+  // Notify profile owner (non-blocking)
+  getProfileOverviewById(userId)
+    .then((saverProfile) => {
+      if (saverProfile) {
+        return notifySystemEvent(
+          profileId, // Profile owner gets notified
+          'Profile Saved',
+          `${saverProfile.name} has saved your profile to their favorites!`,
+          userId // Saver's userId
+        )
+      }
+    })
+    .catch((error) => {
+      console.error('Failed to create profile saved notification:', error)
+    })
 
   return true
 }

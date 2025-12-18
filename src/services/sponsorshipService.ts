@@ -1,4 +1,9 @@
 import { supabase } from './supabaseClient'
+import {
+  getUserIdFromBrandId,
+  getUserIdFromOrganizerId,
+  notifySystemEvent
+} from './notificationService'
 import type {
   ProductImage,
   SponsorshipOffer,
@@ -503,7 +508,27 @@ export async function saveSponsorshipOffer(
     throw new Error(`Failed to save sponsorship offer: ${error.message}`)
   }
 
-  return mapOfferRow(data as SponsorshipOfferRow)
+  const savedOffer = mapOfferRow(data as SponsorshipOfferRow)
+
+  // Notify brand if status is 'published' (non-blocking)
+  if (status === 'published') {
+    getUserIdFromBrandId(brandId)
+      .then((userId) => {
+        if (userId) {
+          return notifySystemEvent(
+            userId,
+            'Sponsorship Offer Published',
+            'Your sponsorship offer has been published and is now visible to organizers!',
+            savedOffer.id
+          )
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to create offer publish notification:', error)
+      })
+  }
+
+  return savedOffer
 }
 
 export async function fetchOrganizerSponsorshipRequest(
@@ -548,5 +573,27 @@ export async function saveOrganizerSponsorshipRequest(
     throw new Error(`Failed to save organizer sponsorship request: ${error.message}`)
   }
 
-  return mapOrganizerRequestRow(data as OrganizerSponsorshipRequestRow)
+  const savedRequest = mapOrganizerRequestRow(
+    data as OrganizerSponsorshipRequestRow
+  )
+
+  // Notify organizer if status is 'published' (non-blocking)
+  if (status === 'published') {
+    getUserIdFromOrganizerId(organizerId)
+      .then((userId) => {
+        if (userId) {
+          return notifySystemEvent(
+            userId,
+            'Sponsorship Request Published',
+            'Your sponsorship request has been published and is now visible to brands!',
+            savedRequest.id
+          )
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to create request publish notification:', error)
+      })
+  }
+
+  return savedRequest
 }

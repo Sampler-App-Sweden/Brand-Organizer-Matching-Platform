@@ -11,6 +11,10 @@ import type {
   EventMedia,
   Partnership
 } from '../types/event'
+import {
+  getUserIdFromOrganizerId,
+  notifySystemEvent
+} from './notificationService'
 
 // Database row interface (snake_case for Supabase)
 interface EventRow {
@@ -298,7 +302,25 @@ export async function publishEvent(
     throw new Error(`Failed to publish event: ${error.message}`)
   }
 
-  return mapEventRow(data as EventRow)
+  const publishedEvent = mapEventRow(data as EventRow)
+
+  // Notify organizer (non-blocking)
+  getUserIdFromOrganizerId(organizerId)
+    .then((userId) => {
+      if (userId) {
+        return notifySystemEvent(
+          userId,
+          'Event Published',
+          `Your event "${publishedEvent.eventName}" has been published and is now visible to brands!`,
+          publishedEvent.id
+        )
+      }
+    })
+    .catch((error) => {
+      console.error('Failed to create event publish notification:', error)
+    })
+
+  return publishedEvent
 }
 
 export async function saveDraftEvent(

@@ -8,6 +8,7 @@ import {
 } from './matchingService'
 
 import { Brand, Organizer } from '../types'
+import { notifyNewMatch, notifyProfileUpdate } from './notificationService'
 
 type BrandRow = {
   id: string
@@ -286,6 +287,16 @@ const insertMatchSuggestions = async (matches: Match[]) => {
   const { error } = await supabase.from('matches').insert(matchRows)
   if (error) {
     console.error('Failed to store match suggestions:', error)
+    return
+  }
+
+  // Notify both parties for each match (non-blocking)
+  for (const match of matches) {
+    notifyNewMatch(match.brandId, match.organizerId, match.id).catch(
+      (error) => {
+        console.error('Failed to create match notification:', error)
+      }
+    )
   }
 }
 
@@ -364,7 +375,20 @@ export const updateBrand = async (
     )
   }
 
-  return mapBrandRowToBrand(data as BrandRow)
+  const updatedBrand = mapBrandRowToBrand(data as BrandRow)
+
+  // Notify users who saved this profile (non-blocking)
+  if (updatedBrand.userId) {
+    notifyProfileUpdate(
+      updatedBrand.userId,
+      updatedBrand.companyName,
+      'brand profile'
+    ).catch((error) => {
+      console.error('Failed to create profile update notification:', error)
+    })
+  }
+
+  return updatedBrand
 }
 
 export const updateOrganizer = async (
@@ -384,7 +408,20 @@ export const updateOrganizer = async (
     )
   }
 
-  return mapOrganizerRowToOrganizer(data as OrganizerRow)
+  const updatedOrganizer = mapOrganizerRowToOrganizer(data as OrganizerRow)
+
+  // Notify users who saved this profile (non-blocking)
+  if (updatedOrganizer.userId) {
+    notifyProfileUpdate(
+      updatedOrganizer.userId,
+      updatedOrganizer.organizerName,
+      'organizer profile'
+    ).catch((error) => {
+      console.error('Failed to create profile update notification:', error)
+    })
+  }
+
+  return updatedOrganizer
 }
 
 // Get brand by user ID
