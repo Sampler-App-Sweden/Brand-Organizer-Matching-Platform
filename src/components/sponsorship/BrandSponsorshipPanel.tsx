@@ -41,7 +41,7 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
 
   if (!brandId) {
     return (
-      <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100'>
+      <div className='py-8'>
         <p className='text-gray-600'>
           Complete your brand profile to configure sponsorship offers.
         </p>
@@ -51,19 +51,14 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
 
   if (loading) {
     return (
-      <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100'>
+      <div className='py-8'>
         <p className='text-gray-600'>Loading your sponsorship offer...</p>
       </div>
     )
   }
   return (
-    <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100 relative overflow-hidden'>
-      {/* Mystical background elements */}
-      <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 opacity-70'></div>
-      <div className='absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 opacity-50'></div>
-      <div className='absolute bottom-0 left-0 w-24 h-24 bg-purple-50 rounded-full -ml-12 -mb-12 opacity-50'></div>
-      <h2 className='text-xl font-semibold text-gray-900 mb-6 flex items-center'>
-        <span className='mr-2 text-2xl'>✦</span>
+    <div className='mb-8'>
+      <h2 className='text-xl font-bold text-gray-900 mb-6'>
         Choose Your Sponsorship Type
       </h2>
       {status && (
@@ -432,8 +427,6 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
           {feedback.message}
         </div>
       )}
-      {/* Mystical decorative elements */}
-      <div className='absolute bottom-0 right-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 opacity-70'></div>
     </div>
   )
 }

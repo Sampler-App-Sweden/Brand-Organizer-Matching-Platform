@@ -65,38 +65,18 @@ export function OrganizerSponsorshipPanel({
     })
   )
   return (
-    <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6 border border-indigo-100 relative overflow-hidden'>
+    <div className='mb-8'>
       {!organizerId && (
         <div className='text-sm text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4'>
           Complete your organizer profile to configure sponsorship requests.
         </div>
       )}
       {loading && (
-        <div className='text-sm text-gray-600'>
+        <div className='text-sm text-gray-600 mb-4'>
           Loading your sponsorship request...
         </div>
       )}
-      {/* Mystical background elements */}
-      <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 opacity-70'></div>
-      <div className='absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50'></div>
-      <div className='absolute bottom-0 left-0 w-24 h-24 bg-indigo-50 rounded-full -ml-12 -mb-12 opacity-50'></div>
-      {/* Stars background */}
-      <div className='absolute inset-0 overflow-hidden opacity-5 pointer-events-none'>
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className='absolute rounded-full bg-white'
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              width: `${Math.random() * 3 + 1}px`,
-              height: `${Math.random() * 3 + 1}px`
-            }}
-          />
-        ))}
-      </div>
-      <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
-        <span className='mr-2 text-2xl'>✧</span>
+      <h2 className='text-xl font-bold text-gray-900 mb-6'>
         What Sponsorship Do You Seek?
       </h2>
       {status && (
@@ -201,8 +181,6 @@ export function OrganizerSponsorshipPanel({
           {feedback.message}
         </div>
       )}
-      {/* Mystical decorative elements */}
-      <div className='absolute bottom-0 right-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 opacity-70'></div>
     </div>
   )
 }

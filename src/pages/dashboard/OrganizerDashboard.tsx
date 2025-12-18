@@ -143,9 +143,9 @@ export function OrganizerDashboard() {
       </div>
 
       {/* Event details */}
-      <div className='bg-white rounded-lg shadow-sm p-6 mb-6'>
+      <div className='mb-8'>
         <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-lg font-semibold text-gray-900'>Event Details</h2>
+          <h2 className='text-xl font-bold text-gray-900'>Event Details</h2>
           <Link
             to='/organizer'
             className='text-sm text-indigo-600 hover:text-indigo-800'
@@ -154,7 +154,7 @@ export function OrganizerDashboard() {
           </Link>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div>
+          <div className='bg-white rounded-lg shadow-sm p-4'>
             <h3 className='text-lg font-medium text-gray-900 mb-2'>
               {organizer.eventName}
             </h3>
@@ -170,7 +170,7 @@ export function OrganizerDashboard() {
               <span>{organizer.location}</span>
             </div>
           </div>
-          <div>
+          <div className='bg-white rounded-lg shadow-sm p-4'>
             <h4 className='text-sm font-medium text-gray-500 mb-1'>
               Expected Attendance
             </h4>
@@ -217,11 +217,9 @@ export function OrganizerDashboard() {
       </div>
 
       {/* Recent matches */}
-      <div className='bg-white rounded-lg shadow-sm p-6'>
+      <div className='mb-8'>
         <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-lg font-semibold text-gray-900'>
-            Recent Matches
-          </h2>
+          <h2 className='text-xl font-bold text-gray-900'>Recent Matches</h2>
           <Link
             to='/dashboard/organizer/matches'
             className='text-sm text-indigo-600 hover:text-indigo-800'
@@ -235,7 +233,7 @@ export function OrganizerDashboard() {
             soon.
           </div>
         ) : (
-          <div className='overflow-x-auto'>
+          <div className='overflow-x-auto bg-white rounded-lg shadow-sm'>
             <table className='min-w-full divide-y divide-gray-200'>
               <thead className='bg-gray-50'>
                 <tr>

@@ -171,11 +171,9 @@ export function BrandDashboard() {
       </div>
 
       {/* Recent matches */}
-      <div className='bg-white rounded-lg shadow-sm p-6 mb-6'>
+      <div className='mb-8'>
         <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-lg font-semibold text-gray-900'>
-            Recent Matches
-          </h2>
+          <h2 className='text-xl font-bold text-gray-900'>Recent Matches</h2>
           <Link
             to='/dashboard/brand/matches'
             className='text-sm text-indigo-600 hover:text-indigo-800'
@@ -189,7 +187,7 @@ export function BrandDashboard() {
             organizers soon.
           </div>
         ) : (
-          <div className='overflow-x-auto'>
+          <div className='overflow-x-auto bg-white rounded-lg shadow-sm'>
             <table className='min-w-full divide-y divide-gray-200'>
               <thead className='bg-gray-50'>
                 <tr>
@@ -222,9 +220,9 @@ export function BrandDashboard() {
       </div>
 
       {/* Profile summary */}
-      <div className='bg-white rounded-lg shadow-sm p-6'>
+      <div className='mb-8'>
         <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-lg font-semibold text-gray-900'>Your Profile</h2>
+          <h2 className='text-xl font-bold text-gray-900'>Your Profile</h2>
           <Link
             to='/dashboard/edit-profile'
             className='text-sm text-indigo-600 hover:text-indigo-800'
@@ -232,17 +230,17 @@ export function BrandDashboard() {
             Edit profile
           </Link>
         </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <h3 className='text-sm font-medium text-gray-500'>Company</h3>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <div className='bg-white rounded-lg shadow-sm p-4'>
+            <h3 className='text-sm font-medium text-gray-500 mb-1'>Company</h3>
             <p className='text-gray-900'>{brand.companyName}</p>
           </div>
-          <div>
-            <h3 className='text-sm font-medium text-gray-500'>Product</h3>
+          <div className='bg-white rounded-lg shadow-sm p-4'>
+            <h3 className='text-sm font-medium text-gray-500 mb-1'>Product</h3>
             <p className='text-gray-900'>{brand.productName}</p>
           </div>
-          <div>
-            <h3 className='text-sm font-medium text-gray-500'>Industry</h3>
+          <div className='bg-white rounded-lg shadow-sm p-4'>
+            <h3 className='text-sm font-medium text-gray-500 mb-1'>Industry</h3>
             <p className='text-gray-900'>
               {brand.industry === 'food_beverage'
                 ? 'Food & Beverage'
@@ -263,8 +261,10 @@ export function BrandDashboard() {
                 : 'Other'}
             </p>
           </div>
-          <div>
-            <h3 className='text-sm font-medium text-gray-500'>Budget Range</h3>
+          <div className='bg-white rounded-lg shadow-sm p-4'>
+            <h3 className='text-sm font-medium text-gray-500 mb-1'>
+              Budget Range
+            </h3>
             <p className='text-gray-900'>
               {brand.budget === 'under_1000'
                 ? 'Under $1,000'

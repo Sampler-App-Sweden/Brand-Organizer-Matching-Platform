@@ -168,7 +168,7 @@ export function ProductSponsorshipManager({
 
   if (!brandId) {
     return (
-      <div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200'>
+      <div className='py-8'>
         <p className='text-gray-600'>
           Complete your brand profile to start adding sponsorship products.
         </p>
@@ -177,23 +177,18 @@ export function ProductSponsorshipManager({
   }
 
   return (
-    <div className='bg-white rounded-lg shadow-sm p-6 border border-gray-200 relative overflow-hidden'>
-      {/* Mystical decorative elements */}
-      <div className='absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-100 via-purple-200 to-indigo-100'></div>
-      <div className='absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 opacity-30'></div>
-      <div className='absolute bottom-0 left-0 w-24 h-24 bg-purple-50 rounded-full -ml-12 -mb-12 opacity-30'></div>
-      <div className='relative z-10'>
-        {/* Header */}
-        <div className='flex flex-col sm:flex-row sm:items-center justify-between mb-6'>
-          <div>
-            <h2 className='text-xl font-semibold text-gray-900 flex items-center'>
-              <PackageIcon className='h-5 w-5 text-indigo-600 mr-2' />
-              Your Sponsorship Products
-            </h2>
-            <p className='text-sm text-gray-600 mt-1'>
-              Upload images, set goals, and sample quantities for each item.
-            </p>
-          </div>
+    <div className='mb-8'>
+      {/* Header */}
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between mb-6'>
+        <div>
+          <h2 className='text-xl font-bold text-gray-900 flex items-center'>
+            <PackageIcon className='h-5 w-5 text-indigo-600 mr-2' />
+            Your Sponsorship Products
+          </h2>
+          <p className='text-sm text-gray-600 mt-1'>
+            Upload images, set goals, and sample quantities for each item.
+          </p>
+        </div>
           <Button
             variant='primary'
             className='mt-4 sm:mt-0 flex items-center bg-gradient-to-r from-green-500 to-green-600'
@@ -285,7 +280,6 @@ export function ProductSponsorshipManager({
               ))}
           </div>
         )}
-      </div>
     </div>
   )
 }
