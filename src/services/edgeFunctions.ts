@@ -1,5 +1,21 @@
 // Helper service for calling Supabase Edge Functions
 import { supabase } from './supabaseClient'
+import type {
+  GenerateMatchesResponse,
+  SendEmailParams,
+  SendEmailResponse,
+  ProcessPaymentParams,
+  ProcessPaymentResponse,
+  AIAssistantParams,
+  AIAssistantResponse,
+  TrackEventParams,
+  TrackEventResponse,
+  AdminOperationParams,
+  AdminOperationResponse,
+  ExportDataParams,
+  UploadURLParams,
+  UploadURLResponse
+} from '../types/edgeFunctions'
 
 /**
  * Generate matches for a brand or organizer
@@ -7,7 +23,7 @@ import { supabase } from './supabaseClient'
 export const generateMatches = async (
   type: 'brand' | 'organizer',
   entityId: string
-): Promise<{ success: boolean; matchCount: number; matches: any[] }> => {
+): Promise<GenerateMatchesResponse> => {
   const { data, error } = await supabase.functions.invoke('generate-matches', {
     body: { type, entityId }
   })
@@ -23,13 +39,7 @@ export const generateMatches = async (
 /**
  * Send an email using templates
  */
-export const sendEmail = async (params: {
-  to: string
-  subject: string
-  template: 'welcome' | 'new_match' | 'match_accepted' | 'support_ticket' | 'custom'
-  data?: Record<string, any>
-  html?: string
-}): Promise<{ success: boolean; emailId?: string; message: string }> => {
+export const sendEmail = async (params: SendEmailParams): Promise<SendEmailResponse> => {
   const { data, error } = await supabase.functions.invoke('send-email', {
     body: params
   })
@@ -45,19 +55,7 @@ export const sendEmail = async (params: {
 /**
  * Process a payment (Stripe integration)
  */
-export const processPayment = async (params: {
-  amount: number // in cents
-  currency: string
-  userId: string
-  description: string
-  metadata?: Record<string, any>
-}): Promise<{
-  success: boolean
-  paymentIntentId?: string
-  clientSecret?: string
-  status?: string
-  message?: string
-}> => {
+export const processPayment = async (params: ProcessPaymentParams): Promise<ProcessPaymentResponse> => {
   const { data, error } = await supabase.functions.invoke('process-payment', {
     body: params
   })
@@ -73,15 +71,7 @@ export const processPayment = async (params: {
 /**
  * AI Assistant - Detect intent, extract profile info, generate questions
  */
-export const callAIAssistant = async (params: {
-  type: 'detect-intent' | 'extract-profile' | 'generate-questions' | 'generate-suggestions'
-  input: string
-  context?: {
-    role?: 'brand' | 'organizer' | 'community'
-    draftProfile?: any
-    conversation?: Array<{ role: string; content: string; timestamp: string }>
-  }
-}): Promise<{ success: boolean; result: any }> => {
+export const callAIAssistant = async (params: AIAssistantParams): Promise<AIAssistantResponse> => {
   const { data, error } = await supabase.functions.invoke('ai-assistant', {
     body: params
   })
@@ -97,20 +87,7 @@ export const callAIAssistant = async (params: {
 /**
  * Track analytics event or error
  */
-export const trackEvent = async (params: {
-  type: 'event' | 'error'
-  data: {
-    event?: string
-    userId?: string
-    sessionId?: string
-    properties?: Record<string, any>
-    // For errors:
-    type?: string
-    message?: string
-    stack?: string
-    metadata?: Record<string, any>
-  }
-}): Promise<{ success: boolean; message: string }> => {
+export const trackEvent = async (params: TrackEventParams): Promise<TrackEventResponse> => {
   const { data, error } = await supabase.functions.invoke('track-analytics', {
     body: params
   })
@@ -127,11 +104,7 @@ export const trackEvent = async (params: {
 /**
  * Admin operations (requires admin role)
  */
-export const adminOperation = async (params: {
-  action: 'get-users' | 'update-user-role' | 'delete-user' | 'ban-user' |
-          'bulk-delete' | 'get-stats' | 'purge-old-data'
-  data?: Record<string, any>
-}): Promise<{ success: boolean; result: any }> => {
+export const adminOperation = async (params: AdminOperationParams): Promise<AdminOperationResponse> => {
   const { data, error } = await supabase.functions.invoke('admin-operations', {
     body: params
   })
@@ -147,17 +120,7 @@ export const adminOperation = async (params: {
 /**
  * Export user data (GDPR request or admin report)
  */
-export const exportData = async (params: {
-  type: 'user-data' | 'admin-report' | 'gdpr-request'
-  format: 'json' | 'csv'
-  userId?: string
-  filters?: {
-    dateFrom?: string
-    dateTo?: string
-    includeDeleted?: boolean
-    tables?: string[]
-  }
-}): Promise<Blob> => {
+export const exportData = async (params: ExportDataParams): Promise<Blob> => {
   const { data, error } = await supabase.functions.invoke('export-data', {
     body: params
   })
@@ -174,18 +137,7 @@ export const exportData = async (params: {
 /**
  * Get signed URL for file upload
  */
-export const getUploadURL = async (params: {
-  fileName: string
-  fileType: string
-  fileSize: number
-  bucket: 'avatars' | 'brand-logos' | 'event-media' | 'support-attachments'
-}): Promise<{
-  success: boolean
-  uploadUrl: string
-  filePath: string
-  publicUrl: string
-  expiresIn: number
-}> => {
+export const getUploadURL = async (params: UploadURLParams): Promise<UploadURLResponse> => {
   const { data, error } = await supabase.functions.invoke('upload-file', {
     body: params
   })

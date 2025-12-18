@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react'
-import { getAllSupportTickets } from '../services/supportTicketService'
+import {
+  getAllSupportTickets,
+  type SupportTicket
+} from '../services/supportTicketService'
 import { sendDataByEmail } from '../services/emailService'
+import type { Brand, Organizer, Match } from '../types'
+import type { UserInfo } from '../types/edgeFunctions'
 
 export function useAdminDashboardData() {
-  const [users, setUsers] = useState<any[]>([])
-  const [brands, setBrands] = useState<any[]>([])
-  const [organizers, setOrganizers] = useState<any[]>([])
-  const [matches, setMatches] = useState<any[]>([])
-  const [tickets, setTickets] = useState<any[]>([])
+  const [users, setUsers] = useState<UserInfo[]>([])
+  const [brands, setBrands] = useState<Brand[]>([])
+  const [organizers, setOrganizers] = useState<Organizer[]>([])
+  const [matches, setMatches] = useState<Match[]>([])
+  const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [activeTab, setActiveTab] = useState<
     'users' | 'brands' | 'organizers' | 'matches' | 'tickets'
   >('users')
@@ -127,16 +132,11 @@ export function useAdminDashboardData() {
         break
     }
     try {
-      await sendDataByEmail(
-        'preslavnikolov@outlook.com',
-        subject,
-        dataType,
-        data
-      )
+      await sendDataByEmail('info@sponsrai.se', subject, dataType, data)
       setExportFeedback({
         message: `${
           dataType.charAt(0).toUpperCase() + dataType.slice(1)
-        } data successfully sent to preslavnikolov@outlook.com`,
+        } data successfully sent to info@sponsrai.se`,
         type: 'success',
         visible: true
       })

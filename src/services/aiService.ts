@@ -1,5 +1,8 @@
 // This is a simplified mock implementation of AI services
 // In a real application, this would connect to a backend API with ML models
+
+import type { DraftProfile } from '../types/profile'
+
 // Detect user intent from text input
 export const detectIntent = async (input: string): Promise<{
   role: 'brand' | 'organizer' | 'community' | null;
@@ -207,10 +210,10 @@ export const generateSuggestions = async (conversation: {
   }
 };
 // Extract structured information from user input
-export const extractProfileInfo = async (input: string, currentRole: 'brand' | 'organizer' | 'community'): Promise<any> => {
+export const extractProfileInfo = async (input: string, currentRole: 'brand' | 'organizer' | 'community'): Promise<Partial<DraftProfile>> => {
   // In a real implementation, this would use NLP to extract structured information
   // For this demo, we'll use a simplified approach with regex
-  const extractedInfo: any = {};
+  const extractedInfo: Partial<DraftProfile> = {};
   // Extract email
   const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
   const emails = input.match(emailRegex);
@@ -240,15 +243,13 @@ export const extractProfileInfo = async (input: string, currentRole: 'brand' | '
     const dateRegex = /(?:on|at|date|scheduled for)\s+([A-Za-z]+\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?)/i;
     const dateMatch = input.match(dateRegex);
     if (dateMatch && dateMatch[1]) {
-      if (!extractedInfo.eventDetails) extractedInfo.eventDetails = {};
-      extractedInfo.eventDetails.date = dateMatch[1].trim();
+      extractedInfo.eventDate = dateMatch[1].trim();
     }
     // Extract event location
     const locationRegex = /(?:at|in|location|venue|place)\s+([A-Za-z\s]+)(?:\.|\,|\s+on)/i;
     const locationMatch = input.match(locationRegex);
     if (locationMatch && locationMatch[1]) {
-      if (!extractedInfo.eventDetails) extractedInfo.eventDetails = {};
-      extractedInfo.eventDetails.location = locationMatch[1].trim();
+      extractedInfo.location = locationMatch[1].trim();
     }
   } else if (currentRole === 'community') {
     // Extract name
@@ -261,15 +262,13 @@ export const extractProfileInfo = async (input: string, currentRole: 'brand' | '
     const ageRegex = /(?:I am|I'm)\s+(\d+)(?:\s+years old)?/i;
     const ageMatch = input.match(ageRegex);
     if (ageMatch && ageMatch[1]) {
-      if (!extractedInfo.personalInfo) extractedInfo.personalInfo = {};
-      extractedInfo.personalInfo.age = parseInt(ageMatch[1].trim());
+      extractedInfo.age = ageMatch[1].trim();
     }
     // Extract location
     const locationRegex = /(?:I live in|from|located in|based in)\s+([A-Za-z\s]+)(?:\.|\,|\s+and)/i;
     const locationMatch = input.match(locationRegex);
     if (locationMatch && locationMatch[1]) {
-      if (!extractedInfo.personalInfo) extractedInfo.personalInfo = {};
-      extractedInfo.personalInfo.location = locationMatch[1].trim();
+      extractedInfo.location = locationMatch[1].trim();
     }
   }
   return extractedInfo;

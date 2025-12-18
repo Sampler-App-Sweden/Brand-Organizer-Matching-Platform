@@ -1,16 +1,16 @@
-export function sortData(
-  data: any[],
+export function sortData<T extends Record<string, unknown>>(
+  data: T[],
   sortField: string,
   sortDirection: 'asc' | 'desc'
-) {
+): T[] {
   if (!sortField) return data
   return [...data].sort((a, b) => {
-    let aValue = a[sortField]
-    let bValue = b[sortField]
+    let aValue: unknown = a[sortField]
+    let bValue: unknown = b[sortField]
     if (sortField.includes('.')) {
       const parts = sortField.split('.')
-      aValue = parts.reduce((obj, key) => obj?.[key], a)
-      bValue = parts.reduce((obj, key) => obj?.[key], b)
+      aValue = parts.reduce((obj: unknown, key: string) => (obj as Record<string, unknown>)?.[key], a as unknown)
+      bValue = parts.reduce((obj: unknown, key: string) => (obj as Record<string, unknown>)?.[key], b as unknown)
     }
     if (aValue instanceof Date && bValue instanceof Date) {
       return sortDirection === 'asc'
@@ -22,11 +22,17 @@ export function sortData(
         ? aValue.localeCompare(bValue)
         : bValue.localeCompare(aValue)
     }
-    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
+    }
+    return 0
   })
 }
 
-export function filterData(data: any[], searchTerm: string) {
+export function filterData<T extends Record<string, unknown>>(
+  data: T[],
+  searchTerm: string
+): T[] {
   if (!searchTerm) return data
   const term = searchTerm.toLowerCase()
   return data.filter((item) => {

@@ -8,7 +8,7 @@ export const generateDraftId = (): string => {
 }
 
 // Get a single draft by ID
-export const getDraft = async (id: string): Promise<any> => {
+export const getDraft = async (id: string): Promise<DraftProfile | null> => {
   try {
     const { data, error } = await supabase
       .from('drafts')
@@ -19,7 +19,7 @@ export const getDraft = async (id: string): Promise<any> => {
       console.error('Error fetching draft:', error)
       return null
     }
-    return data
+    return data as DraftProfile
   } catch (error) {
     console.error('Error in getDraft:', error)
     return null
@@ -27,7 +27,7 @@ export const getDraft = async (id: string): Promise<any> => {
 }
 
 // Get drafts by user ID
-export const getDraftsByUserId = async (userId: string): Promise<any[]> => {
+export const getDraftsByUserId = async (userId: string): Promise<DraftProfile[]> => {
   try {
     const { data, error } = await supabase
       .from('drafts')
@@ -40,7 +40,7 @@ export const getDraftsByUserId = async (userId: string): Promise<any[]> => {
       console.error('Error fetching drafts by user ID:', error)
       return []
     }
-    return data || []
+    return (data as DraftProfile[]) || []
   } catch (error) {
     console.error('Error in getDraftsByUserId:', error)
     return []
@@ -48,7 +48,7 @@ export const getDraftsByUserId = async (userId: string): Promise<any[]> => {
 }
 
 // Get drafts by email
-export const getDraftsByEmail = async (email: string): Promise<any[]> => {
+export const getDraftsByEmail = async (email: string): Promise<DraftProfile[]> => {
   try {
     const { data, error } = await supabase
       .from('drafts')
@@ -61,7 +61,7 @@ export const getDraftsByEmail = async (email: string): Promise<any[]> => {
       console.error('Error fetching drafts by email:', error)
       return []
     }
-    return data || []
+    return (data as DraftProfile[]) || []
   } catch (error) {
     console.error('Error in getDraftsByEmail:', error)
     return []
@@ -71,7 +71,7 @@ export const getDraftsByEmail = async (email: string): Promise<any[]> => {
 // Save a draft profile
 export const saveDraft = async (
   id: string | null,
-  profile: any,
+  profile: Partial<DraftProfile>,
   role: string,
   userId?: string
 ): Promise<string> => {
