@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { ImageIcon, XIcon } from 'lucide-react'
 import { ProductImage } from '../../types/sponsorship'
-import { IMAGE_LIMITS, validateImageUpload, getImageLimitText } from '../../utils/imageUploadLimits'
+import { IMAGE_LIMITS, validateImageUpload, getImageLimitText, convertToWebP } from '../../utils/imageUploadLimits'
 
 interface ImageUploadProps {
   images: ProductImage[]
@@ -32,16 +32,21 @@ export function ImageUpload({
     const newImages: ProductImage[] = []
     let loadedCount = 0
 
-    fileArray.forEach((file, index) => {
-      const reader = new FileReader()
-      const uniqueId = `img-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 15)}`
+    // Convert all images to WebP
+    fileArray.forEach(async (file, index) => {
+      try {
+        const uniqueId = `img-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 15)}`
+        const { dataUrl, blob } = await convertToWebP(file)
 
-      reader.onloadend = () => {
-        const url = reader.result as string
+        // Create a new File object from the blob with .webp extension
+        const webpFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+          type: 'image/webp'
+        })
+
         newImages.push({
           id: uniqueId,
-          url,
-          file
+          url: dataUrl,
+          file: webpFile
         })
         loadedCount++
 
@@ -49,8 +54,16 @@ export function ImageUpload({
         if (loadedCount === fileArray.length) {
           onImagesChange([...images, ...newImages])
         }
+      } catch (error) {
+        console.error('Failed to convert image to WebP:', error)
+        alert(`Failed to process image: ${file.name}`)
+        loadedCount++
+
+        // Continue even if one fails
+        if (loadedCount === fileArray.length) {
+          onImagesChange([...images, ...newImages])
+        }
       }
-      reader.readAsDataURL(file)
     })
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -101,7 +114,7 @@ export function ImageUpload({
         onChange={handleImageUpload}
       />
       <p className='text-xs text-gray-500'>
-        Accepted formats: JPG, PNG, GIF. {getImageLimitText(maxImages)}
+        JPG, PNG, GIF (auto-converted to WebP). {getImageLimitText(maxImages)}
       </p>
     </div>
   )

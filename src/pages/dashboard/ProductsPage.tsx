@@ -6,7 +6,7 @@ import { useBrandProducts } from '../../hooks/useBrandProducts'
 import { getBrandByUserId } from '../../services/dataService'
 import { Button } from '../../components/ui'
 import type { SponsorshipProduct, SponsorshipStatus, ProductImage } from '../../types/sponsorship'
-import { IMAGE_LIMITS, validateImageUpload, getImageLimitText } from '../../utils/imageUploadLimits'
+import { IMAGE_LIMITS, validateImageUpload, getImageLimitText, convertToWebP } from '../../utils/imageUploadLimits'
 
 type ViewMode = 'list' | 'create' | 'edit'
 
@@ -108,21 +108,29 @@ export function ProductsPage() {
     }
 
     const fileArray = Array.from(files)
-    fileArray.forEach((file, index) => {
-      const reader = new FileReader()
-      const uniqueId = `temp-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 15)}`
 
-      reader.onloadend = () => {
-        const imageUrl = reader.result as string
+    // Convert all images to WebP
+    fileArray.forEach(async (file, index) => {
+      try {
+        const uniqueId = `temp-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 15)}`
+        const { dataUrl, blob } = await convertToWebP(file)
+
+        // Create a new File object from the blob with .webp extension
+        const webpFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
+          type: 'image/webp'
+        })
+
         const newImage: ProductImage = {
           id: uniqueId,
-          url: imageUrl,
-          file
+          url: dataUrl,
+          file: webpFile
         }
 
         setImages((prev) => [...prev, newImage])
+      } catch (error) {
+        console.error('Failed to convert image to WebP:', error)
+        alert(`Failed to process image: ${file.name}`)
       }
-      reader.readAsDataURL(file)
     })
 
     // Reset the input so the same file can be uploaded again if needed
@@ -456,7 +464,7 @@ export function ProductsPage() {
                       <p className='mb-2 text-sm text-gray-500'>
                         <span className='font-semibold'>Click to upload</span> or drag and drop
                       </p>
-                      <p className='text-xs text-gray-500'>PNG, JPG or WEBP ({getImageLimitText(IMAGE_LIMITS.PRODUCT)})</p>
+                      <p className='text-xs text-gray-500'>PNG, JPG, GIF (auto-converted to WebP, {getImageLimitText(IMAGE_LIMITS.PRODUCT)})</p>
                     </div>
                     <input
                       type='file'

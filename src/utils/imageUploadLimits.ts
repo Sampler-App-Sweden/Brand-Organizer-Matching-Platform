@@ -10,6 +10,9 @@ export const IMAGE_LIMITS = {
   PRODUCT: 3,
   EVENT: 3,
   PROFILE: 5,
+
+  // WebP conversion quality (0-1, where 1 is highest quality)
+  WEBP_QUALITY: 0.85,
 } as const
 
 /**
@@ -52,4 +55,61 @@ export function validateImageUpload(
 export function getImageLimitText(maxImages: number): string {
   const sizeMB = IMAGE_LIMITS.MAX_FILE_SIZE / (1024 * 1024)
   return `MAX. ${sizeMB}MB each, ${maxImages} images total`
+}
+
+/**
+ * Converts an image file to WebP format using Canvas API
+ */
+export function convertToWebP(
+  file: File
+): Promise<{ dataUrl: string; blob: Blob }> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+
+    reader.onload = (e) => {
+      const img = new Image()
+      img.onload = () => {
+        // Create canvas and draw image
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')
+
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'))
+          return
+        }
+
+        ctx.drawImage(img, 0, 0)
+
+        // Convert to WebP
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Failed to convert image to WebP'))
+              return
+            }
+
+            // Convert blob to data URL for preview
+            const blobReader = new FileReader()
+            blobReader.onloadend = () => {
+              resolve({
+                dataUrl: blobReader.result as string,
+                blob,
+              })
+            }
+            blobReader.readAsDataURL(blob)
+          },
+          'image/webp',
+          IMAGE_LIMITS.WEBP_QUALITY
+        )
+      }
+
+      img.onerror = () => reject(new Error('Failed to load image'))
+      img.src = e.target?.result as string
+    }
+
+    reader.onerror = () => reject(new Error('Failed to read file'))
+    reader.readAsDataURL(file)
+  })
 }
