@@ -19,8 +19,8 @@ export function DemoAccountCard({
   return (
     <div className='p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all'>
       <div className='flex items-start gap-3'>
-        <div className='p-2 bg-blue-50 rounded-lg'>
-          <Icon className='h-5 w-5 text-blue-600' />
+        <div className='p-2 bg-indigo-50 rounded-lg'>
+          <Icon className='h-5 w-5 text-indigo-600' />
         </div>
         <div className='flex-1'>
           <h4 className='font-medium text-gray-900 mb-1'>{account.type}</h4>
@@ -69,7 +69,7 @@ export function DemoAccountCard({
           <button
             type='button'
             onClick={() => onQuickLogin(account.email, account.password)}
-            className='mt-3 w-full text-xs px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md transition-colors'
+            className='mt-3 w-full text-xs px-3 py-1.5 bg-blue-50 text-indigo-700 hover:bg-indigo-100 rounded-md transition-colors'
           >
             Quick Login
           </button>

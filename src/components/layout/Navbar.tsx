@@ -79,7 +79,7 @@ export function Navbar() {
   }
 
   return (
-    <header className='bg-indigo-900 backdrop-blur-sm shadow-sm border-b border-gray-100 sticky top-0 z-30'>
+    <header className="bg-indigo-900 bg-gradient-to-b from-indigo-900 via-indigo-800 to-indigo-900 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] transition-shadow duration-300 backdrop-blur-sm sticky top-0 z-30 border-b border-indigo-800">
       <div className='w-full'>
         <div className='flex justify-between items-center h-16 px-4'>
           <Link to='/' className='flex items-center space-x-2 group'>

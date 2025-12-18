@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { SparklesIcon, ArrowRightIcon } from 'lucide-react'
-import { TechCircuitLines } from '../effects'
 interface TechHeroProps {
   title: string
   subtitle: string

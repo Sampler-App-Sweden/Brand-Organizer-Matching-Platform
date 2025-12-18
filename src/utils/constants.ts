@@ -1,4 +1,4 @@
-import { Building, Calendar, LucideIcon, Users } from 'lucide-react'
+import { Building, Calendar, LucideIcon } from 'lucide-react'
 
 // Constants
 export const APP_NAME = 'SponsrAI'
@@ -55,12 +55,5 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
     password: 'demo123',
     description: 'Active Life Events - Stockholm Fitness Festival',
     icon: Calendar
-  },
-  {
-    type: 'Community Demo',
-    email: 'community@demo.com',
-    password: 'demo123',
-    description: 'Sarah Johnson - Test panel participant',
-    icon: Users
   }
 ]

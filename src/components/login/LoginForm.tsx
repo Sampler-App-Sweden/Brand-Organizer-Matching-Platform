@@ -42,7 +42,7 @@ export function LoginForm({
           type='email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500'
+          className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500'
           placeholder='Enter your email'
           required
         />
@@ -61,7 +61,7 @@ export function LoginForm({
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className='w-full h-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500'
+            className='w-full h-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500'
             placeholder='Enter your password'
             required
           />
@@ -86,7 +86,7 @@ export function LoginForm({
             type='checkbox'
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            className='h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
+            className='h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded'
           />
           <label
             htmlFor='remember-me'
@@ -97,7 +97,7 @@ export function LoginForm({
         </div>
         <Link
           to='/forgot-password'
-          className='text-sm font-medium text-blue-600 hover:text-blue-500'
+          className='text-sm font-medium text-indigo-600 hover:text-indigo-500'
         >
           Forgot password?
         </Link>
@@ -112,7 +112,7 @@ export function LoginForm({
       <button
         type='submit'
         disabled={isLoading}
-        className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200'
+        className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200'
       >
         {isLoading ? 'Signing in...' : 'Sign in'}
       </button>
