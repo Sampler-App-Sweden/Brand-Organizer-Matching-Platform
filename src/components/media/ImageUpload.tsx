@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { ImageIcon, XIcon } from 'lucide-react'
 import { ProductImage } from '../../types/sponsorship'
+import { IMAGE_LIMITS, validateImageUpload, getImageLimitText } from '../../utils/imageUploadLimits'
 
 interface ImageUploadProps {
   images: ProductImage[]
@@ -11,27 +12,43 @@ interface ImageUploadProps {
 export function ImageUpload({
   images,
   onImagesChange,
-  maxImages = 5
+  maxImages = IMAGE_LIMITS.PROFILE
 }: ImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
-    let newImages = [...images]
-    Array.from(files).forEach((file) => {
-      // Validate file type and size in parent
+
+    // Validate upload
+    const validation = validateImageUpload(files, images.length, maxImages)
+    if (!validation.valid) {
+      alert(validation.error)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+
+    const fileArray = Array.from(files)
+    const newImages: ProductImage[] = []
+    let loadedCount = 0
+
+    fileArray.forEach((file, index) => {
       const reader = new FileReader()
-      reader.onload = (e) => {
-        const url = e.target?.result as string
+      const uniqueId = `img-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 15)}`
+
+      reader.onloadend = () => {
+        const url = reader.result as string
         newImages.push({
-          id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: uniqueId,
           url,
           file
         })
-        if (newImages.length > maxImages)
-          newImages = newImages.slice(0, maxImages)
-        onImagesChange([...newImages])
+        loadedCount++
+
+        // Only update once all images are loaded
+        if (loadedCount === fileArray.length) {
+          onImagesChange([...images, ...newImages])
+        }
       }
       reader.readAsDataURL(file)
     })
@@ -84,7 +101,7 @@ export function ImageUpload({
         onChange={handleImageUpload}
       />
       <p className='text-xs text-gray-500'>
-        Accepted formats: JPG, PNG, GIF. Max size: 2MB per image.
+        Accepted formats: JPG, PNG, GIF. {getImageLimitText(maxImages)}
       </p>
     </div>
   )

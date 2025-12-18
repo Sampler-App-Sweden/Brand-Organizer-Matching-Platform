@@ -6,6 +6,7 @@ import { useBrandProducts } from '../../hooks/useBrandProducts'
 import { getBrandByUserId } from '../../services/dataService'
 import { Button } from '../../components/ui'
 import type { SponsorshipProduct, SponsorshipStatus, ProductImage } from '../../types/sponsorship'
+import { IMAGE_LIMITS, validateImageUpload, getImageLimitText } from '../../utils/imageUploadLimits'
 
 type ViewMode = 'list' | 'create' | 'edit'
 
@@ -98,8 +99,15 @@ export function ProductsPage() {
     const files = e.target.files
     if (!files) return
 
-    const fileArray = Array.from(files)
+    // Validate upload
+    const validation = validateImageUpload(files, images.length, IMAGE_LIMITS.PRODUCT)
+    if (!validation.valid) {
+      alert(validation.error)
+      e.target.value = ''
+      return
+    }
 
+    const fileArray = Array.from(files)
     fileArray.forEach((file, index) => {
       const reader = new FileReader()
       const uniqueId = `temp-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 15)}`
@@ -112,7 +120,6 @@ export function ProductsPage() {
           file
         }
 
-        console.log('Adding image with ID:', uniqueId)
         setImages((prev) => [...prev, newImage])
       }
       reader.readAsDataURL(file)
@@ -123,13 +130,7 @@ export function ProductsPage() {
   }
 
   const handleRemoveImage = (imageId: string) => {
-    console.log('Removing image with ID:', imageId)
-    setImages((prev) => {
-      console.log('Current images:', prev.map(img => ({ id: img.id, url: img.url.substring(0, 50) })))
-      const filtered = prev.filter((img) => img.id !== imageId)
-      console.log('After filter:', filtered.map(img => ({ id: img.id, url: img.url.substring(0, 50) })))
-      return filtered
-    })
+    setImages((prev) => prev.filter((img) => img.id !== imageId))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -455,7 +456,7 @@ export function ProductsPage() {
                       <p className='mb-2 text-sm text-gray-500'>
                         <span className='font-semibold'>Click to upload</span> or drag and drop
                       </p>
-                      <p className='text-xs text-gray-500'>PNG, JPG or WEBP (MAX. 5MB)</p>
+                      <p className='text-xs text-gray-500'>PNG, JPG or WEBP ({getImageLimitText(IMAGE_LIMITS.PRODUCT)})</p>
                     </div>
                     <input
                       type='file'
