@@ -1,21 +1,18 @@
 import {
   BellIcon,
-  CalendarIcon,
   HandshakeIcon,
   LogIn,
   Menu,
-  PackageIcon,
-  SparklesIcon,
-  UsersIcon,
   X
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
+import { DASHBOARD_NAV_LINKS, MARKETING_NAV_LINKS } from '../../constants/navigationLinks'
+import { useNotifications } from '../../context'
 import { useAuth } from '../../context/AuthContext'
 import { logoutAndRedirect } from '../../services/logoutService'
-import { useEffect, useRef } from 'react'
-import { useNotifications } from '../../context'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -57,51 +54,7 @@ export function Navbar() {
         return '/dashboard/brand'
     }
   }
-  const marketingLinks = useMemo(
-    () => [
-      {
-        label: 'Community',
-        path: '/community',
-        icon: <UsersIcon className='h-4 w-4 mr-1' />
-      },
-      {
-        label: 'Brands',
-        path: '/brands',
-        icon: <PackageIcon className='h-4 w-4 mr-1' />
-      },
-      {
-        label: 'Organizers',
-        path: '/organizers',
-        icon: <CalendarIcon className='h-4 w-4 mr-1' />
-      }
-    ],
-    []
-  )
-
-  const dashboardLinks = useMemo(
-    () => [
-      {
-        label: 'Community',
-        path: '/community'
-      },
-      {
-        label: 'Brands',
-        path: '/brands'
-      },
-      {
-        label: 'Organizers',
-        path: '/organizers'
-      },
-      {
-        label: 'Inspiration',
-        path: '/dashboard/inspiration',
-        icon: <SparklesIcon className='h-4 w-4 mr-0.5' />
-      }
-    ],
-    []
-  )
-
-  const linksToRender = isAuthenticated ? dashboardLinks : marketingLinks
+  const linksToRender = isAuthenticated ? DASHBOARD_NAV_LINKS : MARKETING_NAV_LINKS
 
   const showDashboardActions = isAuthenticated && isOnDashboard
 
@@ -127,7 +80,7 @@ export function Navbar() {
   return (
     <header className='bg-indigo-800 backdrop-blur-sm shadow-sm border-b border-gray-100 sticky top-0 z-30'>
       <div className='w-full'>
-        <div className='flex justify-between items-center h-16'>
+        <div className='flex justify-between items-center h-16 px-4'>
           <Link to='/' className='flex items-center space-x-2 group'>
             <div className='bg-indigo-600 p-2 rounded-md relative overflow-hidden tech-pulse'>
               <HandshakeIcon className='h-6 w-6 text-white relative z-10' />

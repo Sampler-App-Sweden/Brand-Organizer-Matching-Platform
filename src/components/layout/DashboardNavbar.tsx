@@ -1,15 +1,13 @@
 import {
   BellIcon,
   HandshakeIcon,
-  HomeIcon,
   Menu as MenuIcon,
-  SparklesIcon,
-  UsersIcon,
   X as XIcon
 } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import { MAIN_NAV_ITEMS } from '../../constants/navigationLinks'
 import { useNotifications } from '../../context'
 import { useAuth } from '../../context/AuthContext'
 
@@ -25,29 +23,6 @@ export function DashboardNavbar() {
     logout()
     navigate('/')
   }
-
-  const mainNavItems = [
-    {
-      label: 'Community',
-      icon: <UsersIcon className='h-5 w-5' />,
-      path: '/community'
-    },
-    {
-      label: 'Brands',
-      icon: <HandshakeIcon className='h-5 w-5' />,
-      path: '/for-brands'
-    },
-    {
-      label: 'Organizers',
-      icon: <HomeIcon className='h-5 w-5' />,
-      path: '/for-organizers'
-    },
-    {
-      label: 'Inspiration',
-      icon: <SparklesIcon className='h-5 w-5' />,
-      path: '/inspiration'
-    }
-  ]
 
   return (
     <header className='bg-white bg-opacity-95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50'>
@@ -66,7 +41,7 @@ export function DashboardNavbar() {
           {/* Center: Nav */}
           <div className='flex-1 flex justify-center'>
             <nav className='hidden md:flex items-center space-x-1'>
-              {mainNavItems.map((item) => (
+              {MAIN_NAV_ITEMS.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -148,7 +123,7 @@ export function DashboardNavbar() {
       {mobileMenuOpen && (
         <div className='md:hidden bg-white border-t border-gray-200'>
           <nav className='px-4 py-2 space-y-1'>
-            {mainNavItems.map((item) => (
+            {MAIN_NAV_ITEMS.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
