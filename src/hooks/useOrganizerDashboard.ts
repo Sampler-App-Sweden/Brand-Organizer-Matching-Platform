@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { Organizer } from '../types/organizer'
-import type { Match } from '../services/matchingService'
+import type { Organizer, Match } from '../types'
 import {
   getOrganizerByUserId,
   getMatchesForOrganizer

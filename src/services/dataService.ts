@@ -1,13 +1,7 @@
 import { supabase } from './supabaseClient'
 
 // Data service for managing brand and organizer data
-import {
-  Match,
-  findMatchesForBrand,
-  findMatchesForOrganizer
-} from './matchingService'
-
-import { Brand, Organizer } from '../types'
+import { Brand, Organizer, Match } from '../types'
 import { notifyNewMatch, notifyProfileUpdate } from './notificationService'
 
 type BrandRow = {

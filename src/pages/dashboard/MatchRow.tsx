@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { Match } from '../../services/matchingService'
 import { getOrganizerById } from '../../services/dataService'
-import { Organizer } from '../../types'
+import { Organizer, Match } from '../../types'
 
 export function MatchRow({
   match,

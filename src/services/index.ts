@@ -26,7 +26,8 @@ export * from './draftService'
 export { initEmailJS, sendDataByEmail } from './emailService'
 
 // Matching & Experiments
-export * from './matchingService'
+// Note: Match algorithm moved to Edge Functions (server-side only)
+// Match type available from '../types'
 export * from './experimentService'
 export * from './matchPreferencesService'
 

@@ -15,7 +15,6 @@ import {
   getConversationMessages,
   sendMessage
 } from '../../services/chatService'
-import { Match } from '../../services/matchingService'
 import { Button } from '../../components/ui'
 import {
   CheckIcon,
@@ -26,7 +25,7 @@ import {
   CheckCircleIcon
 } from 'lucide-react'
 import { ContractDetails, ContractForm } from '../../components/contract'
-import type { Brand, Contract, Organizer } from '../../types'
+import type { Brand, Contract, Organizer, Match } from '../../types'
 
 type StoredBrand = Brand & {
   address?: string

@@ -7,12 +7,11 @@ import {
   getMatchesForBrand,
   getOrganizersByIds
 } from '../../services/dataService'
-import { Match } from '../../services/matchingService'
 import { TrendingUpIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
 import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
-import { Brand, Organizer } from '../../types'
+import { Brand, Organizer, Match } from '../../types'
 import { MatchRow } from '../dashboard/MatchRow'
 
 export function BrandDashboard() {

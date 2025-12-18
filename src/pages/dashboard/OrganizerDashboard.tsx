@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import { getBrandById, getBrandsByIds } from '../../services/dataService'
-import { Brand } from '../../types'
-import { Match } from '../../services/matchingService'
+import { Brand, Match } from '../../types'
 import {
   TrendingUpIcon,
   CheckCircleIcon,
