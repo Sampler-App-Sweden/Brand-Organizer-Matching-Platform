@@ -33,7 +33,6 @@ CREATE POLICY "Allow admins to view all support tickets"
 DROP POLICY IF EXISTS "Allow anyone to create support tickets" ON public.support_tickets;
 CREATE POLICY "Allow anyone to create support tickets"
   ON public.support_tickets FOR INSERT
-  TO public
   WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Allow admins to update support tickets" ON public.support_tickets;

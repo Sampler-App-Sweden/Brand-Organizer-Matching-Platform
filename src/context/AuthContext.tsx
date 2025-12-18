@@ -101,17 +101,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const { user } = await signIn(email, password)
-      if (user && user.user_metadata) {
+      if (user) {
+        // Fetch profile data from Supabase to get the current role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name, role')
+          .eq('id', user.id)
+          .single()
+
         const loggedInUser = {
           id: user.id,
           email: user.email || '',
-          type: user.user_metadata.type || 'brand',
-          name: user.user_metadata.name || ''
+          type:
+            profile?.role?.toLowerCase() || user.user_metadata?.type || 'brand',
+          name: profile?.name || user.user_metadata?.name || ''
         }
         setCurrentUser(loggedInUser)
         return loggedInUser
       }
-      throw new Error('User metadata not found')
+      throw new Error('User not found')
     } catch (error) {
       console.error('Login error:', error)
       throw error

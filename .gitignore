@@ -49,3 +49,8 @@ settings.local.json
 .claude_sessions/
 .claude_audio_recordings/
 .claude_debug.log
+
+# Supabase
+.supabase
+supabase/.env
+supabase/.env.local

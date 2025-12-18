@@ -318,10 +318,20 @@ export const saveBrand = async (
 
   const newBrand = mapBrandRowToBrand(data as BrandRow)
 
+  // Generate matches using Edge Function (server-side)
   try {
-    const organizers = await fetchAllOrganizers()
-    const matches = findMatchesForBrand(newBrand, organizers)
-    await insertMatchSuggestions(matches)
+    const { data: functionData, error: functionError } = await supabase.functions.invoke(
+      'generate-matches',
+      {
+        body: { type: 'brand', entityId: newBrand.id }
+      }
+    )
+
+    if (functionError) {
+      console.error('Failed to generate matches via Edge Function:', functionError)
+    } else {
+      console.log(`Generated ${functionData.matchCount} matches for brand`)
+    }
   } catch (matchError) {
     console.error('Failed to generate organizer matches for brand:', matchError)
   }
@@ -347,10 +357,20 @@ export const saveOrganizer = async (
 
   const newOrganizer = mapOrganizerRowToOrganizer(data as OrganizerRow)
 
+  // Generate matches using Edge Function (server-side)
   try {
-    const brands = await fetchAllBrands()
-    const matches = findMatchesForOrganizer(newOrganizer, brands)
-    await insertMatchSuggestions(matches)
+    const { data: functionData, error: functionError } = await supabase.functions.invoke(
+      'generate-matches',
+      {
+        body: { type: 'organizer', entityId: newOrganizer.id }
+      }
+    )
+
+    if (functionError) {
+      console.error('Failed to generate matches via Edge Function:', functionError)
+    } else {
+      console.log(`Generated ${functionData.matchCount} matches for organizer`)
+    }
   } catch (matchError) {
     console.error('Failed to generate brand matches for organizer:', matchError)
   }

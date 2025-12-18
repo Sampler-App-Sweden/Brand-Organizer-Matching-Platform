@@ -1,0 +1,32 @@
+# Supabase Configuration
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[functions]
+# Edge Functions configuration
+enabled = true
+port = 54321
+
+# Verify JWT tokens
+verify_jwt = true
+
+# Import map for Deno runtime
+[functions.import_map]
+# You can add custom import mappings here if needed
+
+# Environment variables for local development
+# Create a .env.local file for sensitive values
+# Don't commit .env.local to git!
