@@ -1,7 +1,7 @@
 import { FilterIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { FilterSelect } from './FilterSelect'
-import { SearchBar } from './SearchBar'
+import { SearchBar } from '../ui'
 import {
   getCategoryOptions,
   locationOptions,
