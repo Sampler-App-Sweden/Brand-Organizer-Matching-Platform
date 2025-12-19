@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { Table } from '../ui'
+
 interface Brand {
   id: string
   companyName: string
@@ -13,92 +15,90 @@ interface Brand {
 interface BrandsTableProps {
   brands: Brand[]
   handleSort: (field: string) => void
-  renderSortIcon: (field: string) => React.ReactNode
+  currentSort?: { field: string; direction: 'asc' | 'desc' }
+  renderSortIcon?: (field: string) => React.ReactNode
 }
 
 export function BrandsTable({
   brands,
   handleSort,
-  renderSortIcon
+  currentSort
 }: BrandsTableProps) {
   return (
-    <div className='overflow-x-auto'>
-      <table className='min-w-full divide-y divide-gray-200'>
-        <thead className='bg-gray-50'>
-          <tr>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('companyName')}
-            >
-              Company {renderSortIcon('companyName')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('contactName')}
-            >
-              Contact {renderSortIcon('contactName')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('industry')}
-            >
-              Industry {renderSortIcon('industry')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('productName')}
-            >
-              Product {renderSortIcon('productName')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('budget')}
-            >
-              Budget {renderSortIcon('budget')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('createdAt')}
-            >
-              Created At {renderSortIcon('createdAt')}
-            </th>
-          </tr>
-        </thead>
-        <tbody className='bg-white divide-y divide-gray-200'>
-          {brands.map((brand) => (
-            <tr key={brand.id}>
-              <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
+    <Table variant='simple' size='md'>
+      <Table.Head>
+        <Table.Row>
+          <Table.HeadCell
+            sortable
+            sortField='companyName'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Company
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='contactName'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Contact
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='industry'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Industry
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='productName'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Product
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='budget'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Budget
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='createdAt'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Created At
+          </Table.HeadCell>
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {brands.map((brand) => (
+          <Table.Row key={brand.id} hover>
+            <Table.Cell>
+              <span className='font-medium text-gray-900'>
                 {brand.companyName}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {brand.contactName}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {brand.industry}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {brand.productName}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {brand.budget}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {new Date(brand.createdAt).toLocaleDateString()}
-              </td>
-            </tr>
-          ))}
-          {brands.length === 0 && (
-            <tr>
-              <td
-                colSpan={6}
-                className='px-6 py-4 text-center text-sm text-gray-500'
-              >
-                No brands found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+              </span>
+            </Table.Cell>
+            <Table.Cell>{brand.contactName}</Table.Cell>
+            <Table.Cell>{brand.industry}</Table.Cell>
+            <Table.Cell>{brand.productName}</Table.Cell>
+            <Table.Cell>{brand.budget}</Table.Cell>
+            <Table.Cell>
+              {new Date(brand.createdAt).toLocaleDateString()}
+            </Table.Cell>
+          </Table.Row>
+        ))}
+        {brands.length === 0 && (
+          <Table.EmptyState colSpan={6}>No brands found</Table.EmptyState>
+        )}
+      </Table.Body>
+    </Table>
   )
 }

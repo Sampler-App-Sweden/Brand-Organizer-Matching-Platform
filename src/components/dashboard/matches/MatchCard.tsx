@@ -2,7 +2,7 @@ import { ArrowRightIcon, CheckIcon, StarIcon, XIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { EnhancedMatch, MatchView } from '../../../types/matches'
-import { Button } from '../../ui'
+import { Avatar, Badge, Button, IconButton } from '../../ui'
 
 interface MatchCardProps {
   match: EnhancedMatch
@@ -14,10 +14,10 @@ interface MatchCardProps {
   onExpressInterest: (matchId: string) => void
 }
 
-function getScoreColor(score: number) {
-  if (score >= 85) return 'bg-green-100 text-green-800'
-  if (score >= 70) return 'bg-amber-100 text-amber-800'
-  return 'bg-gray-100 text-gray-800'
+function getScoreVariant(score: number): 'success' | 'warning' | 'neutral' {
+  if (score >= 85) return 'success'
+  if (score >= 70) return 'warning'
+  return 'neutral'
 }
 
 export function MatchCard({
@@ -38,46 +38,34 @@ export function MatchCard({
       <div className='p-5'>
         <div className='flex justify-between items-start mb-4'>
           <div className='flex items-center'>
-            <div className='h-12 w-12 rounded-full overflow-hidden mr-2 bg-gray-200'>
-              {match.brandLogo ? (
-                <img
-                  src={match.brandLogo}
-                  alt={match.brandName}
-                  className='h-full w-full object-cover'
-                />
-              ) : (
-                <div className='h-full w-full flex items-center justify-center bg-blue-100 text-blue-800 font-bold'>
-                  {match.brandName.charAt(0)}
-                </div>
-              )}
-            </div>
+            <Avatar
+              src={match.brandLogo}
+              name={match.brandName}
+              alt={match.brandName}
+              size='md'
+              variant='circle'
+              colorScheme='brand'
+              className='mr-2'
+            />
             <div className='flex flex-col items-center mx-1'>
               <div className='w-5 h-0.5 bg-gray-300'></div>
               <div className='my-1 text-gray-400'>×</div>
               <div className='w-5 h-0.5 bg-gray-300'></div>
             </div>
-            <div className='h-12 w-12 rounded-full overflow-hidden ml-2 bg-gray-200'>
-              {match.organizerLogo ? (
-                <img
-                  src={match.organizerLogo}
-                  alt={match.organizerName}
-                  className='h-full w-full object-cover'
-                />
-              ) : (
-                <div className='h-full w-full flex items-center justify-center bg-green-100 text-green-800 font-bold'>
-                  {match.organizerName.charAt(0)}
-                </div>
-              )}
-            </div>
+            <Avatar
+              src={match.organizerLogo}
+              name={match.organizerName}
+              alt={match.organizerName}
+              size='md'
+              variant='circle'
+              colorScheme='organizer'
+              className='ml-2'
+            />
           </div>
           {activeView === 'suggested' && (
-            <div
-              className={`px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(
-                match.score
-              )}`}
-            >
+            <Badge variant={getScoreVariant(match.score)} size='md' rounded='full'>
               {match.score}% Match
-            </div>
+            </Badge>
           )}
         </div>
 
@@ -160,13 +148,14 @@ export function MatchCard({
                   >
                     Express Interest
                   </Button>
-                  <button
-                    className='p-2 text-gray-400 hover:text-gray-600'
+                  <IconButton
+                    variant='ghost'
+                    size='md'
+                    colorScheme='gray'
+                    icon={<XIcon className='h-5 w-5' />}
                     onClick={() => onDismiss(match.id)}
-                    title='Dismiss'
-                  >
-                    <XIcon className='h-5 w-5' />
-                  </button>
+                    aria-label='Dismiss match'
+                  />
                 </>
               )}
             </div>

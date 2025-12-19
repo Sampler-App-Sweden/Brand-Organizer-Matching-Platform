@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { Table } from '../ui'
+
 interface User {
   id: string
   name: string
@@ -11,80 +13,78 @@ interface User {
 interface UsersTableProps {
   users: User[]
   handleSort: (field: string) => void
-  renderSortIcon: (field: string) => React.ReactNode
+  currentSort?: { field: string; direction: 'asc' | 'desc' }
+  renderSortIcon?: (field: string) => React.ReactNode
 }
 
 export function UsersTable({
   users,
   handleSort,
-  renderSortIcon
+  currentSort
 }: UsersTableProps) {
   return (
-    <div className='overflow-x-auto'>
-      <table className='min-w-full divide-y divide-gray-200'>
-        <thead className='bg-gray-50'>
-          <tr>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('id')}
-            >
-              ID {renderSortIcon('id')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('name')}
-            >
-              Name {renderSortIcon('name')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('email')}
-            >
-              Email {renderSortIcon('email')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('type')}
-            >
-              Type {renderSortIcon('type')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('createdAt')}
-            >
-              Created At {renderSortIcon('createdAt')}
-            </th>
-          </tr>
-        </thead>
-        <tbody className='bg-white divide-y divide-gray-200'>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
-                {user.name}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {user.email}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {user.type}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {new Date(user.createdAt).toLocaleDateString()}
-              </td>
-            </tr>
-          ))}
-          {users.length === 0 && (
-            <tr>
-              <td
-                colSpan={5}
-                className='px-6 py-4 text-center text-sm text-gray-500'
-              >
-                No users found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+    <Table variant='simple' size='md'>
+      <Table.Head>
+        <Table.Row>
+          <Table.HeadCell
+            sortable
+            sortField='id'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            ID
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='name'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Name
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='email'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Email
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='type'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Type
+          </Table.HeadCell>
+          <Table.HeadCell
+            sortable
+            sortField='createdAt'
+            onSort={handleSort}
+            currentSort={currentSort}
+          >
+            Created At
+          </Table.HeadCell>
+        </Table.Row>
+      </Table.Head>
+      <Table.Body>
+        {users.map((user) => (
+          <Table.Row key={user.id} hover>
+            <Table.Cell>
+              <span className='font-medium text-gray-900'>{user.name}</span>
+            </Table.Cell>
+            <Table.Cell>{user.email}</Table.Cell>
+            <Table.Cell>{user.type}</Table.Cell>
+            <Table.Cell>
+              {new Date(user.createdAt).toLocaleDateString()}
+            </Table.Cell>
+          </Table.Row>
+        ))}
+        {users.length === 0 && (
+          <Table.EmptyState colSpan={5}>No users found</Table.EmptyState>
+        )}
+      </Table.Body>
+    </Table>
   )
 }

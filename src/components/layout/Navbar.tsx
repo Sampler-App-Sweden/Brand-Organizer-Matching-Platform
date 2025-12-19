@@ -10,6 +10,7 @@ import {
 import { useNotifications } from '../../context'
 import { useAuth } from '../../context/AuthContext'
 import { logoutAndRedirect } from '../../services/logoutService'
+import { Avatar, Badge, IconButton } from '../ui'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -105,14 +106,26 @@ export function Navbar() {
             {showDashboardActions ? (
               <div className='flex items-center space-x-4'>
                 {/* Notifications */}
-                <button className='relative text-white hover:text-indigo-200 transition-colors'>
-                  <BellIcon className='h-5 w-5' />
+                <div className='relative'>
+                  <IconButton
+                    variant='ghost'
+                    size='md'
+                    colorScheme='gray'
+                    icon={<BellIcon className='h-5 w-5' />}
+                    aria-label='Notifications'
+                    className='text-white hover:text-indigo-200'
+                  />
                   {unreadCount > 0 && (
-                    <span className='absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-semibold'>
+                    <Badge
+                      variant='danger'
+                      size='xs'
+                      rounded='full'
+                      className='absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1'
+                    >
                       {unreadCount > 99 ? '99+' : unreadCount}
-                    </span>
+                    </Badge>
                   )}
-                </button>
+                </div>
 
                 <div className='relative flex items-center space-x-2'>
                   <span className='hidden sm:block text-sm font-medium text-white'>
@@ -120,11 +133,14 @@ export function Navbar() {
                   </span>
                   <button
                     onClick={() => setShowUserMenu((prev) => !prev)}
-                    className='text-gray-700 hover:text-indigo-400 transition-colors'
+                    className='hover:opacity-80 transition-opacity'
                   >
-                    <div className='bg-indigo-100 text-indigo-800 rounded-full h-8 w-8 flex items-center justify-center font-semibold'>
-                      {currentUser?.name?.charAt(0).toUpperCase() || '?'}
-                    </div>
+                    <Avatar
+                      name={currentUser?.name}
+                      size='sm'
+                      variant='circle'
+                      colorScheme='primary'
+                    />
                   </button>
 
                   {showUserMenu && (
