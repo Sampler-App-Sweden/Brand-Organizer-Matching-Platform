@@ -59,10 +59,10 @@ export function Home() {
         title='Connect Brands with Event Organizers Effortlessly'
         subtitle='SponsrAI is the perfect platform for brands to find sampling opportunities and for event organizers to secure valuable sponsorships.'
         videoSrc='./hero-video.mp4'
-        ctaText='Get Started with AI'
-        ctaLink='/onboarding'
+        ctaText='Get Started'
+        ctaLink='/register'
         secondaryCtaText='Explore Community'
-        secondaryCtaLink='/community'
+        secondaryCtaLink='/explore'
       />
 
       {/* Search Section */}

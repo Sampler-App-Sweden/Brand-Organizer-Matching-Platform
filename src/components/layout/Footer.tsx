@@ -39,6 +39,12 @@ export function Footer({ className = '' }: FooterProps) {
               Terms
             </Link>
             <Link
+              to='/help'
+              className='text-sm text-gray-500 hover:text-indigo-600 transition-colors'
+            >
+              Help
+            </Link>
+            <Link
               to='/contact'
               className='text-sm text-gray-500 hover:text-indigo-600 transition-colors'
             >
