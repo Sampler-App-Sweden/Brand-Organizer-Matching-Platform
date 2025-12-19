@@ -23,7 +23,7 @@ export function DirectoryGrid({
           key={profile.id}
           profile={profile}
           showInterestAction={showInterestAction}
-          interestStatus={interestStatuses?.get(profile.userId) || 'none'}
+          interestStatus={interestStatuses?.get(profile.id) || 'none'}
           onExpressInterest={onExpressInterest}
         />
       ))}

@@ -60,7 +60,7 @@ export function BrandsDirectoryPage() {
       }
 
       try {
-        const profileUserIds = visibleProfiles.map(p => p.userId)
+        const profileUserIds = visibleProfiles.map(p => p.id)
         const statuses = await getBatchInterestStatuses(currentUser.id, profileUserIds)
         setInterestStatuses(statuses)
       } catch (error) {
@@ -100,12 +100,12 @@ export function BrandsDirectoryPage() {
       await expressInterest(
         currentUser.id,
         'organizer',
-        profile.userId,
+        profile.id,
         'brand'
       )
 
       // Refresh interest statuses
-      const profileUserIds = visibleProfiles.map(p => p.userId)
+      const profileUserIds = visibleProfiles.map(p => p.id)
       const statuses = await getBatchInterestStatuses(currentUser.id, profileUserIds)
       setInterestStatuses(statuses)
     } catch (error: any) {
