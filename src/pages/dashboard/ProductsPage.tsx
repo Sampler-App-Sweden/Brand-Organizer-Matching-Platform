@@ -3,10 +3,11 @@ import { Plus, Package, Trash2, Edit2, Save, Eye, EyeOff, Upload, X } from 'luci
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import { useBrandProducts } from '../../hooks/useBrandProducts'
+import { useImageUpload } from '../../hooks/useImageUpload'
 import { getBrandByUserId } from '../../services/dataService'
 import { Button } from '../../components/ui'
 import type { SponsorshipProduct, SponsorshipStatus, ProductImage } from '../../types/sponsorship'
-import { IMAGE_LIMITS, validateImageUpload, getImageLimitText, convertToWebP } from '../../utils/imageUploadLimits'
+import { IMAGE_LIMITS, getImageLimitText } from '../../utils/imageUploadLimits'
 
 type ViewMode = 'list' | 'create' | 'edit'
 
@@ -69,6 +70,10 @@ export function ProductsPage() {
   const [status, setStatus] = useState<SponsorshipStatus>('online')
   const [images, setImages] = useState<ProductImage[]>([])
 
+  const { processImageUpload } = useImageUpload({
+    maxImages: IMAGE_LIMITS.PRODUCT
+  })
+
   const resetForm = () => {
     setName('')
     setGoals('')
@@ -95,43 +100,13 @@ export function ProductsPage() {
     setViewMode('edit')
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    if (!files) return
 
-    // Validate upload
-    const validation = validateImageUpload(files, images.length, IMAGE_LIMITS.PRODUCT)
-    if (!validation.valid) {
-      alert(validation.error)
-      e.target.value = ''
-      return
+    const newImages = await processImageUpload(files, images)
+    if (newImages.length > 0) {
+      setImages((prev) => [...prev, ...newImages])
     }
-
-    const fileArray = Array.from(files)
-
-    // Convert all images to WebP
-    fileArray.forEach(async (file, index) => {
-      try {
-        const uniqueId = `temp-${Date.now()}-${index}-${Math.random().toString(36).substring(2, 15)}`
-        const { dataUrl, blob } = await convertToWebP(file)
-
-        // Create a new File object from the blob with .webp extension
-        const webpFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
-          type: 'image/webp'
-        })
-
-        const newImage: ProductImage = {
-          id: uniqueId,
-          url: dataUrl,
-          file: webpFile
-        }
-
-        setImages((prev) => [...prev, newImage])
-      } catch (error) {
-        console.error('Failed to convert image to WebP:', error)
-        alert(`Failed to process image: ${file.name}`)
-      }
-    })
 
     // Reset the input so the same file can be uploaded again if needed
     e.target.value = ''
@@ -296,9 +271,9 @@ export function ProductsPage() {
                       )}
                       {product.images.length > 0 && (
                         <div className='flex gap-2 mt-3 flex-wrap'>
-                          {product.images.slice(0, 3).map((image) => (
+                          {product.images.slice(0, 3).map((image, index) => (
                             <img
-                              key={image.id}
+                              key={image.id || `${product.id}-img-${index}`}
                               src={image.url}
                               alt='Product'
                               className='w-16 h-16 object-cover rounded border border-gray-200'
@@ -439,8 +414,8 @@ export function ProductsPage() {
               <div className='space-y-3'>
                 {images.length > 0 && (
                   <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-                    {images.map((image) => (
-                      <div key={image.id} className='relative group'>
+                    {images.map((image, index) => (
+                      <div key={image.id || `form-img-${index}`} className='relative group'>
                         <img
                           src={image.url}
                           alt='Product'
