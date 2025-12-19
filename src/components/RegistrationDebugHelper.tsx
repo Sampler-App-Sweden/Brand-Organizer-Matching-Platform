@@ -1,10 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
+interface DebugInfo {
+  url: string
+  userAgent: string
+  timestamp: string
+  pathname: string
+  search: string
+  referrer: string
+  screenSize: {
+    width: number
+    height: number
+  }
+  localStorage: {
+    hasToken: boolean
+    hasDraft: boolean
+  }
+}
+
 export function RegistrationDebugHelper() {
   const location = useLocation()
   const [isVisible, setIsVisible] = useState(false)
-  const [debugInfo, setDebugInfo] = useState<any>({})
+  const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null)
   useEffect(() => {
     // Only collect debug info on registration-related pages
     if (
