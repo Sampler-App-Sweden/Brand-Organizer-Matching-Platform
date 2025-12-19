@@ -13,6 +13,7 @@ import {
   isProfileSaved,
   toggleSavedProfile
 } from '../../services/savedProfilesService'
+import { Badge, IconButton } from '../ui'
 
 interface DirectoryCardProps {
   profile: ProfileOverview
@@ -113,27 +114,30 @@ export function DirectoryCard({
     >
       <article className='relative bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100 transition-all group-hover:shadow-md group-hover:border-indigo-100'>
         {showSaveAction && (
-          <button
+          <IconButton
             type='button'
+            variant='solid'
+            size='md'
+            colorScheme='gray'
+            rounded='full'
+            icon={
+              isCheckingSaved ? (
+                <span className='h-4 w-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin'></span>
+              ) : (
+                <BookmarkIcon
+                  className={`h-4 w-4 ${
+                    isSaved ? 'fill-indigo-500 text-indigo-500' : ''
+                  }`}
+                />
+              )
+            }
             onClick={handleToggleSave}
             disabled={isCheckingSaved || isSaving}
-            aria-pressed={isSaved}
-            className='absolute top-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-gray-500 shadow-sm border border-gray-200 hover:text-indigo-600 hover:border-indigo-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
-            title={isSaved ? 'Unsave profile' : 'Save profile'}
-          >
-            {isCheckingSaved ? (
-              <span className='h-4 w-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin'></span>
-            ) : (
-              <BookmarkIcon
-                className={`h-4 w-4 ${
-                  isSaved ? 'fill-indigo-500 text-indigo-500' : 'text-gray-500'
-                }`}
-              />
-            )}
-            <span className='sr-only'>
-              {isSaved ? 'Unsave profile' : 'Save profile'}
-            </span>
-          </button>
+            aria-label={isSaved ? 'Unsave profile' : 'Save profile'}
+            className={`absolute top-3 right-3 bg-white/90 shadow-sm border ${
+              isSaved ? 'text-indigo-500 border-indigo-200' : 'text-gray-500 border-gray-200'
+            } hover:text-indigo-600 hover:border-indigo-200`}
+          />
         )}
         <div className='p-6 space-y-4'>
           <div className='flex items-start'>
@@ -159,15 +163,9 @@ export function DirectoryCard({
                 <h3 className='text-lg font-semibold text-gray-900'>
                   {profile.name}
                 </h3>
-                <span
-                  className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    isBrand
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}
-                >
+                <Badge variant={isBrand ? 'brand' : 'organizer'} size='xs' rounded='full'>
                   {profile.role}
-                </span>
+                </Badge>
               </div>
               <p className='mt-1 text-sm text-gray-600 line-clamp-2'>
                 {profile.description || 'No description provided yet.'}
@@ -183,12 +181,9 @@ export function DirectoryCard({
               <div className='flex flex-wrap gap-2'>
                 {sponsorshipTypes.length ? (
                   sponsorshipTypes.map((type) => (
-                    <span
-                      key={type}
-                      className='inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700'
-                    >
+                    <Badge key={type} variant='primary' size='sm'>
                       {type}
-                    </span>
+                    </Badge>
                   ))
                 ) : (
                   <span className='text-xs text-gray-400'>
@@ -214,12 +209,9 @@ export function DirectoryCard({
                 </div>
                 <div className='flex flex-wrap gap-2'>
                   {eventOrAudience.map((entry) => (
-                    <span
-                      key={entry}
-                      className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700'
-                    >
+                    <Badge key={entry} variant='secondary' size='sm'>
                       {entry}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </div>
