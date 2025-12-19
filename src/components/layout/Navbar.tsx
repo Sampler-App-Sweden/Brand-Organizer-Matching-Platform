@@ -7,6 +7,7 @@ import {
   DASHBOARD_NAV_LINKS,
   MARKETING_NAV_LINKS
 } from '../../constants/navigationLinks'
+import { HamburgerMenu } from './HamburgerMenu'
 import { useNotifications } from '../../context'
 import { useAuth } from '../../context/AuthContext'
 import { logoutAndRedirect } from '../../services/logoutService'
@@ -80,7 +81,7 @@ export function Navbar() {
   }
 
   return (
-    <header className="bg-indigo-900 bg-gradient-to-b from-indigo-900 via-indigo-800 to-indigo-900 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] transition-shadow duration-300 backdrop-blur-sm sticky top-0 z-30 border-b border-indigo-800">
+    <header className='bg-indigo-900 bg-gradient-to-b from-indigo-900 via-indigo-800 to-indigo-900 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] transition-shadow duration-300 backdrop-blur-sm sticky top-0 z-30 border-b border-indigo-800'>
       <div className='w-full'>
         <div className='flex justify-between items-center h-16 px-4'>
           <Link to='/' className='flex items-center space-x-2 group'>
@@ -191,77 +192,26 @@ export function Navbar() {
 
           <div className='md:hidden'>
             <button
-              className='p-2 rounded-md text-gray-700 hover:bg-gray-100'
+              className='p-2 rounded-md text-white hover:bg-indigo-800 transition-colors'
               onClick={() => setMobileMenuOpen((prev) => !prev)}
             >
               {mobileMenuOpen ? (
-                <X className='h-6 w-6' />
+                <X className='h-6 w-6 text-white' />
               ) : (
-                <Menu className='h-6 w-6' />
+                <Menu className='h-6 w-6 text-white' />
               )}
             </button>
           </div>
         </div>
       </div>
 
-      {mobileMenuOpen && (
-        <div className='md:hidden bg-white border-t border-gray-200'>
-          <nav className='px-4 py-2 space-y-1'>
-            {linksToRender.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium ${
-                  location.pathname === item.path
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            ))}
-
-            {showDashboardActions ? (
-              <div className='border-t border-gray-200 pt-2 mt-2'>
-                <Link
-                  to='/dashboard/edit-profile'
-                  className='flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg'
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Profile Settings
-                  <span className='text-xs text-gray-400'>
-                    {currentUser?.name || 'User'}
-                  </span>
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className='w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg'
-                >
-                  Log Out
-                </button>
-              </div>
-            ) : isAuthenticated ? (
-              <Link
-                to={getDashboardLink()}
-                className='block px-4 py-2 text-center text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700'
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Go to Dashboard
-              </Link>
-            ) : (
-              <Link
-                to='/login'
-                className='block px-4 py-2 text-center text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700'
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Login
-              </Link>
-            )}
-          </nav>
-        </div>
-      )}
+      <HamburgerMenu
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        showDashboardActions={showDashboardActions}
+        handleLogout={handleLogout}
+        currentUser={currentUser}
+      />
     </header>
   )
 }
