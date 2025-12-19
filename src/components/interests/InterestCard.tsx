@@ -118,8 +118,7 @@ export function InterestCard({
           <>
             <Button
               size='sm'
-              variant='outline'
-              colorScheme='red'
+              variant='danger'
               onClick={() => onReject?.(interest.id)}
               leftIcon={<X className='h-4 w-4' />}
             >
@@ -127,8 +126,7 @@ export function InterestCard({
             </Button>
             <Button
               size='sm'
-              variant='solid'
-              colorScheme='green'
+              variant='success'
               onClick={() => onAccept?.(interest.id)}
               leftIcon={<Check className='h-4 w-4' />}
             >
@@ -141,7 +139,6 @@ export function InterestCard({
           <Button
             size='sm'
             variant='outline'
-            colorScheme='gray'
             onClick={() => onWithdraw?.(interest.id)}
             leftIcon={<Trash2 className='h-4 w-4' />}
             title={
@@ -157,8 +154,7 @@ export function InterestCard({
         {interest.isMutual && (
           <Button
             size='sm'
-            variant='solid'
-            colorScheme='indigo'
+            variant='primary'
             onClick={() => onStartConversation?.(interest.brandId, interest.organizerId)}
             leftIcon={<MessageCircle className='h-4 w-4' />}
           >

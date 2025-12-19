@@ -37,11 +37,6 @@ export const sidebarItems: SidebarCollection = {
       matchExact: true
     },
     {
-      label: 'Collaborations',
-      icon: createElement(HandshakeIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/collaborations'
-    },
-    {
       label: 'Matches',
       icon: createElement(UsersIcon, { className: 'h-5 w-5' }),
       path: '/dashboard/matches'
@@ -57,11 +52,6 @@ export const sidebarItems: SidebarCollection = {
       path: '/dashboard/products'
     },
     {
-      label: 'Messages',
-      icon: createElement(MessageSquareIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/messages'
-    },
-    {
       label: 'Saved',
       icon: createElement(Bookmark, { className: 'h-5 w-5' }),
       path: '/dashboard/saved'
@@ -73,11 +63,6 @@ export const sidebarItems: SidebarCollection = {
       icon: createElement(HomeIcon, { className: 'h-5 w-5' }),
       path: '/dashboard/organizer',
       matchExact: true
-    },
-    {
-      label: 'Collaborations',
-      icon: createElement(HandshakeIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/collaborations'
     },
     {
       label: 'Events',
@@ -93,11 +78,6 @@ export const sidebarItems: SidebarCollection = {
       label: 'Interests',
       icon: createElement(Heart, { className: 'h-5 w-5' }),
       path: '/dashboard/interests'
-    },
-    {
-      label: 'Messages',
-      icon: createElement(MessageSquareIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/messages'
     },
     {
       label: 'Saved',
@@ -129,6 +109,11 @@ export const sidebarItems: SidebarCollection = {
     }
   ],
   common: [
+    {
+      label: 'Messages',
+      icon: createElement(MessageSquareIcon, { className: 'h-5 w-5' }),
+      path: '/dashboard/messages'
+    },
     {
       label: 'Notifications',
       icon: createElement(BellIcon, { className: 'h-5 w-5' }),

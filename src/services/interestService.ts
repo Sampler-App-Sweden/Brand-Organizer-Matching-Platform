@@ -6,7 +6,7 @@ import {
   InterestStats
 } from '../types/interest'
 import { getBrandById, getOrganizerById } from './dataService'
-import { notifyInterestReceived, notifyInterestAccepted, notifyMutualMatch } from './notificationService'
+import { notifyInterestReceived, notifyMutualMatch } from './notificationService'
 
 /**
  * Map database row to Interest object
@@ -286,33 +286,63 @@ export async function respondToInterest(
 
   const interest = mapInterestRowToInterest(data as InterestRow)
 
-  // If accepted, check if this creates a mutual match
+  // If accepted, create reverse interest and mutual match
   if (status === 'accepted') {
-    const isMutual = await checkMutualInterest(interest.senderId, interest.receiverId)
+    console.log('[respondToInterest] Interest accepted, checking for reverse interest...')
+    console.log('[respondToInterest] Interest details:', {
+      id: interest.id,
+      sender: interest.senderId,
+      receiver: interest.receiverId,
+      senderType: interest.senderType,
+      receiverType: interest.receiverType
+    })
 
-    if (isMutual) {
-      // Create manual match
-      await createManualMatch(interest.brandId, interest.organizerId)
+    // Check if receiver has already expressed interest (reverse interest exists)
+    const reverseInterest = await checkExistingInterest(interest.receiverId, interest.senderId)
+    console.log('[respondToInterest] Reverse interest:', reverseInterest ? { id: reverseInterest.id, status: reverseInterest.status } : 'none')
 
-      // Notify both parties
-      await notifyMutualMatch(interest.brandId, interest.organizerId, interest.id).catch((error) => {
-        console.error('Failed to send mutual match notification:', error)
-      })
-    } else {
-      // Just notify the sender that their interest was accepted
-      let receiverName: string
-      if (interest.receiverType === 'brand') {
-        const brandProfile = await getBrandById(interest.brandId)
-        receiverName = brandProfile?.companyName || 'The brand'
-      } else {
-        const organizerProfile = await getOrganizerById(interest.organizerId)
-        receiverName = organizerProfile?.organizerName || 'The organizer'
+    if (!reverseInterest) {
+      console.log('[respondToInterest] Creating reverse interest...')
+      // Receiver hasn't expressed interest yet, so create it for them
+      // This represents the receiver accepting = expressing interest back
+      const { brandId, organizerId } = await getBrandOrganizerIds(
+        interest.receiverId,
+        interest.receiverType,
+        interest.senderId
+      )
+
+      const { data, error } = await supabase.from('interests').insert({
+        sender_id: interest.receiverId,
+        sender_type: interest.receiverType,
+        receiver_id: interest.senderId,
+        receiver_type: interest.senderType,
+        brand_id: brandId,
+        organizer_id: organizerId,
+        status: 'accepted'
+      }).select()
+
+      if (error) {
+        console.error('[respondToInterest] Error creating reverse interest:', error)
+        throw new Error(`Failed to create reverse interest: ${error.message}`)
       }
-
-      await notifyInterestAccepted(interest.senderId, receiverName, interest.id).catch((error) => {
-        console.error('Failed to send interest accepted notification:', error)
-      })
+      console.log('[respondToInterest] Reverse interest created:', data)
+    } else if (reverseInterest.status === 'pending') {
+      console.log('[respondToInterest] Updating existing reverse interest to accepted...')
+      // Reverse interest exists, update it to accepted
+      await respondToInterest(reverseInterest.id, 'accepted')
     }
+
+    console.log('[respondToInterest] Creating manual match...')
+    // Now create the mutual match
+    await createManualMatch(interest.brandId, interest.organizerId)
+
+    console.log('[respondToInterest] Sending notifications...')
+    // Notify both parties
+    await notifyMutualMatch(interest.brandId, interest.organizerId, interest.id).catch((error) => {
+      console.error('Failed to send mutual match notification:', error)
+    })
+
+    console.log('[respondToInterest] ✅ Mutual match flow complete!')
   }
   // No notification sent for rejections - silent operation
 
@@ -520,41 +550,70 @@ export async function getInterestStats(userId: string): Promise<InterestStats> {
  * Create a manual match from mutual interest
  */
 async function createManualMatch(brandId: string, organizerId: string): Promise<void> {
+  console.log('[createManualMatch] Creating match for:', { brandId, organizerId })
+
   // Check if match already exists
-  const { data: existingMatch } = await supabase
+  const { data: existingMatch, error: fetchError } = await supabase
     .from('matches')
     .select('*')
     .eq('brand_id', brandId)
     .eq('organizer_id', organizerId)
     .maybeSingle()
 
+  if (fetchError) {
+    console.error('[createManualMatch] Error fetching existing match:', fetchError)
+    throw new Error(`Failed to check existing match: ${fetchError.message}`)
+  }
+
+  console.log('[createManualMatch] Existing match:', existingMatch ? { id: existingMatch.id, source: existingMatch.match_source, status: existingMatch.status } : 'none')
+
   if (existingMatch) {
     // Update to hybrid if it was AI-generated
     if (existingMatch.match_source === 'ai') {
-      await supabase
+      console.log('[createManualMatch] Updating AI match to hybrid...')
+      const { error } = await supabase
         .from('matches')
         .update({ match_source: 'hybrid', status: 'accepted' })
         .eq('id', existingMatch.id)
+
+      if (error) {
+        console.error('[createManualMatch] Error updating to hybrid:', error)
+        throw new Error(`Failed to update match to hybrid: ${error.message}`)
+      }
     } else {
       // Just update status to accepted
-      await supabase
+      console.log('[createManualMatch] Updating match status to accepted...')
+      const { error } = await supabase
         .from('matches')
         .update({ status: 'accepted' })
         .eq('id', existingMatch.id)
+
+      if (error) {
+        console.error('[createManualMatch] Error updating match status:', error)
+        throw new Error(`Failed to update match status: ${error.message}`)
+      }
     }
   } else {
     // Create new manual match
-    await supabase.from('matches').insert({
+    console.log('[createManualMatch] Creating new manual match...')
+    const { data, error } = await supabase.from('matches').insert({
       brand_id: brandId,
       organizer_id: organizerId,
       score: 0,
       match_reasons: ['Mutual interest expressed'],
       status: 'accepted',
       match_source: 'manual'
-    })
+    }).select()
+
+    if (error) {
+      console.error('[createManualMatch] Error creating match:', error)
+      throw new Error(`Failed to create match: ${error.message}`)
+    }
+    console.log('[createManualMatch] Match created:', data)
   }
 
   // Create conversation if it doesn't exist
+  console.log('[createManualMatch] Checking for existing conversation...')
   const { data: existingConversation } = await supabase
     .from('conversations')
     .select('*')
@@ -562,12 +621,23 @@ async function createManualMatch(brandId: string, organizerId: string): Promise<
     .eq('organizer_id', organizerId)
     .maybeSingle()
 
+  console.log('[createManualMatch] Existing conversation:', existingConversation ? { id: existingConversation.id } : 'none')
+
   if (!existingConversation) {
-    await supabase.from('conversations').insert({
+    console.log('[createManualMatch] Creating conversation...')
+    const { data, error } = await supabase.from('conversations').insert({
       brand_id: brandId,
       organizer_id: organizerId
-    })
+    }).select()
+
+    if (error) {
+      console.error('[createManualMatch] Error creating conversation:', error)
+      throw new Error(`Failed to create conversation: ${error.message}`)
+    }
+    console.log('[createManualMatch] Conversation created:', data)
   }
+
+  console.log('[createManualMatch] ✅ Match creation complete!')
 }
 
 /**
