@@ -232,11 +232,12 @@ BEGIN
     SELECT 1 FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'notifications'
-      AND policyname = 'Allow insert own notifications'
+      AND policyname = 'Allow authenticated users to create notifications'
   ) THEN
-    CREATE POLICY "Allow insert own notifications"
+    CREATE POLICY "Allow authenticated users to create notifications"
       ON public.notifications FOR INSERT
-      WITH CHECK (auth.uid() = user_id);
+      TO authenticated
+      WITH CHECK (true);
   END IF;
 
   IF NOT EXISTS (
