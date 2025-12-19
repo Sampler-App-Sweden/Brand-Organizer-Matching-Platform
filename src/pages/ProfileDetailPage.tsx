@@ -19,8 +19,11 @@ import { EventDisplayCard } from '../components/profile/EventDisplayCard'
 import { ProductDetailModal } from '../components/profile/ProductDetailModal'
 import { ProductDisplayCard } from '../components/profile/ProductDisplayCard'
 import { Button } from '../components/ui/Button'
+import { InterestButton } from '../components/directory/InterestButton'
+import { useAuth } from '../context/AuthContext'
 import { getBrandByUserId, getOrganizerByUserId } from '../services/dataService'
 import { fetchOrganizerEvents } from '../services/eventsService'
+import { getInterestStatus } from '../services/interestService'
 import {
   getProfileOverviewById,
   ProfileOverview
@@ -33,6 +36,7 @@ import { categorizeEventsByDate } from '../utils/eventUtils'
 export function ProfileDetailPage() {
   const { profileId } = useParams<{ profileId: string }>()
   const navigate = useNavigate()
+  const { currentUser } = useAuth()
   const [profile, setProfile] = useState<ProfileOverview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -43,6 +47,7 @@ export function ProfileDetailPage() {
   const [selectedProduct, setSelectedProduct] =
     useState<SponsorshipProduct | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [interestStatus, setInterestStatus] = useState<'none' | 'sent' | 'received' | 'mutual'>('none')
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -111,6 +116,25 @@ export function ProfileDetailPage() {
     loadProfile()
   }, [profileId])
 
+  // Fetch interest status
+  useEffect(() => {
+    const loadInterestStatus = async () => {
+      if (!currentUser || !profile || profile.id === currentUser.id) {
+        setInterestStatus('none')
+        return
+      }
+
+      try {
+        const status = await getInterestStatus(currentUser.id, profile.id)
+        setInterestStatus(status)
+      } catch (err) {
+        console.error('Failed to load interest status:', err)
+      }
+    }
+
+    loadInterestStatus()
+  }, [currentUser, profile])
+
   const metaTags = useMemo(() => {
     if (!profile) {
       return []
@@ -135,6 +159,18 @@ export function ProfileDetailPage() {
       navigate('/organizers')
     } else {
       navigate(-1)
+    }
+  }
+
+  const handleInterestChange = async () => {
+    // Refetch interest status after any interest action
+    if (!currentUser || !profile) return
+
+    try {
+      const newStatus = await getInterestStatus(currentUser.id, profile.id)
+      setInterestStatus(newStatus)
+    } catch (err) {
+      console.error('Failed to reload interest status:', err)
     }
   }
 
@@ -192,15 +228,26 @@ export function ProfileDetailPage() {
                     </div>
                   </div>
                   <div className='space-y-3 w-full md:w-auto'>
-                    <Button
-                      className='w-full md:w-auto'
-                      onClick={() =>
-                        window.open(`mailto:${profile.email}`, '_blank')
-                      }
-                    >
-                      <MailIcon className='h-4 w-4 mr-2' />
-                      Contact {profile.role === 'Brand' ? 'Brand' : 'Organizer'}
-                    </Button>
+                    {currentUser && currentUser.id !== profile.id ? (
+                      <InterestButton
+                        profileId={profile.id}
+                        profileRole={profile.role.toLowerCase() as 'brand' | 'organizer'}
+                        currentUserId={currentUser.id}
+                        currentUserType={currentUser.type}
+                        interestStatus={interestStatus}
+                        onInterestChange={handleInterestChange}
+                      />
+                    ) : (
+                      <Button
+                        className='w-full md:w-auto'
+                        onClick={() =>
+                          window.open(`mailto:${profile.email}`, '_blank')
+                        }
+                      >
+                        <MailIcon className='h-4 w-4 mr-2' />
+                        Contact {profile.role === 'Brand' ? 'Brand' : 'Organizer'}
+                      </Button>
+                    )}
                     <div className='text-sm text-gray-500 flex items-center gap-2 justify-center md:justify-end'>
                       <LinkIcon className='h-4 w-4' />
                       Profile ID: {profile.id}
