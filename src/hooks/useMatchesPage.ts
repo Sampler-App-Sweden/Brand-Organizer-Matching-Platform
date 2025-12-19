@@ -13,7 +13,7 @@ import {
   getMatchPreferences,
   upsertMatchPreference
 } from '../services/matchPreferencesService'
-import { DisplayMode, EnhancedMatch, MatchView } from '../types/matches'
+import { DisplayMode, EnhancedMatch, MatchView, MatchSource } from '../types/matches'
 
 interface UseMatchesPageOptions {
   userId: string | null
@@ -29,6 +29,8 @@ interface UseMatchesPageResult {
   setDisplayMode: (mode: DisplayMode) => void
   searchTerm: string
   setSearchTerm: (value: string) => void
+  matchSource: MatchSource | 'all'
+  setMatchSource: (source: MatchSource | 'all') => void
   filteredMatches: EnhancedMatch[]
   handleSaveSuggestion: (matchId: string) => Promise<void>
   handleDismissSuggestion: (matchId: string) => Promise<void>
@@ -54,6 +56,7 @@ export function useMatchesPage({
   const [activeView, setActiveView] = useState<MatchView>('confirmed')
   const [displayMode, setDisplayMode] = useState<DisplayMode>('grid')
   const [searchTerm, setSearchTerm] = useState('')
+  const [matchSource, setMatchSource] = useState<MatchSource | 'all'>('all')
   const [savedSuggestions, setSavedSuggestions] = useState<string[]>([])
   const [dismissedSuggestions, setDismissedSuggestions] = useState<string[]>([])
 
@@ -212,11 +215,18 @@ export function useMatchesPage({
   )
 
   const filteredMatches = useMemo(() => {
-    const viewFiltered = matches.filter((match) =>
+    let viewFiltered = matches.filter((match) =>
       activeView === 'confirmed'
         ? match.status === 'accepted'
         : match.status === 'pending' && !dismissedSuggestions.includes(match.id)
     )
+
+    // Filter by match source for confirmed matches
+    if (activeView === 'confirmed' && matchSource !== 'all') {
+      viewFiltered = viewFiltered.filter(
+        (match) => match.matchSource === matchSource
+      )
+    }
 
     if (!searchTerm) {
       return viewFiltered
@@ -230,7 +240,7 @@ export function useMatchesPage({
         match.eventName.toLowerCase().includes(term) ||
         match.productName.toLowerCase().includes(term)
     )
-  }, [activeView, dismissedSuggestions, matches, searchTerm])
+  }, [activeView, dismissedSuggestions, matches, searchTerm, matchSource])
 
   return {
     userType: resolvedUserType,
@@ -241,6 +251,8 @@ export function useMatchesPage({
     setDisplayMode,
     searchTerm,
     setSearchTerm,
+    matchSource,
+    setMatchSource,
     filteredMatches,
     handleSaveSuggestion,
     handleDismissSuggestion,

@@ -335,6 +335,112 @@ export async function withdrawInterest(interestId: string): Promise<void> {
 }
 
 /**
+ * Get interest status between current user and a profile
+ * Returns 'none', 'sent', 'received', or 'mutual'
+ */
+export async function getInterestStatus(
+  currentUserId: string,
+  profileUserId: string
+): Promise<'none' | 'sent' | 'received' | 'mutual'> {
+  if (!currentUserId || !profileUserId || currentUserId === profileUserId) {
+    return 'none'
+  }
+
+  const sentInterest = await checkExistingInterest(currentUserId, profileUserId)
+  const receivedInterest = await checkExistingInterest(profileUserId, currentUserId)
+
+  // Check if both interests exist and are active (pending or accepted)
+  const sentActive = sentInterest && (sentInterest.status === 'pending' || sentInterest.status === 'accepted')
+  const receivedActive = receivedInterest && (receivedInterest.status === 'pending' || receivedInterest.status === 'accepted')
+
+  if (sentActive && receivedActive) {
+    return 'mutual'
+  } else if (sentActive) {
+    return 'sent'
+  } else if (receivedActive) {
+    return 'received'
+  }
+
+  return 'none'
+}
+
+/**
+ * Get interest statuses for multiple profiles in batch (optimized for directory views)
+ * Returns a map of profileUserId -> InterestStatus
+ */
+export async function getBatchInterestStatuses(
+  currentUserId: string,
+  profileUserIds: string[]
+): Promise<Map<string, 'none' | 'sent' | 'received' | 'mutual'>> {
+  const statusMap = new Map<string, 'none' | 'sent' | 'received' | 'mutual'>()
+
+  if (!currentUserId || profileUserIds.length === 0) {
+    return statusMap
+  }
+
+  // Filter out current user
+  const otherUserIds = profileUserIds.filter(id => id !== currentUserId)
+
+  if (otherUserIds.length === 0) {
+    return statusMap
+  }
+
+  // Fetch all interests sent by current user to these profiles
+  const { data: sentInterests, error: sentError } = await supabase
+    .from('interests')
+    .select('*')
+    .eq('sender_id', currentUserId)
+    .in('receiver_id', otherUserIds)
+    .in('status', ['pending', 'accepted'])
+
+  if (sentError) {
+    console.error('Failed to fetch sent interests:', sentError)
+  }
+
+  // Fetch all interests received by current user from these profiles
+  const { data: receivedInterests, error: receivedError } = await supabase
+    .from('interests')
+    .select('*')
+    .eq('receiver_id', currentUserId)
+    .in('sender_id', otherUserIds)
+    .in('status', ['pending', 'accepted'])
+
+  if (receivedError) {
+    console.error('Failed to fetch received interests:', receivedError)
+  }
+
+  // Create lookup maps
+  const sentMap = new Map<string, boolean>()
+  const receivedMap = new Map<string, boolean>()
+
+  sentInterests?.forEach(interest => {
+    sentMap.set(interest.receiver_id, true)
+  })
+
+  receivedInterests?.forEach(interest => {
+    receivedMap.set(interest.sender_id, true)
+  })
+
+  // Determine status for each profile
+  otherUserIds.forEach(profileUserId => {
+    const hasSent = sentMap.has(profileUserId)
+    const hasReceived = receivedMap.has(profileUserId)
+
+    if (hasSent && hasReceived) {
+      statusMap.set(profileUserId, 'mutual')
+    } else if (hasSent) {
+      statusMap.set(profileUserId, 'sent')
+    } else if (hasReceived) {
+      statusMap.set(profileUserId, 'received')
+    } else {
+      statusMap.set(profileUserId, 'none')
+    }
+  })
+
+  return statusMap
+}
+
+/**
  * Get interest statistics for a user
  */
 export async function getInterestStats(userId: string): Promise<InterestStats> {

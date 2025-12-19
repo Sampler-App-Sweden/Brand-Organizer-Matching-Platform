@@ -16,6 +16,8 @@ export function MatchesPage() {
     setDisplayMode,
     searchTerm,
     setSearchTerm,
+    matchSource,
+    setMatchSource,
     filteredMatches,
     handleSaveSuggestion,
     handleDismissSuggestion,
@@ -52,6 +54,8 @@ export function MatchesPage() {
           onDisplayModeChange={setDisplayMode}
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
+          matchSource={matchSource}
+          onMatchSourceChange={setMatchSource}
         />
         {loading ? (
           <div className='flex justify-center items-center h-64'>

@@ -62,11 +62,30 @@ export function MatchCard({
               className='ml-2'
             />
           </div>
-          {activeView === 'suggested' && (
-            <Badge variant={getScoreVariant(match.score)} size='md' rounded='full'>
-              {match.score}% Match
-            </Badge>
-          )}
+          <div className='flex flex-col items-end gap-1'>
+            {activeView === 'suggested' && (
+              <Badge variant={getScoreVariant(match.score)} size='md' rounded='full'>
+                {match.score}% Match
+              </Badge>
+            )}
+            {activeView === 'confirmed' && match.matchSource && (
+              <Badge
+                variant={
+                  match.matchSource === 'hybrid'
+                    ? 'success'
+                    : match.matchSource === 'manual'
+                    ? 'neutral'
+                    : 'info'
+                }
+                size='sm'
+                rounded='full'
+              >
+                {match.matchSource === 'ai' && 'AI Match'}
+                {match.matchSource === 'manual' && 'Manual Match'}
+                {match.matchSource === 'hybrid' && 'Hybrid Match'}
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className='flex justify-between items-start mb-4'>

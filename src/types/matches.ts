@@ -1,5 +1,6 @@
-import { Match } from './match'
+import { Match, MatchSource } from './match'
 
+export type { MatchSource }
 export type MatchView = 'confirmed' | 'suggested'
 export type DisplayMode = 'grid' | 'list'
 

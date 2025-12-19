@@ -9,12 +9,18 @@ import { Pagination } from '../components/directory/Pagination'
 import { filterProfilesByRole } from '../components/directory/profileDirectoryUtils'
 import { Layout } from '../components/layout'
 import { getProfiles, ProfileOverview } from '../services/profileService'
+import { getBatchInterestStatuses, expressInterest } from '../services/interestService'
+import { useAuth } from '../context/AuthContext'
+
+type InterestStatus = 'none' | 'sent' | 'received' | 'mutual'
 
 export function OrganizersDirectoryPage() {
+  const { currentUser } = useAuth()
   const [profiles, setProfiles] = useState<ProfileOverview[]>([])
   const [visibleProfiles, setVisibleProfiles] = useState<ProfileOverview[]>([])
   const [loading, setLoading] = useState(true)
   const [totalPages, setTotalPages] = useState(1)
+  const [interestStatuses, setInterestStatuses] = useState<Map<string, InterestStatus>>(new Map())
   const [queryParams, setQueryParams] = useState<DirectoryFilterParams>({
     page: 1,
     limit: 12,
@@ -49,6 +55,26 @@ export function OrganizersDirectoryPage() {
     setVisibleProfiles(filtered.slice(start, start + limit))
   }, [profiles, queryParams])
 
+  // Fetch interest statuses for visible profiles
+  useEffect(() => {
+    const fetchInterestStatuses = async () => {
+      if (!currentUser || visibleProfiles.length === 0) {
+        setInterestStatuses(new Map())
+        return
+      }
+
+      try {
+        const profileUserIds = visibleProfiles.map(p => p.userId)
+        const statuses = await getBatchInterestStatuses(currentUser.id, profileUserIds)
+        setInterestStatuses(statuses)
+      } catch (error) {
+        console.error('Failed to fetch interest statuses:', error)
+      }
+    }
+
+    fetchInterestStatuses()
+  }, [currentUser, visibleProfiles])
+
   const handleFilterChange = (newParams: Partial<DirectoryFilterParams>) => {
     setQueryParams((prev) => ({
       ...prev,
@@ -56,11 +82,40 @@ export function OrganizersDirectoryPage() {
       page: 1
     }))
   }
+
   const handlePageChange = (page: number) => {
     setQueryParams((prev) => ({
       ...prev,
       page
     }))
+  }
+
+  const handleExpressInterest = async (profileId: string) => {
+    if (!currentUser) {
+      alert('Please sign in to express interest')
+      return
+    }
+
+    try {
+      const profile = visibleProfiles.find(p => p.id === profileId)
+      if (!profile) return
+
+      // Current user must be a brand to express interest in organizers
+      await expressInterest(
+        currentUser.id,
+        'brand',
+        profile.userId,
+        'organizer'
+      )
+
+      // Refresh interest statuses
+      const profileUserIds = visibleProfiles.map(p => p.userId)
+      const statuses = await getBatchInterestStatuses(currentUser.id, profileUserIds)
+      setInterestStatuses(statuses)
+    } catch (error: any) {
+      console.error('Failed to express interest:', error)
+      alert(error.message || 'Failed to express interest. Please try again.')
+    }
   }
   return (
     <Layout>
@@ -128,7 +183,12 @@ export function OrganizersDirectoryPage() {
                   </div>
                 ) : (
                   <>
-                    <DirectoryGrid profiles={visibleProfiles} />
+                    <DirectoryGrid
+                      profiles={visibleProfiles}
+                      showInterestAction={!!currentUser}
+                      interestStatuses={interestStatuses}
+                      onExpressInterest={handleExpressInterest}
+                    />
                     <div className='mt-8'>
                       <Pagination
                         currentPage={queryParams.page || 1}

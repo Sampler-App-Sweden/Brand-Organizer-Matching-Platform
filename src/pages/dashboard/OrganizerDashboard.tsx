@@ -141,6 +141,112 @@ export function OrganizerDashboard() {
         <OrganizerSponsorshipPanel organizerId={organizer.id} />
       </div>
 
+      {/* Upcoming Events Panel */}
+      <div className='mb-8'>
+        <div className='flex justify-between items-center mb-4'>
+          <h2 className='text-xl font-bold text-gray-900'>Upcoming Events</h2>
+          <Link to='/dashboard/events'>
+            <Button variant='outline' size='sm'>
+              Manage Events
+            </Button>
+          </Link>
+        </div>
+        <div className='bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg shadow-lg p-6 text-white'>
+          <div className='flex items-start justify-between'>
+            <div className='flex-1'>
+              <div className='flex items-center gap-2 mb-2'>
+                <CalendarIcon className='h-5 w-5' />
+                <span className='text-sm font-medium opacity-90'>
+                  Next Event
+                </span>
+              </div>
+              <h3 className='text-2xl font-bold mb-2'>
+                {organizer.eventName}
+              </h3>
+              <p className='text-indigo-100 mb-4 line-clamp-2'>
+                {organizer.elevatorPitch}
+              </p>
+              <div className='flex flex-wrap gap-4 text-sm'>
+                <div className='flex items-center gap-2'>
+                  <CalendarIcon className='h-4 w-4' />
+                  <span>
+                    {new Date(organizer.eventDate).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <div className='h-4 w-4 flex items-center justify-center'>
+                    📍
+                  </div>
+                  <span>{organizer.location}</span>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <div className='h-4 w-4 flex items-center justify-center'>
+                    👥
+                  </div>
+                  <span>
+                    {organizer.attendeeCount === 'under_100'
+                      ? '< 100'
+                      : organizer.attendeeCount === '100_500'
+                      ? '100-500'
+                      : organizer.attendeeCount === '500_1000'
+                      ? '500-1K'
+                      : organizer.attendeeCount === '1000_5000'
+                      ? '1K-5K'
+                      : organizer.attendeeCount === '5000_plus'
+                      ? '5K+'
+                      : 'TBD'}{' '}
+                    attendees
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className='ml-4'>
+              <div className='bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center min-w-[100px]'>
+                <div className='text-3xl font-bold'>
+                  {(() => {
+                    const eventDate = new Date(organizer.eventDate)
+                    const today = new Date()
+                    const daysUntil = Math.ceil(
+                      (eventDate.getTime() - today.getTime()) /
+                        (1000 * 60 * 60 * 24)
+                    )
+                    return isNaN(daysUntil) ? '--' : daysUntil
+                  })()}
+                </div>
+                <div className='text-xs uppercase opacity-90 mt-1'>
+                  Days Away
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className='mt-4 pt-4 border-t border-white/20 flex gap-3'>
+            <Link to='/dashboard/matches'>
+              <Button
+                variant='primary'
+                size='sm'
+                className='bg-white text-indigo-600 hover:bg-indigo-50'
+              >
+                Find Sponsors
+              </Button>
+            </Link>
+            <Link to='/organizer'>
+              <Button
+                variant='outline'
+                size='sm'
+                className='border-white text-white hover:bg-white/10'
+              >
+                Edit Event
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Event details */}
       <div className='mb-8'>
         <div className='flex justify-between items-center mb-4'>
