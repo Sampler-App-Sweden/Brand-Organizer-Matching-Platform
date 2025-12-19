@@ -235,15 +235,10 @@ export function Register() {
     }
     setIsSubmitting(true)
     try {
-      // Map userType to the correct type for register function
-      const actualType =
-        userType === 'community'
-          ? 'organizer'
-          : (userType as 'brand' | 'organizer' | 'admin')
       const user = await register(
         email,
         password,
-        actualType,
+        userType as 'brand' | 'organizer' | 'admin',
         email.split('@')[0]
       )
       // If we have a draft profile, convert it to a full profile
