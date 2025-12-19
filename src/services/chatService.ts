@@ -1,5 +1,7 @@
 import { supabase } from './supabaseClient'
 import { notifyNewMessage } from './notificationService'
+import { checkExistingMatch } from './dataService'
+import { checkMutualInterest } from './interestService'
 
 // Chat service for AI-powered communication
 export interface Message {
@@ -114,11 +116,53 @@ const shouldTriggerAIResponse = (content: string) => {
   )
 }
 
+/**
+ * Check if two users can start a conversation
+ * Requires either an accepted match or mutual interest
+ */
+async function canStartConversation(
+  brandId: string,
+  organizerId: string
+): Promise<boolean> {
+  // Check for existing match (AI or manual)
+  const match = await checkExistingMatch(brandId, organizerId)
+  if (match && match.status === 'accepted') {
+    return true
+  }
+
+  // Get user IDs from brand and organizer IDs
+  const { data: brandData } = await supabase
+    .from('brands')
+    .select('user_id')
+    .eq('id', brandId)
+    .maybeSingle()
+
+  const { data: organizerData } = await supabase
+    .from('organizers')
+    .select('user_id')
+    .eq('id', organizerId)
+    .maybeSingle()
+
+  if (!brandData?.user_id || !organizerData?.user_id) {
+    return false
+  }
+
+  // Check for mutual interest
+  return await checkMutualInterest(brandData.user_id, organizerData.user_id)
+}
+
 // Get or create a conversation between a brand and an organizer
 export const getOrCreateConversation = async (
   brandId: string,
   organizerId: string
 ): Promise<Conversation> => {
+  // Check access control first
+  const hasAccess = await canStartConversation(brandId, organizerId)
+  if (!hasAccess) {
+    throw new Error(
+      'Cannot start conversation. Mutual match or interest required.'
+    )
+  }
   const { data, error } = await supabase
     .from('conversations')
     .select('*')

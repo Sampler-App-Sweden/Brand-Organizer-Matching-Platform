@@ -1,6 +1,8 @@
 // Match type definition
 // Matching algorithm is server-side only (see supabase/functions/generate-matches)
 
+export type MatchSource = 'ai' | 'manual' | 'hybrid'
+
 export interface Match {
   id: string
   brandId: string
@@ -9,4 +11,5 @@ export interface Match {
   matchReasons: string[]
   createdAt: Date
   status: 'pending' | 'accepted' | 'rejected'
+  matchSource?: MatchSource
 }

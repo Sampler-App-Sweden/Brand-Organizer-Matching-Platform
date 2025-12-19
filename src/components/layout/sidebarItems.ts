@@ -2,6 +2,7 @@ import {
   BellIcon,
   Bookmark,
   HandshakeIcon,
+  Heart,
   HomeIcon,
   LogOut,
   MessageSquareIcon,
@@ -46,6 +47,11 @@ export const sidebarItems: SidebarCollection = {
       path: '/dashboard/matches'
     },
     {
+      label: 'Interests',
+      icon: createElement(Heart, { className: 'h-5 w-5' }),
+      path: '/dashboard/interests'
+    },
+    {
       label: 'Products',
       icon: createElement(Package, { className: 'h-5 w-5' }),
       path: '/dashboard/products'
@@ -82,6 +88,11 @@ export const sidebarItems: SidebarCollection = {
       label: 'Matches',
       icon: createElement(UsersIcon, { className: 'h-5 w-5' }),
       path: '/dashboard/matches'
+    },
+    {
+      label: 'Interests',
+      icon: createElement(Heart, { className: 'h-5 w-5' }),
+      path: '/dashboard/interests'
     },
     {
       label: 'Messages',

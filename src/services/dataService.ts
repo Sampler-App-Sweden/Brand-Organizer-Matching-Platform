@@ -79,6 +79,7 @@ type MatchRow = {
   score: number
   match_reasons: string[] | null
   status: 'pending' | 'accepted' | 'rejected'
+  match_source?: 'ai' | 'manual' | 'hybrid'
   created_at: string | null
 }
 
@@ -174,7 +175,8 @@ const mapMatchRowToMatch = (row: MatchRow): Match => ({
   score: row.score,
   matchReasons: row.match_reasons ?? [],
   createdAt: row.created_at ? new Date(row.created_at) : new Date(),
-  status: row.status
+  status: row.status,
+  matchSource: row.match_source
 })
 
 const buildBrandPayload = (brandData: Omit<Brand, 'id' | 'createdAt'>) => ({
@@ -599,4 +601,52 @@ export const getBrandsByIds = async (brandIds: string[]): Promise<Brand[]> => {
   }
 
   return (data as BrandRow[] | null)?.map(mapBrandRowToBrand) ?? []
+}
+
+/**
+ * Check if a match exists between a brand and organizer
+ */
+export const checkExistingMatch = async (
+  brandId: string,
+  organizerId: string
+): Promise<Match | null> => {
+  const { data, error } = await supabase
+    .from('matches')
+    .select('*')
+    .eq('brand_id', brandId)
+    .eq('organizer_id', organizerId)
+    .maybeSingle()
+
+  if (error && error.code !== 'PGRST116') {
+    throw new Error(`Failed to check existing match: ${error.message}`)
+  }
+
+  return data ? mapMatchRowToMatch(data as MatchRow) : null
+}
+
+/**
+ * Create a manual match from mutual interest
+ */
+export const createManualMatch = async (
+  brandId: string,
+  organizerId: string
+): Promise<Match> => {
+  const { data, error } = await supabase
+    .from('matches')
+    .insert({
+      brand_id: brandId,
+      organizer_id: organizerId,
+      score: 0,
+      match_reasons: ['Mutual interest expressed'],
+      status: 'accepted',
+      match_source: 'manual'
+    })
+    .select('*')
+    .single()
+
+  if (error) {
+    throw new Error(`Failed to create manual match: ${error.message}`)
+  }
+
+  return mapMatchRowToMatch(data as MatchRow)
 }

@@ -305,3 +305,91 @@ export async function notifySystemEvent(
     throw error
   }
 }
+
+/**
+ * Notify user when someone expresses interest in their profile
+ */
+export async function notifyInterestReceived(
+  receiverId: string,
+  senderName: string,
+  interestId: string
+): Promise<void> {
+  try {
+    await createNotification(
+      receiverId,
+      'Someone is interested!',
+      `${senderName} expressed interest in your profile. Check it out!`,
+      'match',
+      interestId
+    )
+  } catch (error) {
+    console.error('Failed to notify interest received:', error)
+    throw error
+  }
+}
+
+/**
+ * Notify user when their interest expression is accepted
+ */
+export async function notifyInterestAccepted(
+  senderId: string,
+  receiverName: string,
+  interestId: string
+): Promise<void> {
+  try {
+    await createNotification(
+      senderId,
+      'Interest Accepted!',
+      `${receiverName} accepted your interest. You can now start a conversation!`,
+      'match',
+      interestId
+    )
+  } catch (error) {
+    console.error('Failed to notify interest accepted:', error)
+    throw error
+  }
+}
+
+/**
+ * Notify both parties when mutual interest creates a match
+ */
+export async function notifyMutualMatch(
+  brandId: string,
+  organizerId: string,
+  matchId: string
+): Promise<void> {
+  try {
+    // Get user IDs
+    const brandUserId = await getUserIdFromBrandId(brandId)
+    const organizerUserId = await getUserIdFromOrganizerId(organizerId)
+
+    // Get names
+    const brandName = await getUserName(brandUserId ?? '')
+    const organizerName = await getUserName(organizerUserId ?? '')
+
+    // Notify brand
+    if (brandUserId) {
+      await createNotification(
+        brandUserId,
+        "It's a Match!",
+        `You and ${organizerName} have mutual interest! Start your conversation now.`,
+        'match',
+        matchId
+      )
+    }
+
+    // Notify organizer
+    if (organizerUserId) {
+      await createNotification(
+        organizerUserId,
+        "It's a Match!",
+        `You and ${brandName} have mutual interest! Start your conversation now.`,
+        'match',
+        matchId
+      )
+    }
+  } catch (error) {
+    console.error('Failed to notify mutual match:', error)
+    throw error
+  }
+}

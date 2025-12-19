@@ -1,6 +1,7 @@
 import {
   BadgeDollarSign,
   BookmarkIcon,
+  Heart,
   PackageIcon,
   UsersIcon
 } from 'lucide-react'
@@ -15,16 +16,24 @@ import {
 } from '../../services/savedProfilesService'
 import { Badge, IconButton } from '../ui'
 
+type InterestStatus = 'none' | 'sent' | 'received' | 'mutual'
+
 interface DirectoryCardProps {
   profile: ProfileOverview
   initialSaved?: boolean
   showSaveAction?: boolean
+  showInterestAction?: boolean
+  interestStatus?: InterestStatus
+  onExpressInterest?: (profileId: string) => void
 }
 
 export function DirectoryCard({
   profile,
   initialSaved,
-  showSaveAction = true
+  showSaveAction = true,
+  showInterestAction = false,
+  interestStatus = 'none',
+  onExpressInterest
 }: DirectoryCardProps) {
   const { currentUser } = useAuth()
   const navigate = useNavigate()
@@ -105,6 +114,24 @@ export function DirectoryCard({
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleExpressInterest = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    if (!showInterestAction) {
+      return
+    }
+
+    if (!currentUser) {
+      navigate('/login', {
+        state: { returnUrl: `${location.pathname}${location.search}` }
+      })
+      return
+    }
+
+    onExpressInterest?.(profile.id)
   }
 
   return (
@@ -227,6 +254,38 @@ export function DirectoryCard({
               </div>
             )}
           </div>
+
+          {/* Express Interest Action */}
+          {showInterestAction && (
+            <div className='mt-4 pt-4 border-t border-gray-100'>
+              <button
+                onClick={handleExpressInterest}
+                disabled={interestStatus !== 'none'}
+                className={`
+                  w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium text-sm transition-colors
+                  ${
+                    interestStatus === 'mutual'
+                      ? 'bg-pink-50 text-pink-700 border border-pink-200 cursor-default'
+                      : interestStatus === 'sent'
+                      ? 'bg-gray-50 text-gray-500 border border-gray-200 cursor-not-allowed'
+                      : interestStatus === 'received'
+                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 cursor-default'
+                      : 'bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent'
+                  }
+                `}
+              >
+                <Heart
+                  className={`h-4 w-4 ${
+                    interestStatus === 'mutual' ? 'fill-pink-500 text-pink-500' : ''
+                  }`}
+                />
+                {interestStatus === 'mutual' && 'Mutual Interest'}
+                {interestStatus === 'sent' && 'Interest Sent'}
+                {interestStatus === 'received' && 'Interested in You'}
+                {interestStatus === 'none' && 'Express Interest'}
+              </button>
+            </div>
+          )}
         </div>
       </article>
     </Link>
