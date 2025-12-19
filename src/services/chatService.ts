@@ -20,6 +20,10 @@ export interface Conversation {
   messages: Message[]
   createdAt: Date
   lastActivity: Date
+  archived?: boolean
+  readOnly?: boolean
+  archivedAt?: Date
+  archivedBy?: string
 }
 
 interface ConversationRow {
@@ -28,6 +32,10 @@ interface ConversationRow {
   organizer_id: string
   created_at: string
   last_activity: string | null
+  archived?: boolean
+  read_only?: boolean
+  archived_at?: string | null
+  archived_by?: string | null
 }
 
 interface MessageRow {
@@ -57,7 +65,11 @@ const mapConversationRow = (
   organizerId: row.organizer_id,
   messages,
   createdAt: new Date(row.created_at),
-  lastActivity: new Date(row.last_activity ?? row.created_at)
+  lastActivity: new Date(row.last_activity ?? row.created_at),
+  archived: row.archived ?? false,
+  readOnly: row.read_only ?? false,
+  archivedAt: row.archived_at ? new Date(row.archived_at) : undefined,
+  archivedBy: row.archived_by ?? undefined
 })
 
 const hydrateConversations = async (
@@ -156,25 +168,34 @@ export const getOrCreateConversation = async (
   brandId: string,
   organizerId: string
 ): Promise<Conversation> => {
-  // Check access control first
-  const hasAccess = await canStartConversation(brandId, organizerId)
-  if (!hasAccess) {
-    throw new Error(
-      'Cannot start conversation. Mutual match or interest required.'
-    )
-  }
-  const { data, error } = await supabase
+  // First check if archived conversation exists (allow read access)
+  const { data: existingConversation, error: fetchError } = await supabase
     .from('conversations')
     .select('*')
     .eq('brand_id', brandId)
     .eq('organizer_id', organizerId)
     .maybeSingle()
 
-  if (error && error.code !== 'PGRST116') {
-    throw new Error(`Failed to fetch conversation: ${error.message}`)
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    throw new Error(`Failed to fetch conversation: ${fetchError.message}`)
   }
 
-  if (!data) {
+  // If archived conversation exists, return it (read-only access)
+  if (existingConversation && existingConversation.archived) {
+    const messages = await getConversationMessages(existingConversation.id)
+    return mapConversationRow(existingConversation as ConversationRow, messages)
+  }
+
+  // For new/active conversations, check access control
+  const hasAccess = await canStartConversation(brandId, organizerId)
+  if (!hasAccess) {
+    throw new Error(
+      'Cannot start conversation. Mutual match or interest required.'
+    )
+  }
+
+  // If conversation doesn't exist, create it
+  if (!existingConversation) {
     const { data: inserted, error: insertError } = await supabase
       .from('conversations')
       .insert({ brand_id: brandId, organizer_id: organizerId })
@@ -188,8 +209,9 @@ export const getOrCreateConversation = async (
     return mapConversationRow(inserted as ConversationRow, [])
   }
 
-  const messages = await getConversationMessages((data as ConversationRow).id)
-  return mapConversationRow(data as ConversationRow, messages)
+  // Return existing active conversation
+  const messages = await getConversationMessages(existingConversation.id)
+  return mapConversationRow(existingConversation as ConversationRow, messages)
 }
 
 // Send a message in a conversation
@@ -199,6 +221,23 @@ export const sendMessage = async (
   senderType: 'brand' | 'organizer',
   content: string
 ): Promise<Message> => {
+  // Check if conversation is read-only
+  const { data: conversation, error: fetchError } = await supabase
+    .from('conversations')
+    .select('read_only, archived')
+    .eq('id', conversationId)
+    .single()
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch conversation: ${fetchError.message}`)
+  }
+
+  if (conversation.read_only) {
+    throw new Error(
+      'This conversation has been archived and is read-only. You cannot send new messages.'
+    )
+  }
+
   const { data, error } = await supabase
     .from('messages')
     .insert({

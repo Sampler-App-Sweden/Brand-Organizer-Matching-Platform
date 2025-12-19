@@ -91,7 +91,14 @@ export function ConversationList({
                   </p>
                 </div>
                 <div className='flex justify-between items-center'>
-                  <PhaseBadge phase={conversation.phase} />
+                  <div className='flex items-center gap-2'>
+                    <PhaseBadge phase={conversation.phase} />
+                    {conversation.archived && (
+                      <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700'>
+                        Archived
+                      </span>
+                    )}
+                  </div>
                   <span className='text-xs text-gray-500'>
                     {conversation.lastMessageTime &&
                       new Date(

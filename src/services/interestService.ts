@@ -3,8 +3,7 @@ import {
   Interest,
   InterestRow,
   EnhancedInterest,
-  InterestStats,
-  InterestStatus
+  InterestStats
 } from '../types/interest'
 import { getBrandById, getOrganizerById } from './dataService'
 import { notifyInterestReceived, notifyInterestAccepted, notifyMutualMatch } from './notificationService'
@@ -31,8 +30,7 @@ const mapInterestRowToInterest = (row: InterestRow): Interest => ({
 async function getBrandOrganizerIds(
   senderId: string,
   senderType: 'brand' | 'organizer',
-  receiverId: string,
-  receiverType: 'brand' | 'organizer'
+  receiverId: string
 ): Promise<{ brandId: string; organizerId: string }> {
   let brandUserId: string, organizerUserId: string
 
@@ -111,8 +109,7 @@ export async function expressInterest(
   const { brandId, organizerId } = await getBrandOrganizerIds(
     senderId,
     senderType,
-    receiverId,
-    receiverType
+    receiverId
   )
 
   // Create interest record
@@ -153,13 +150,14 @@ export async function expressInterest(
     })
   } else {
     // One-way interest, notify receiver
-    const sender = senderType === 'brand'
-      ? await getBrandById(brandId)
-      : await getOrganizerById(organizerId)
-
-    const senderName = senderType === 'brand'
-      ? sender?.companyName || 'A brand'
-      : sender?.organizerName || 'An organizer'
+    let senderName: string
+    if (senderType === 'brand') {
+      const brandProfile = await getBrandById(brandId)
+      senderName = brandProfile?.companyName || 'A brand'
+    } else {
+      const organizerProfile = await getOrganizerById(organizerId)
+      senderName = organizerProfile?.organizerName || 'An organizer'
+    }
 
     await notifyInterestReceived(receiverId, senderName, interest.id).catch((error) => {
       console.error('Failed to send interest notification:', error)
@@ -302,35 +300,88 @@ export async function respondToInterest(
       })
     } else {
       // Just notify the sender that their interest was accepted
-      const receiver = interest.receiverType === 'brand'
-        ? await getBrandById(interest.brandId)
-        : await getOrganizerById(interest.organizerId)
-
-      const receiverName = interest.receiverType === 'brand'
-        ? receiver?.companyName || 'The brand'
-        : receiver?.organizerName || 'The organizer'
+      let receiverName: string
+      if (interest.receiverType === 'brand') {
+        const brandProfile = await getBrandById(interest.brandId)
+        receiverName = brandProfile?.companyName || 'The brand'
+      } else {
+        const organizerProfile = await getOrganizerById(interest.organizerId)
+        receiverName = organizerProfile?.organizerName || 'The organizer'
+      }
 
       await notifyInterestAccepted(interest.senderId, receiverName, interest.id).catch((error) => {
         console.error('Failed to send interest accepted notification:', error)
       })
     }
   }
+  // No notification sent for rejections - silent operation
 
   return interest
 }
 
 /**
- * Withdraw a pending interest
+ * Withdraw interest and handle mutual match cleanup
+ * - If mutual match exists: mark match as inactive, archive conversation
+ * - Conversation remains accessible (read-only)
+ * - Messages are preserved
  */
 export async function withdrawInterest(interestId: string): Promise<void> {
-  const { error } = await supabase
+  // Step 1: Fetch the interest to get context
+  const { data: interestData, error: fetchError } = await supabase
+    .from('interests')
+    .select('*')
+    .eq('id', interestId)
+    .single()
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch interest: ${fetchError.message}`)
+  }
+
+  const interest = mapInterestRowToInterest(interestData as InterestRow)
+
+  // Step 2: Check for mutual match
+  const isMutual = await checkMutualInterest(interest.senderId, interest.receiverId)
+
+  // Step 3: Update interest to withdrawn
+  const { error: updateError } = await supabase
     .from('interests')
     .update({ status: 'withdrawn' })
     .eq('id', interestId)
-    .eq('status', 'pending')
+    .in('status', ['pending', 'accepted'])
 
-  if (error) {
-    throw new Error(`Failed to withdraw interest: ${error.message}`)
+  if (updateError) {
+    throw new Error(`Failed to withdraw interest: ${updateError.message}`)
+  }
+
+  // Step 4: If mutual match exists, handle cleanup
+  if (isMutual) {
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Mark match as inactive (don't delete)
+    await supabase
+      .from('matches')
+      .update({ status: 'inactive' })
+      .eq('brand_id', interest.brandId)
+      .eq('organizer_id', interest.organizerId)
+      .in('status', ['pending', 'accepted'])
+      .then(({ error }) => {
+        if (error) console.error('Failed to mark match as inactive:', error)
+      })
+
+    // Archive conversation (mark as read-only, keep accessible)
+    await supabase
+      .from('conversations')
+      .update({
+        archived: true,
+        read_only: true,
+        archived_at: new Date().toISOString(),
+        archived_by: user?.id || null
+      })
+      .eq('brand_id', interest.brandId)
+      .eq('organizer_id', interest.organizerId)
+      .then(({ error }) => {
+        if (error) console.error('Failed to archive conversation:', error)
+      })
   }
 }
 
@@ -523,13 +574,25 @@ async function createManualMatch(brandId: string, organizerId: string): Promise<
  * Get enhanced interest with profile information
  */
 export async function getEnhancedInterest(interest: Interest): Promise<EnhancedInterest> {
-  const senderProfile = interest.senderType === 'brand'
-    ? await getBrandById(interest.brandId)
-    : await getOrganizerById(interest.organizerId)
+  // Get sender profile and name
+  let senderName: string
+  if (interest.senderType === 'brand') {
+    const brandProfile = await getBrandById(interest.brandId)
+    senderName = brandProfile?.companyName || 'Unknown'
+  } else {
+    const organizerProfile = await getOrganizerById(interest.organizerId)
+    senderName = organizerProfile?.organizerName || 'Unknown'
+  }
 
-  const receiverProfile = interest.receiverType === 'brand'
-    ? await getBrandById(interest.brandId)
-    : await getOrganizerById(interest.organizerId)
+  // Get receiver profile and name
+  let receiverName: string
+  if (interest.receiverType === 'brand') {
+    const brandProfile = await getBrandById(interest.brandId)
+    receiverName = brandProfile?.companyName || 'Unknown'
+  } else {
+    const organizerProfile = await getOrganizerById(interest.organizerId)
+    receiverName = organizerProfile?.organizerName || 'Unknown'
+  }
 
   const isMutual = await checkMutualInterest(interest.senderId, interest.receiverId)
 
@@ -544,13 +607,9 @@ export async function getEnhancedInterest(interest: Interest): Promise<EnhancedI
 
   return {
     ...interest,
-    senderName: interest.senderType === 'brand'
-      ? senderProfile?.companyName || 'Unknown'
-      : senderProfile?.organizerName || 'Unknown',
+    senderName,
     senderLogo: undefined, // Can be added later with logo service
-    receiverName: interest.receiverType === 'brand'
-      ? receiverProfile?.companyName || 'Unknown'
-      : receiverProfile?.organizerName || 'Unknown',
+    receiverName,
     receiverLogo: undefined,
     isMutual,
     hasAIMatch: !!aiMatch

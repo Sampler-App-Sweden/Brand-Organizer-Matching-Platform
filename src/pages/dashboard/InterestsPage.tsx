@@ -84,6 +84,23 @@ export function InterestsPage() {
   }
 
   const handleWithdraw = async (id: string) => {
+    const interest = [...sentInterests, ...mutualInterests].find(i => i.id === id)
+
+    if (!interest) return
+
+    // Show confirmation for mutual matches
+    if (interest.isMutual) {
+      const confirmed = window.confirm(
+        `Withdrawing from a mutual match will:\n\n` +
+        `• Mark the match as inactive\n` +
+        `• Archive your conversation\n` +
+        `• Keep messages accessible (read-only)\n\n` +
+        `Are you sure you want to withdraw?`
+      )
+
+      if (!confirmed) return
+    }
+
     try {
       await withdrawPendingInterest(id)
     } catch (err) {

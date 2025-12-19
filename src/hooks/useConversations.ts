@@ -30,6 +30,7 @@ export function useConversations() {
   const [newMessage, setNewMessage] = useState('')
   const [phaseFilter, setPhaseFilter] = useState<ConversationPhase | 'all'>('all')
   const [sortBy, setSortBy] = useState<'recent' | 'unread'>('recent')
+  const [showArchived, setShowArchived] = useState(false)
   const [partnerInfo, setPartnerInfo] = useState<Brand | Organizer | null>(null)
   const [userType, setUserType] = useState<'brand' | 'organizer'>('brand')
   const [messagesLoading, setMessagesLoading] = useState(false)
@@ -37,10 +38,17 @@ export function useConversations() {
   const [messageError, setMessageError] = useState<string | null>(null)
   const [conversationsError, setConversationsError] = useState<string | null>(null)
 
-  const filteredConversations = useMemo(
-    () => getFilteredConversations(conversations, phaseFilter, sortBy),
-    [conversations, phaseFilter, sortBy]
-  )
+  const filteredConversations = useMemo(() => {
+    let filtered = conversations
+
+    // Filter by archived status
+    if (!showArchived) {
+      filtered = filtered.filter(c => !c.archived)
+    }
+
+    // Apply existing phase and sort filters
+    return getFilteredConversations(filtered, phaseFilter, sortBy)
+  }, [conversations, showArchived, phaseFilter, sortBy])
 
   const selectedConversationRef = useRef<string | null>(null)
   useEffect(() => {
@@ -162,7 +170,11 @@ export function useConversations() {
               unreadCount,
               phase,
               reference,
-              awaitingReply
+              awaitingReply,
+              archived: conv.archived,
+              readOnly: conv.readOnly,
+              archivedAt: conv.archivedAt,
+              archivedBy: conv.archivedBy
             }
           })
         )
@@ -296,6 +308,8 @@ export function useConversations() {
     phaseFilter,
     setPhaseFilter,
     sortBy,
-    setSortBy
+    setSortBy,
+    showArchived,
+    setShowArchived
   }
 }

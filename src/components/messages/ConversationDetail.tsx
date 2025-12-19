@@ -1,4 +1,4 @@
-import { MessageSquareIcon, PaperclipIcon, SendIcon } from 'lucide-react'
+import { Archive, MessageSquareIcon, PaperclipIcon, SendIcon } from 'lucide-react'
 import type { FormEvent } from 'react'
 
 import { Button } from '../ui'
@@ -59,6 +59,16 @@ export function ConversationDetail({
         userType={userType}
         onPhaseChange={onPhaseChange}
       />
+      {activeConversation.readOnly && (
+        <div className='bg-yellow-50 border-b border-yellow-200 px-4 py-3'>
+          <div className='flex items-center gap-2 text-yellow-800'>
+            <Archive className='h-4 w-4' />
+            <span className='text-sm font-medium'>
+              This conversation has been archived. You can view messages but cannot send new ones.
+            </span>
+          </div>
+        </div>
+      )}
       {/* Window with conversations */}
       <div className='flex-1 min-h-0 overflow-y-auto p-4 space-y-4'>
         {messagesLoading ? (
@@ -90,11 +100,16 @@ export function ConversationDetail({
         <form onSubmit={onSendMessage} className='flex items-end'>
           <div className='flex-1 border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500'>
             <textarea
-              className='block w-full border-0 resize-none py-3 px-4 focus:outline-none focus:ring-0 sm:text-sm'
-              placeholder='Type a message...'
+              className='block w-full border-0 resize-none py-3 px-4 focus:outline-none focus:ring-0 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed'
+              placeholder={
+                activeConversation.readOnly
+                  ? 'This conversation is archived'
+                  : 'Type a message...'
+              }
               rows={2}
               value={newMessage}
               onChange={(e) => onMessageChange(e.target.value)}
+              disabled={activeConversation.readOnly}
             />
             <div className='flex items-center justify-between p-2 border-t border-gray-200'>
               <button
@@ -106,7 +121,7 @@ export function ConversationDetail({
               <Button
                 type='submit'
                 variant='primary'
-                disabled={!newMessage.trim() || sendingMessage}
+                disabled={!newMessage.trim() || sendingMessage || activeConversation.readOnly}
                 className='flex items-center'
               >
                 <SendIcon className='h-4 w-4 mr-1' />

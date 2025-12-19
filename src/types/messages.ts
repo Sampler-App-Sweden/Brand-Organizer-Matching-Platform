@@ -18,4 +18,8 @@ export interface EnhancedConversation {
   phase: ConversationPhase
   reference: string
   awaitingReply: boolean
+  archived?: boolean
+  readOnly?: boolean
+  archivedAt?: Date
+  archivedBy?: string
 }

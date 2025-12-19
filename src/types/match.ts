@@ -10,6 +10,6 @@ export interface Match {
   score: number
   matchReasons: string[]
   createdAt: Date
-  status: 'pending' | 'accepted' | 'rejected'
+  status: 'pending' | 'accepted' | 'rejected' | 'inactive'
   matchSource?: MatchSource
 }

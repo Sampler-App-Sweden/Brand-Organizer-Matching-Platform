@@ -137,13 +137,18 @@ export function InterestCard({
           </>
         )}
 
-        {viewType === 'sent' && interest.status === 'pending' && (
+        {viewType === 'sent' && (interest.status === 'pending' || interest.status === 'accepted') && (
           <Button
             size='sm'
             variant='outline'
             colorScheme='gray'
             onClick={() => onWithdraw?.(interest.id)}
             leftIcon={<Trash2 className='h-4 w-4' />}
+            title={
+              interest.status === 'accepted' && interest.isMutual
+                ? 'Withdrawing will archive the conversation'
+                : 'Withdraw your interest'
+            }
           >
             Withdraw
           </Button>
