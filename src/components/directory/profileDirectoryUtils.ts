@@ -7,6 +7,57 @@ const includesText = (value?: string | null, term?: string) =>
 const includesArray = (value?: string[], term?: string) =>
   term ? value?.some((entry) => entry.toLowerCase().includes(term)) ?? false : true
 
+/**
+ * Check if a profile is complete enough to show in the directory
+ * Requirements:
+ * - Must have a description (required)
+ * - For Brands: sponsorship types, budget range, and audience tags
+ * - For Organizers: event types and audience demographics
+ * - Logo is optional
+ */
+export function isProfileComplete(profile: ProfileOverview): boolean {
+  // Check if profile has a description (required by user)
+  if (!profile.description || profile.description.trim() === '') {
+    return false
+  }
+
+  // Check core whatTheySeek fields
+  const whatTheySeek = profile.whatTheySeek
+  if (!whatTheySeek) {
+    return false
+  }
+
+  if (profile.role === 'Brand') {
+    // For brands, check:
+    // - Has sponsorship types
+    // - Has budget range
+    // - Has audience tags
+    const hasSponsorshipTypes =
+      !!whatTheySeek.sponsorshipTypes &&
+      whatTheySeek.sponsorshipTypes.length > 0
+    const hasBudget = !!whatTheySeek.budgetRange
+    const hasAudienceTags =
+      !!whatTheySeek.audienceTags &&
+      whatTheySeek.audienceTags.length > 0
+
+    return hasSponsorshipTypes && hasBudget && hasAudienceTags
+  } else if (profile.role === 'Organizer') {
+    // For organizers, check:
+    // - Has event types
+    // - Has audience tags (demographics)
+    const hasEventTypes =
+      !!whatTheySeek.eventTypes &&
+      whatTheySeek.eventTypes.length > 0
+    const hasAudienceTags =
+      !!whatTheySeek.audienceTags &&
+      whatTheySeek.audienceTags.length > 0
+
+    return hasEventTypes && hasAudienceTags
+  }
+
+  return false
+}
+
 export function filterProfilesByRole(
   profiles: ProfileOverview[],
   filters: DirectoryFilterParams,
@@ -20,6 +71,11 @@ export function filterProfilesByRole(
 
   return profiles.filter((profile) => {
     if (profile.role !== role) {
+      return false
+    }
+
+    // Filter out incomplete profiles
+    if (!isProfileComplete(profile)) {
       return false
     }
 
