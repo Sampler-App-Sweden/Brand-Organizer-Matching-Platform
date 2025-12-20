@@ -1,7 +1,7 @@
 import { Heart } from 'lucide-react'
 import { MouseEvent, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { expressInterest, withdrawInterest, getSentInterests } from '../../services/interestService'
+import { expressConnection, withdrawConnection, getSentConnections } from '../../services/connectionService'
 
 type InterestStatusUI = 'none' | 'sent' | 'received' | 'mutual'
 
@@ -55,27 +55,27 @@ export function InterestButton({
       setIsLoading(true)
 
       if (interestStatus === 'none') {
-        // Express new interest
-        await expressInterest(
+        // Express new connection
+        await expressConnection(
           currentUserId,
           currentUserType as 'brand' | 'organizer',
           profileId,
           profileRole
         )
       } else if (interestStatus === 'sent') {
-        // Withdraw interest
-        const sentInterests = await getSentInterests(currentUserId)
-        const interest = sentInterests.find(i => i.receiverId === profileId)
+        // Withdraw connection
+        const sentConnections = await getSentConnections(currentUserId)
+        const connection = sentConnections.find(i => i.receiverId === profileId)
 
-        if (interest) {
+        if (connection) {
           const confirmed = window.confirm(
-            interest.status === 'accepted'
+            connection.status === 'accepted'
               ? 'Withdrawing from a mutual match will archive the conversation. Are you sure?'
-              : 'Are you sure you want to withdraw your interest?'
+              : 'Are you sure you want to withdraw your connection?'
           )
 
           if (confirmed) {
-            await withdrawInterest(interest.id)
+            await withdrawConnection(connection.id)
           } else {
             setIsLoading(false)
             return
@@ -86,8 +86,8 @@ export function InterestButton({
       // Notify parent to refetch status
       onInterestChange?.()
     } catch (err) {
-      console.error('Failed to handle interest:', err)
-      alert('Failed to update interest. Please try again.')
+      console.error('Failed to handle connection:', err)
+      alert('Failed to update connection. Please try again.')
     } finally {
       setIsLoading(false)
     }

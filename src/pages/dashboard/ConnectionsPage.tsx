@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { useInterests } from '../../hooks/useInterests'
+import { useConnections } from '../../hooks/useConnections'
 import { DashboardLayout } from '../../components/layout'
-import { InterestCard } from '../../components/interests'
+import { ConnectionCard } from '../../components/connections'
 import { Heart, Send, Users } from 'lucide-react'
 
 type TabView = 'sent' | 'received' | 'mutual'
@@ -12,34 +12,34 @@ export function ConnectionsPage() {
   const [activeTab, setActiveTab] = useState<TabView>('received')
 
   const {
-    sentInterests,
-    receivedInterests,
-    mutualInterests,
+    sentConnections,
+    receivedConnections,
+    mutualConnections,
     stats,
     loading,
     error,
-    acceptInterest,
-    rejectInterest,
-    withdrawPendingInterest,
+    acceptConnection,
+    rejectConnection,
+    withdrawPendingConnection,
     startConversation
-  } = useInterests({ userId: currentUser?.id ?? null })
+  } = useConnections({ userId: currentUser?.id ?? null })
 
   const userType = currentUser?.type ?? null
 
-  const getActiveInterests = () => {
+  const getActiveConnections = () => {
     switch (activeTab) {
       case 'sent':
-        return sentInterests
+        return sentConnections
       case 'received':
-        return receivedInterests
+        return receivedConnections
       case 'mutual':
-        return mutualInterests
+        return mutualConnections
       default:
         return []
     }
   }
 
-  const activeInterests = getActiveInterests()
+  const activeConnections = getActiveConnections()
 
   const tabs = [
     {
@@ -67,29 +67,29 @@ export function ConnectionsPage() {
 
   const handleAccept = async (id: string) => {
     try {
-      await acceptInterest(id)
+      await acceptConnection(id)
     } catch (err) {
-      console.error('Failed to accept interest:', err)
-      alert('Failed to accept interest. Please try again.')
+      console.error('Failed to accept connection:', err)
+      alert('Failed to accept connection. Please try again.')
     }
   }
 
   const handleReject = async (id: string) => {
     try {
-      await rejectInterest(id)
+      await rejectConnection(id)
     } catch (err) {
-      console.error('Failed to reject interest:', err)
-      alert('Failed to reject interest. Please try again.')
+      console.error('Failed to reject connection:', err)
+      alert('Failed to reject connection. Please try again.')
     }
   }
 
   const handleWithdraw = async (id: string) => {
-    const interest = [...sentInterests, ...mutualInterests].find(i => i.id === id)
+    const connection = [...sentConnections, ...mutualConnections].find(i => i.id === id)
 
-    if (!interest) return
+    if (!connection) return
 
     // Show confirmation for mutual matches
-    if (interest.isMutual) {
+    if (connection.isMutual) {
       const confirmed = window.confirm(
         `Withdrawing from a mutual match will:\n\n` +
         `• Mark the match as inactive\n` +
@@ -102,10 +102,10 @@ export function ConnectionsPage() {
     }
 
     try {
-      await withdrawPendingInterest(id)
+      await withdrawPendingConnection(id)
     } catch (err) {
-      console.error('Failed to withdraw interest:', err)
-      alert('Failed to withdraw interest. Please try again.')
+      console.error('Failed to withdraw connection:', err)
+      alert('Failed to withdraw connection. Please try again.')
     }
   }
 
@@ -175,7 +175,7 @@ export function ConnectionsPage() {
           <div className='bg-red-50 border border-red-200 rounded-lg p-4'>
             <p className='text-red-800'>{error}</p>
           </div>
-        ) : activeInterests.length === 0 ? (
+        ) : activeConnections.length === 0 ? (
           <div className='bg-gray-50 border border-gray-200 rounded-lg p-12 text-center'>
             <div className='text-gray-400 mb-4'>
               {activeTab === 'received' && <Heart className='h-16 w-16 mx-auto' />}
@@ -183,22 +183,22 @@ export function ConnectionsPage() {
               {activeTab === 'mutual' && <Users className='h-16 w-16 mx-auto' />}
             </div>
             <h3 className='text-lg font-medium text-gray-900 mb-2'>
-              {activeTab === 'received' && 'No interests received yet'}
-              {activeTab === 'sent' && 'No interests sent yet'}
-              {activeTab === 'mutual' && 'No mutual interests yet'}
+              {activeTab === 'received' && 'No connections received yet'}
+              {activeTab === 'sent' && 'No connections sent yet'}
+              {activeTab === 'mutual' && 'No mutual connections yet'}
             </h3>
             <p className='text-gray-600'>
-              {activeTab === 'received' && 'When others express interest in your profile, they\'ll appear here.'}
-              {activeTab === 'sent' && 'Browse the directory and express interest in profiles to get started.'}
-              {activeTab === 'mutual' && 'When you and another user both express interest, you\'ll see it here.'}
+              {activeTab === 'received' && 'When others want to connect with you, they\'ll appear here.'}
+              {activeTab === 'sent' && 'Browse the directory and connect with profiles to get started.'}
+              {activeTab === 'mutual' && 'When you and another user both express connection interest, you\'ll see it here.'}
             </p>
           </div>
         ) : (
           <div className='space-y-4'>
-            {activeInterests.map((interest) => (
-              <InterestCard
-                key={interest.id}
-                interest={interest}
+            {activeConnections.map((connection) => (
+              <ConnectionCard
+                key={connection.id}
+                connection={connection}
                 viewType={activeTab}
                 onAccept={handleAccept}
                 onReject={handleReject}

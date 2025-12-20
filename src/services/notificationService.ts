@@ -345,51 +345,51 @@ export async function notifySystemEvent(
 }
 
 /**
- * Notify user when someone expresses interest in their profile
+ * Notify user when someone expresses connection interest in their profile
  */
-export async function notifyInterestReceived(
+export async function notifyConnectionReceived(
   receiverId: string,
   senderName: string,
-  interestId: string
+  connectionId: string
 ): Promise<void> {
   try {
     await createNotification(
       receiverId,
-      'Someone is interested!',
-      `${senderName} expressed interest in your profile. Check it out!`,
+      'Someone wants to connect!',
+      `${senderName} wants to connect with you. Check it out!`,
       'match',
-      interestId
+      connectionId
     )
   } catch (error) {
-    console.error('Failed to notify interest received:', error)
+    console.error('Failed to notify connection received:', error)
     throw error
   }
 }
 
 /**
- * Notify user when their interest expression is accepted
+ * Notify user when their connection request is accepted
  */
-export async function notifyInterestAccepted(
+export async function notifyConnectionAccepted(
   senderId: string,
   receiverName: string,
-  interestId: string
+  connectionId: string
 ): Promise<void> {
   try {
     await createNotification(
       senderId,
-      'Interest Accepted!',
-      `${receiverName} accepted your interest. You can now start a conversation!`,
+      'Connection Accepted!',
+      `${receiverName} accepted your connection. You can now start a conversation!`,
       'match',
-      interestId
+      connectionId
     )
   } catch (error) {
-    console.error('Failed to notify interest accepted:', error)
+    console.error('Failed to notify connection accepted:', error)
     throw error
   }
 }
 
 /**
- * Notify both parties when mutual interest creates a match
+ * Notify both parties when mutual connection creates a match
  */
 export async function notifyMutualMatch(
   brandId: string,
@@ -410,7 +410,7 @@ export async function notifyMutualMatch(
       await createNotification(
         brandUserId,
         "It's a Match!",
-        `You and ${organizerName} have mutual interest! Start your conversation now.`,
+        `You and ${organizerName} have a mutual connection! Start your conversation now.`,
         'match',
         matchId
       )
@@ -421,7 +421,7 @@ export async function notifyMutualMatch(
       await createNotification(
         organizerUserId,
         "It's a Match!",
-        `You and ${brandName} have mutual interest! Start your conversation now.`,
+        `You and ${brandName} have a mutual connection! Start your conversation now.`,
         'match',
         matchId
       )

@@ -1,10 +1,10 @@
 import { Check, X, Heart, MessageCircle, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { EnhancedInterest } from '../../types/interest'
+import { EnhancedConnection } from '../../types/connection'
 import { Badge, Button, IconButton } from '../ui'
 
-interface InterestCardProps {
-  interest: EnhancedInterest
+interface ConnectionCardProps {
+  connection: EnhancedConnection
   viewType: 'sent' | 'received' | 'mutual'
   onAccept?: (id: string) => void
   onReject?: (id: string) => void
@@ -12,25 +12,25 @@ interface InterestCardProps {
   onStartConversation?: (brandId: string, organizerId: string) => void
 }
 
-export function InterestCard({
-  interest,
+export function ConnectionCard({
+  connection,
   viewType,
   onAccept,
   onReject,
   onWithdraw,
   onStartConversation
-}: InterestCardProps) {
-  const displayName = viewType === 'sent' ? interest.receiverName : interest.senderName
-  const displayLogo = viewType === 'sent' ? interest.receiverLogo : interest.senderLogo
-  const isOrganizer = interest.senderType === 'organizer'
-  const isBrand = interest.senderType === 'brand'
+}: ConnectionCardProps) {
+  const displayName = viewType === 'sent' ? connection.receiverName : connection.senderName
+  const displayLogo = viewType === 'sent' ? connection.receiverLogo : connection.senderLogo
+  const isOrganizer = connection.senderType === 'organizer'
+  const isBrand = connection.senderType === 'brand'
 
   const getStatusBadge = () => {
-    if (interest.isMutual) {
-      return <Badge variant='success' size='sm'>Mutual Interest</Badge>
+    if (connection.isMutual) {
+      return <Badge variant='success' size='sm'>Mutual Connection</Badge>
     }
 
-    switch (interest.status) {
+    switch (connection.status) {
       case 'pending':
         return <Badge variant='warning' size='sm'>Pending</Badge>
       case 'accepted':
@@ -76,7 +76,7 @@ export function InterestCard({
                 {displayName.charAt(0)}
               </div>
             )}
-            {interest.isMutual && (
+            {connection.isMutual && (
               <div className='absolute -top-1 -right-1 bg-pink-500 rounded-full p-1'>
                 <Heart className='h-3 w-3 text-white fill-white' />
               </div>
@@ -86,7 +86,7 @@ export function InterestCard({
           {/* Profile Info */}
           <div className='flex-grow'>
             <Link
-              to={`/profiles/${interest.senderType === viewType ? interest.senderId : interest.receiverId}`}
+              to={`/profiles/${connection.senderType === viewType ? connection.senderId : connection.receiverId}`}
               className='text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors'
             >
               {displayName}
@@ -96,10 +96,10 @@ export function InterestCard({
                 variant={isBrand ? 'brand' : 'organizer'}
                 size='xs'
               >
-                {interest.senderType === viewType ? interest.receiverType : interest.senderType}
+                {connection.senderType === viewType ? connection.receiverType : connection.senderType}
               </Badge>
               {getStatusBadge()}
-              {interest.hasAIMatch && (
+              {connection.hasAIMatch && (
                 <Badge variant='secondary' size='xs'>AI Match Too</Badge>
               )}
             </div>
@@ -108,18 +108,18 @@ export function InterestCard({
 
         {/* Status Date */}
         <div className='text-sm text-gray-500'>
-          {formatDate(interest.createdAt)}
+          {formatDate(connection.createdAt)}
         </div>
       </div>
 
       {/* Actions */}
       <div className='flex items-center justify-end gap-2 mt-4 pt-4 border-t border-gray-100'>
-        {viewType === 'received' && interest.status === 'pending' && (
+        {viewType === 'received' && connection.status === 'pending' && (
           <>
             <Button
               size='sm'
               variant='danger'
-              onClick={() => onReject?.(interest.id)}
+              onClick={() => onReject?.(connection.id)}
               leftIcon={<X className='h-4 w-4' />}
             >
               Decline
@@ -127,7 +127,7 @@ export function InterestCard({
             <Button
               size='sm'
               variant='success'
-              onClick={() => onAccept?.(interest.id)}
+              onClick={() => onAccept?.(connection.id)}
               leftIcon={<Check className='h-4 w-4' />}
             >
               Accept
@@ -135,36 +135,36 @@ export function InterestCard({
           </>
         )}
 
-        {viewType === 'sent' && (interest.status === 'pending' || interest.status === 'accepted') && (
+        {viewType === 'sent' && (connection.status === 'pending' || connection.status === 'accepted') && (
           <Button
             size='sm'
             variant='outline'
-            onClick={() => onWithdraw?.(interest.id)}
+            onClick={() => onWithdraw?.(connection.id)}
             leftIcon={<Trash2 className='h-4 w-4' />}
             title={
-              interest.status === 'accepted' && interest.isMutual
+              connection.status === 'accepted' && connection.isMutual
                 ? 'Withdrawing will archive the conversation'
-                : 'Withdraw your interest'
+                : 'Withdraw your connection'
             }
           >
             Withdraw
           </Button>
         )}
 
-        {interest.isMutual && (
+        {connection.isMutual && (
           <Button
             size='sm'
             variant='primary'
-            onClick={() => onStartConversation?.(interest.brandId, interest.organizerId)}
+            onClick={() => onStartConversation?.(connection.brandId, connection.organizerId)}
             leftIcon={<MessageCircle className='h-4 w-4' />}
           >
             Start Conversation
           </Button>
         )}
 
-        {viewType === 'sent' && interest.status === 'accepted' && !interest.isMutual && (
+        {viewType === 'sent' && connection.status === 'accepted' && !connection.isMutual && (
           <div className='text-sm text-gray-600'>
-            Waiting for them to express interest back
+            Waiting for them to express connection back
           </div>
         )}
       </div>

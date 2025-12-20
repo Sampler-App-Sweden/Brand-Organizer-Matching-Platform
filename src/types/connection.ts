@@ -1,11 +1,11 @@
-// Interest types for manual interest expression system
+// Connection types for manual connection expression system
 
-export type InterestStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn'
+export type ConnectionStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn'
 
 /**
- * Core Interest interface representing a one-way interest expression
+ * Core Connection interface representing a one-way connection expression
  */
-export interface Interest {
+export interface Connection {
   id: string
   senderId: string
   senderType: 'brand' | 'organizer'
@@ -13,15 +13,15 @@ export interface Interest {
   receiverType: 'brand' | 'organizer'
   brandId: string
   organizerId: string
-  status: InterestStatus
+  status: ConnectionStatus
   createdAt: Date
   updatedAt: Date
 }
 
 /**
- * Enhanced Interest with additional profile information for display
+ * Enhanced Connection with additional profile information for display
  */
-export interface EnhancedInterest extends Interest {
+export interface EnhancedConnection extends Connection {
   senderName: string
   senderLogo?: string
   senderDescription?: string
@@ -33,9 +33,9 @@ export interface EnhancedInterest extends Interest {
 }
 
 /**
- * Interest statistics for dashboard widgets
+ * Connection statistics for dashboard widgets
  */
-export interface InterestStats {
+export interface ConnectionStats {
   sent: {
     pending: number
     accepted: number
@@ -52,9 +52,9 @@ export interface InterestStats {
 }
 
 /**
- * Database row type for interests table
+ * Database row type for connections table
  */
-export interface InterestRow {
+export interface ConnectionRow {
   id: string
   sender_id: string
   sender_type: 'brand' | 'organizer'
@@ -62,7 +62,7 @@ export interface InterestRow {
   receiver_type: 'brand' | 'organizer'
   brand_id: string
   organizer_id: string
-  status: InterestStatus
+  status: ConnectionStatus
   created_at: string
   updated_at: string
 }

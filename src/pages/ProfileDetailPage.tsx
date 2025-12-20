@@ -23,7 +23,7 @@ import { InterestButton } from '../components/directory/InterestButton'
 import { useAuth } from '../context/AuthContext'
 import { getBrandByUserId, getOrganizerByUserId } from '../services/dataService'
 import { fetchOrganizerEvents } from '../services/eventsService'
-import { getInterestStatus } from '../services/interestService'
+import { getConnectionStatus } from '../services/connectionService'
 import {
   getProfileOverviewById,
   ProfileOverview
@@ -125,7 +125,7 @@ export function ProfileDetailPage() {
       }
 
       try {
-        const status = await getInterestStatus(currentUser.id, profile.id)
+        const status = await getConnectionStatus(currentUser.id, profile.id)
         setInterestStatus(status)
       } catch (err) {
         console.error('Failed to load interest status:', err)
@@ -167,7 +167,7 @@ export function ProfileDetailPage() {
     if (!currentUser || !profile) return
 
     try {
-      const newStatus = await getInterestStatus(currentUser.id, profile.id)
+      const newStatus = await getConnectionStatus(currentUser.id, profile.id)
       setInterestStatus(newStatus)
     } catch (err) {
       console.error('Failed to reload interest status:', err)

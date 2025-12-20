@@ -1,7 +1,7 @@
 import { supabase } from './supabaseClient'
 import { notifyNewMessage } from './notificationService'
 import { checkExistingMatch } from './dataService'
-import { checkMutualInterest } from './interestService'
+import { checkMutualConnection } from './connectionService'
 
 // Chat service for AI-powered communication
 export interface Message {
@@ -159,8 +159,8 @@ async function canStartConversation(
     return false
   }
 
-  // Check for mutual interest
-  return await checkMutualInterest(brandData.user_id, organizerData.user_id)
+  // Check for mutual connection
+  return await checkMutualConnection(brandData.user_id, organizerData.user_id)
 }
 
 // Get or create a conversation between a brand and an organizer

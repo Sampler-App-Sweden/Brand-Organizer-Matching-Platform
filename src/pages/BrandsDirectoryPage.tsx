@@ -9,7 +9,7 @@ import { Pagination } from '../components/ui'
 import { filterProfilesByRole } from '../components/directory/profileDirectoryUtils'
 import { Layout } from '../components/layout'
 import { getProfiles, ProfileOverview } from '../services/profileService'
-import { getBatchInterestStatuses, expressInterest } from '../services/interestService'
+import { getBatchConnectionStatuses, expressConnection } from '../services/connectionService'
 import { useAuth } from '../context/AuthContext'
 
 type InterestStatus = 'none' | 'sent' | 'received' | 'mutual'
@@ -61,7 +61,7 @@ export function BrandsDirectoryPage() {
 
       try {
         const profileUserIds = visibleProfiles.map(p => p.id)
-        const statuses = await getBatchInterestStatuses(currentUser.id, profileUserIds)
+        const statuses = await getBatchConnectionStatuses(currentUser.id, profileUserIds)
         setInterestStatuses(statuses)
       } catch (error) {
         console.error('Failed to fetch interest statuses:', error)
@@ -103,7 +103,7 @@ export function BrandsDirectoryPage() {
       if (!profile) return
 
       // Current user must be an organizer to express interest in brands
-      await expressInterest(
+      await expressConnection(
         currentUser.id,
         'organizer',
         profile.id,
@@ -112,7 +112,7 @@ export function BrandsDirectoryPage() {
 
       // Refresh interest statuses
       const profileUserIds = visibleProfiles.map(p => p.id)
-      const statuses = await getBatchInterestStatuses(currentUser.id, profileUserIds)
+      const statuses = await getBatchConnectionStatuses(currentUser.id, profileUserIds)
       setInterestStatuses(statuses)
     } catch (error: any) {
       console.error('Failed to express interest:', error)
