@@ -614,27 +614,42 @@ async function createManualMatch(brandId: string, organizerId: string): Promise<
 
   // Create conversation if it doesn't exist
   console.log('[createManualMatch] Checking for existing conversation...')
-  const { data: existingConversation } = await supabase
+  const { data: existingConversation, error: conversationFetchError } = await supabase
     .from('conversations')
     .select('*')
     .eq('brand_id', brandId)
     .eq('organizer_id', organizerId)
     .maybeSingle()
 
+  if (conversationFetchError) {
+    console.error('[createManualMatch] Error fetching conversation:', conversationFetchError)
+  }
+
   console.log('[createManualMatch] Existing conversation:', existingConversation ? { id: existingConversation.id } : 'none')
 
   if (!existingConversation) {
-    console.log('[createManualMatch] Creating conversation...')
+    console.log('[createManualMatch] Creating conversation for:', { brandId, organizerId })
+    const { data: currentUser } = await supabase.auth.getUser()
+    console.log('[createManualMatch] Current user creating conversation:', currentUser?.user?.id)
+
     const { data, error } = await supabase.from('conversations').insert({
       brand_id: brandId,
       organizer_id: organizerId
     }).select()
 
     if (error) {
-      console.error('[createManualMatch] Error creating conversation:', error)
-      throw new Error(`Failed to create conversation: ${error.message}`)
+      console.error('[createManualMatch] ❌ Error creating conversation:', {
+        error,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
+      // Log but don't throw - match should still be created even if conversation fails
+      console.warn('[createManualMatch] ⚠️ Conversation creation failed, but match was created successfully')
+    } else {
+      console.log('[createManualMatch] ✅ Conversation created:', data)
     }
-    console.log('[createManualMatch] Conversation created:', data)
   }
 
   console.log('[createManualMatch] ✅ Match creation complete!')
@@ -684,4 +699,125 @@ export async function getEnhancedInterest(interest: Interest): Promise<EnhancedI
     isMutual,
     hasAIMatch: !!aiMatch
   }
+}
+
+/**
+ * Batch enhance multiple interests with profile information (optimized)
+ * This reduces N+1 queries by fetching all profiles at once
+ */
+export async function getBatchEnhancedInterests(interests: Interest[]): Promise<EnhancedInterest[]> {
+  if (interests.length === 0) return []
+
+  // Extract unique brand and organizer IDs
+  const brandIds = new Set<string>()
+  const organizerIds = new Set<string>()
+
+  interests.forEach(interest => {
+    brandIds.add(interest.brandId)
+    organizerIds.add(interest.organizerId)
+  })
+
+  // Batch fetch all brands and organizers in parallel
+  const [brandsData, organizersData] = await Promise.all([
+    supabase
+      .from('brands')
+      .select('id, company_name, user_id')
+      .in('id', Array.from(brandIds)),
+    supabase
+      .from('organizers')
+      .select('id, organizer_name, user_id')
+      .in('id', Array.from(organizerIds))
+  ])
+
+  if (brandsData.error) {
+    console.error('Failed to fetch brands:', brandsData.error)
+  }
+  if (organizersData.error) {
+    console.error('Failed to fetch organizers:', organizersData.error)
+  }
+
+  // Create lookup maps
+  const brandMap = new Map(
+    (brandsData.data || []).map(b => [b.id, { name: b.company_name, userId: b.user_id }])
+  )
+  const organizerMap = new Map(
+    (organizersData.data || []).map(o => [o.id, { name: o.organizer_name, userId: o.user_id }])
+  )
+
+  // Get all user IDs for mutual interest check
+  const userIds = new Set<string>()
+  interests.forEach(i => {
+    userIds.add(i.senderId)
+    userIds.add(i.receiverId)
+  })
+
+  // Batch fetch all interests between these users for mutual check
+  const { data: allInterests } = await supabase
+    .from('interests')
+    .select('sender_id, receiver_id, status')
+    .in('sender_id', Array.from(userIds))
+    .in('receiver_id', Array.from(userIds))
+    .in('status', ['pending', 'accepted'])
+
+  // Create mutual interest map
+  const mutualMap = new Map<string, boolean>()
+  const interestLookup = new Map<string, boolean>()
+
+  ;(allInterests || []).forEach(i => {
+    interestLookup.set(`${i.sender_id}|${i.receiver_id}`, true)
+  })
+
+  interests.forEach(interest => {
+    const forward = interestLookup.has(`${interest.senderId}|${interest.receiverId}`)
+    const reverse = interestLookup.has(`${interest.receiverId}|${interest.senderId}`)
+    const pairKey = [interest.senderId, interest.receiverId].sort().join('|')
+    mutualMap.set(pairKey, forward && reverse)
+  })
+
+  // Batch check for AI matches
+  const brandOrgPairs = Array.from(new Set(
+    interests.map(i => ({ brand_id: i.brandId, organizer_id: i.organizerId }))
+  ))
+
+  const matchConditions = brandOrgPairs.map(pair =>
+    `and(brand_id.eq.${pair.brand_id},organizer_id.eq.${pair.organizer_id})`
+  ).join(',')
+
+  const { data: aiMatches } = await supabase
+    .from('matches')
+    .select('brand_id, organizer_id')
+    .eq('match_source', 'ai')
+    .or(matchConditions)
+
+  const aiMatchMap = new Set(
+    (aiMatches || []).map(m => `${m.brand_id}|${m.organizer_id}`)
+  )
+
+  // Enhance all interests using the lookup maps
+  return interests.map(interest => {
+    const brand = brandMap.get(interest.brandId)
+    const organizer = organizerMap.get(interest.organizerId)
+
+    const senderName = interest.senderType === 'brand'
+      ? (brand?.name || 'Unknown')
+      : (organizer?.name || 'Unknown')
+
+    const receiverName = interest.receiverType === 'brand'
+      ? (brand?.name || 'Unknown')
+      : (organizer?.name || 'Unknown')
+
+    const pairKey = [interest.senderId, interest.receiverId].sort().join('|')
+    const isMutual = mutualMap.get(pairKey) || false
+    const hasAIMatch = aiMatchMap.has(`${interest.brandId}|${interest.organizerId}`)
+
+    return {
+      ...interest,
+      senderName,
+      senderLogo: undefined,
+      receiverName,
+      receiverLogo: undefined,
+      isMutual,
+      hasAIMatch
+    }
+  })
 }

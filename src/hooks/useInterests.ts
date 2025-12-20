@@ -11,7 +11,7 @@ import {
   respondToInterest,
   withdrawInterest,
   getInterestStats,
-  getEnhancedInterest
+  getBatchEnhancedInterests
 } from '../services/interestService'
 import { useNavigate } from 'react-router-dom'
 import { getOrCreateConversation } from '../services/chatService'
@@ -65,19 +65,20 @@ export function useInterests({
         getInterestStats(userId)
       ])
 
-      // Enhance interests with profile information
-      const enhancedSent = await Promise.all(
-        sent.map((interest) => getEnhancedInterest(interest))
-      )
-      const enhancedReceived = await Promise.all(
-        received.map((interest) => getEnhancedInterest(interest))
-      )
-      const enhancedMutual = await Promise.all(
-        mutual.map((interest) => getEnhancedInterest(interest))
-      )
+      // Batch enhance interests with profile information (optimized!)
+      const [enhancedSent, enhancedReceived, enhancedMutual] = await Promise.all([
+        getBatchEnhancedInterests(sent),
+        getBatchEnhancedInterests(received),
+        getBatchEnhancedInterests(mutual)
+      ])
 
-      setSentInterests(enhancedSent)
-      setReceivedInterests(enhancedReceived)
+      // Filter out mutual interests from sent and received tabs
+      // so they only appear in the mutual tab
+      const filteredSent = enhancedSent.filter(interest => !interest.isMutual)
+      const filteredReceived = enhancedReceived.filter(interest => !interest.isMutual)
+
+      setSentInterests(filteredSent)
+      setReceivedInterests(filteredReceived)
       setMutualInterests(enhancedMutual)
       setStats(statistics)
     } catch (err) {
