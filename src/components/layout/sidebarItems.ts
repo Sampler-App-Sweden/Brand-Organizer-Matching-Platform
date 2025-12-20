@@ -6,7 +6,6 @@ import {
   HomeIcon,
   LogOut,
   MessageSquareIcon,
-  Package,
   UsersIcon
 } from 'lucide-react'
 import { createElement, ReactElement } from 'react'
@@ -37,19 +36,9 @@ export const sidebarItems: SidebarCollection = {
       matchExact: true
     },
     {
-      label: 'Matches',
-      icon: createElement(UsersIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/matches'
-    },
-    {
-      label: 'Interests',
+      label: 'Connections',
       icon: createElement(Heart, { className: 'h-5 w-5' }),
-      path: '/dashboard/interests'
-    },
-    {
-      label: 'Products',
-      icon: createElement(Package, { className: 'h-5 w-5' }),
-      path: '/dashboard/products'
+      path: '/dashboard/connections'
     },
     {
       label: 'Saved',
@@ -65,19 +54,9 @@ export const sidebarItems: SidebarCollection = {
       matchExact: true
     },
     {
-      label: 'Events',
-      icon: createElement(Package, { className: 'h-5 w-5' }),
-      path: '/dashboard/events'
-    },
-    {
-      label: 'Matches',
-      icon: createElement(UsersIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/matches'
-    },
-    {
-      label: 'Interests',
+      label: 'Connections',
       icon: createElement(Heart, { className: 'h-5 w-5' }),
-      path: '/dashboard/interests'
+      path: '/dashboard/connections'
     },
     {
       label: 'Saved',
@@ -120,9 +99,9 @@ export const sidebarItems: SidebarCollection = {
       path: '/dashboard/notifications'
     },
     {
-      label: 'Profile',
+      label: 'Account',
       icon: createElement(UsersIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/edit-profile'
+      path: '/dashboard/account'
     },
     {
       label: 'Log out',

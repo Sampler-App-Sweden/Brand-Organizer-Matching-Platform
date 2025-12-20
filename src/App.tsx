@@ -14,14 +14,11 @@ import { BrandForm } from './pages/BrandForm'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
 import { ContactPage } from './pages/ContactPage'
 import { BrandDashboard, OrganizerDashboard } from './pages/dashboard'
-import { EditProfilePage } from './pages/dashboard/EditProfilePage'
-import { EventsPage } from './pages/dashboard/EventsPage'
-import { InterestsPage } from './pages/dashboard/InterestsPage'
+import { AccountPage } from './pages/dashboard/AccountPage'
+import { ConnectionsPage } from './pages/dashboard/ConnectionsPage'
 import { MatchDetails } from './pages/dashboard/MatchDetails'
-import { MatchesPage } from './pages/dashboard/MatchesPage'
 import { MessagesPage } from './pages/dashboard/MessagesPage'
 import { NotificationsPage } from './pages/dashboard/NotificationsPage'
-import { ProductsPage } from './pages/dashboard/ProductsPage'
 import { SavedItemsPage } from './pages/dashboard/SavedItemsPage'
 import { Home } from './pages/Home'
 import { InspirationBoardPage } from './pages/InspirationBoardPage'
@@ -96,28 +93,12 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      <Route
-        path='/dashboard/events'
-        element={
-          <ProtectedRoute requiredType='organizer'>
-            <EventsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path='/dashboard/products'
-        element={
-          <ProtectedRoute requiredType='brand'>
-            <ProductsPage />
-          </ProtectedRoute>
-        }
-      />
       {/* Shared dashboard routes */}
       <Route
-        path='/dashboard/edit-profile'
+        path='/dashboard/account'
         element={
           <ProtectedRoute>
-            <EditProfilePage />
+            <AccountPage />
           </ProtectedRoute>
         }
       />
@@ -137,7 +118,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      {/* New messages and matches routes */}
+      {/* New messages and connections routes */}
       <Route
         path='/dashboard/messages'
         element={
@@ -147,18 +128,10 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path='/dashboard/matches'
+        path='/dashboard/connections'
         element={
           <ProtectedRoute>
-            <MatchesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path='/dashboard/interests'
-        element={
-          <ProtectedRoute>
-            <InterestsPage />
+            <ConnectionsPage />
           </ProtectedRoute>
         }
       />
@@ -179,6 +152,12 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      {/* Redirects for backward compatibility */}
+      <Route path='/dashboard/interests' element={<Navigate to='/dashboard/connections' replace />} />
+      <Route path='/dashboard/edit-profile' element={<Navigate to='/dashboard/account' replace />} />
+      <Route path='/dashboard/matches' element={<Navigate to='/dashboard/connections?tab=mutual' replace />} />
+      <Route path='/dashboard/products' element={<Navigate to='/dashboard/account?tab=products' replace />} />
+      <Route path='/dashboard/events' element={<Navigate to='/dashboard/account?tab=events' replace />} />
       {/* Catch-all redirect */}
       <Route path='*' element={<Navigate to='/' replace />} />
     </Routes>

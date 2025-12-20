@@ -69,7 +69,7 @@ export function OrganizerDashboard() {
             <Link to='/organizer'>
               <Button variant='primary'>Create Organizer Profile</Button>
             </Link>
-            <Link to='/dashboard/edit-profile'>
+            <Link to='/dashboard/account'>
               <Button variant='outline'>Edit Basic Info</Button>
             </Link>
           </div>
@@ -126,7 +126,7 @@ export function OrganizerDashboard() {
       <div className='mb-8'>
         <div className='flex justify-between items-center mb-4'>
           <h2 className='text-xl font-bold text-gray-900'>Upcoming Events</h2>
-          <Link to='/dashboard/events'>
+          <Link to='/dashboard/account?tab=events'>
             <Button variant='outline' size='sm'>
               Manage Events
             </Button>
@@ -206,7 +206,7 @@ export function OrganizerDashboard() {
             </div>
           </div>
           <div className='mt-4 pt-4 border-t border-white/20 flex gap-3'>
-            <Link to='/dashboard/matches'>
+            <Link to='/dashboard/connections?tab=mutual'>
               <Button
                 variant='primary'
                 size='sm'

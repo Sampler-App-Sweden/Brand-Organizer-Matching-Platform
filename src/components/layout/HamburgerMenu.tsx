@@ -87,11 +87,11 @@ export function HamburgerMenu({
         {showDashboardActions ? (
           <div className='border-t border-gray-200 pt-2 mt-2'>
             <Link
-              to='/dashboard/edit-profile'
+              to='/dashboard/account'
               className='flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg'
               onClick={onClose}
             >
-              Profile Settings
+              Account Settings
               <span className='text-xs text-gray-400'>
                 {currentUser?.name || 'User'}
               </span>

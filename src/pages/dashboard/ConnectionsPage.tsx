@@ -7,7 +7,7 @@ import { Heart, Send, Users } from 'lucide-react'
 
 type TabView = 'sent' | 'received' | 'mutual'
 
-export function InterestsPage() {
+export function ConnectionsPage() {
   const { currentUser } = useAuth()
   const [activeTab, setActiveTab] = useState<TabView>('received')
 
@@ -123,9 +123,9 @@ export function InterestsPage() {
       <div className='flex flex-col'>
         {/* Header */}
         <div className='mb-6'>
-          <h1 className='text-2xl font-bold text-gray-900'>Interests</h1>
+          <h1 className='text-2xl font-bold text-gray-900'>Connections</h1>
           <p className='text-gray-600 mt-1'>
-            Manage your interest expressions and discover mutual connections
+            Manage your connections and discover mutual interests
           </p>
         </div>
 
@@ -169,7 +169,7 @@ export function InterestsPage() {
         {/* Content */}
         {loading ? (
           <div className='flex justify-center items-center h-64'>
-            <div className='text-gray-500'>Loading interests...</div>
+            <div className='text-gray-500'>Loading connections...</div>
           </div>
         ) : error ? (
           <div className='bg-red-50 border border-red-200 rounded-lg p-4'>

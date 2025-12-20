@@ -122,19 +122,9 @@ export function getMobileNavLinks(role?: string): NavLink[] {
     case 'brand':
       dashboardLinks = [
         {
-          label: 'Matches',
-          path: '/dashboard/matches',
-          icon: <UsersIcon className='h-4 w-4' />
-        },
-        {
-          label: 'Interests',
-          path: '/dashboard/interests',
+          label: 'Connections',
+          path: '/dashboard/connections',
           icon: <Heart className='h-4 w-4' />
-        },
-        {
-          label: 'Products',
-          path: '/dashboard/products',
-          icon: <PackageIcon className='h-4 w-4' />
         },
         {
           label: 'Saved',
@@ -146,18 +136,8 @@ export function getMobileNavLinks(role?: string): NavLink[] {
     case 'organizer':
       dashboardLinks = [
         {
-          label: 'Events',
-          path: '/dashboard/events',
-          icon: <PackageIcon className='h-4 w-4' />
-        },
-        {
-          label: 'Matches',
-          path: '/dashboard/matches',
-          icon: <UsersIcon className='h-4 w-4' />
-        },
-        {
-          label: 'Interests',
-          path: '/dashboard/interests',
+          label: 'Connections',
+          path: '/dashboard/connections',
           icon: <Heart className='h-4 w-4' />
         },
         {

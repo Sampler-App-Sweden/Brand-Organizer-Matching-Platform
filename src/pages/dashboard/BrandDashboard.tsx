@@ -93,7 +93,7 @@ export function BrandDashboard() {
             <Link to='/brand'>
               <Button variant='primary'>Create Brand Profile</Button>
             </Link>
-            <Link to='/dashboard/edit-profile'>
+            <Link to='/dashboard/account'>
               <Button variant='outline'>Edit Basic Info</Button>
             </Link>
           </div>
@@ -204,7 +204,7 @@ export function BrandDashboard() {
         <div className='flex justify-between items-center mb-4'>
           <h2 className='text-xl font-bold text-gray-900'>Your Profile</h2>
           <Link
-            to='/dashboard/edit-profile'
+            to='/dashboard/account'
             className='text-sm text-indigo-600 hover:text-indigo-800'
           >
             Edit profile
