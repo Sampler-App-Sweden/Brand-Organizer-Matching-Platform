@@ -228,7 +228,9 @@ export function ProfileDetailPage() {
                     </div>
                   </div>
                   <div className='space-y-3 w-full md:w-auto'>
-                    {currentUser && currentUser.id !== profile.id ? (
+                    {currentUser && currentUser.id !== profile.id &&
+                     ((profile.role === 'Brand' && currentUser.type === 'organizer') ||
+                      (profile.role === 'Organizer' && currentUser.type === 'brand')) ? (
                       <InterestButton
                         profileId={profile.id}
                         profileRole={profile.role.toLowerCase() as 'brand' | 'organizer'}

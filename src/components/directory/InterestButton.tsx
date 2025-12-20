@@ -39,6 +39,12 @@ export function InterestButton({
       return
     }
 
+    // Prevent brands from expressing interest in brands or organizers in organizers
+    if (currentUserType === profileRole) {
+      alert(`You can only express interest in ${profileRole === 'brand' ? 'organizers' : 'brands'}, not other ${profileRole}s.`)
+      return
+    }
+
     if (interestStatus === 'received' || interestStatus === 'mutual') {
       // Don't allow action on received or mutual status from this button
       // They should go to the interests page to accept/view
