@@ -10,6 +10,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { MAIN_NAV_ITEMS } from '../../constants/navigationLinks'
 import { useNotifications } from '../../context'
 import { useAuth } from '../../context/AuthContext'
+import { HamburgerMenu } from './HamburgerMenu'
 
 export function DashboardNavbar() {
   const { currentUser, logout } = useAuth()
@@ -120,27 +121,13 @@ export function DashboardNavbar() {
         </div>
       </div>
 
-      {mobileMenuOpen && (
-        <div className='md:hidden bg-white border-t border-gray-200'>
-          <nav className='px-4 py-2 space-y-1'>
-            {MAIN_NAV_ITEMS.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium ${
-                  location.pathname === item.path
-                    ? 'bg-indigo-50 text-indigo-600'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </div>
-      )}
+      <HamburgerMenu
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        showDashboardActions={true}
+        handleLogout={handleLogout}
+        currentUser={currentUser}
+      />
     </header>
   )
 }

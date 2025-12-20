@@ -5,7 +5,6 @@ import {
   CalendarIcon,
   HandshakeIcon,
   Heart,
-  HomeIcon,
   MessageSquareIcon,
   PackageIcon,
   UsersIcon
@@ -123,11 +122,6 @@ export function getMobileNavLinks(role?: string): NavLink[] {
     case 'brand':
       dashboardLinks = [
         {
-          label: 'Dashboard',
-          path: '/dashboard/brand',
-          icon: <HomeIcon className='h-4 w-4' />
-        },
-        {
           label: 'Matches',
           path: '/dashboard/matches',
           icon: <UsersIcon className='h-4 w-4' />
@@ -152,11 +146,6 @@ export function getMobileNavLinks(role?: string): NavLink[] {
     case 'organizer':
       dashboardLinks = [
         {
-          label: 'Dashboard',
-          path: '/dashboard/organizer',
-          icon: <HomeIcon className='h-4 w-4' />
-        },
-        {
           label: 'Events',
           path: '/dashboard/events',
           icon: <PackageIcon className='h-4 w-4' />
@@ -180,11 +169,6 @@ export function getMobileNavLinks(role?: string): NavLink[] {
       break
     case 'admin':
       dashboardLinks = [
-        {
-          label: 'Dashboard',
-          path: '/admin',
-          icon: <HomeIcon className='h-4 w-4' />
-        },
         {
           label: 'Brands',
           path: '/admin/brands',

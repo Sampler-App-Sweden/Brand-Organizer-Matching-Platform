@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { getBrandById, getBrandsByIds } from '../../services/dataService'
 import { Brand, Match } from '../../types'
 import {
-  TrendingUpIcon,
+  UsersIcon,
   CheckCircleIcon,
   AlertCircleIcon,
   CalendarIcon
@@ -13,6 +13,7 @@ import {
 import { Button } from '../../components/ui'
 import { OrganizerSponsorshipPanel } from '../../components/sponsorship/OrganizerSponsorshipPanel'
 import { useOrganizerDashboard } from '../../hooks/useOrganizerDashboard'
+import { StatsCard } from '../../components/dashboard/StatsCard'
 
 export function OrganizerDashboard() {
   const { currentUser } = useAuth()
@@ -92,48 +93,28 @@ export function OrganizerDashboard() {
       </div>
 
       {/* Stats */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-6'>
-        <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6'>
-          <div className='flex items-center'>
-            <div className='bg-indigo-100 rounded-md p-3'>
-              <TrendingUpIcon className='h-6 w-6 text-indigo-600' />
-            </div>
-            <div className='ml-4'>
-              <h3 className='text-lg font-semibold text-gray-900'>
-                Total Matches
-              </h3>
-              <p className='text-2xl font-bold text-gray-900'>
-                {matches.length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6'>
-          <div className='flex items-center'>
-            <div className='bg-yellow-100 rounded-md p-3'>
-              <AlertCircleIcon className='h-6 w-6 text-yellow-600' />
-            </div>
-            <div className='ml-4'>
-              <h3 className='text-lg font-semibold text-gray-900'>Pending</h3>
-              <p className='text-2xl font-bold text-gray-900'>
-                {pendingMatches.length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6'>
-          <div className='flex items-center'>
-            <div className='bg-green-100 rounded-md p-3'>
-              <CheckCircleIcon className='h-6 w-6 text-green-600' />
-            </div>
-            <div className='ml-4'>
-              <h3 className='text-lg font-semibold text-gray-900'>Confirmed</h3>
-              <p className='text-2xl font-bold text-gray-900'>
-                {acceptedMatches.length}
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6'>
+        <StatsCard
+          icon={UsersIcon}
+          iconColor='indigo'
+          label='Total Matches'
+          value={matches.length}
+          sublabel='Brand connections found'
+        />
+        <StatsCard
+          icon={AlertCircleIcon}
+          iconColor='yellow'
+          label='Pending Matches'
+          value={pendingMatches.length}
+          sublabel='Awaiting response'
+        />
+        <StatsCard
+          icon={CheckCircleIcon}
+          iconColor='green'
+          label='Active Sponsorships'
+          value={acceptedMatches.length}
+          sublabel='Confirmed partnerships'
+        />
       </div>
 
       {/* Organizer Sponsorship Panel */}

@@ -44,6 +44,9 @@ export function DirectoryCard({
   const eventOrAudience = isBrand
     ? profile.whatTheySeek?.audienceTags ?? []
     : profile.whatTheySeek?.eventTypes ?? []
+
+  // Check if this profile belongs to the current user
+  const isOwnProfile = currentUser?.email === profile.email
   const [isSaved, setIsSaved] = useState<boolean>(initialSaved ?? false)
   const [isCheckingSaved, setIsCheckingSaved] = useState<boolean>(
     showSaveAction && initialSaved === undefined && Boolean(userId)
@@ -120,7 +123,7 @@ export function DirectoryCard({
     event.preventDefault()
     event.stopPropagation()
 
-    if (!showInterestAction) {
+    if (!showInterestAction || isOwnProfile) {
       return
     }
 
@@ -260,11 +263,13 @@ export function DirectoryCard({
             <div className='mt-4 pt-4 border-t border-gray-100'>
               <button
                 onClick={handleExpressInterest}
-                disabled={interestStatus !== 'none'}
+                disabled={isOwnProfile || interestStatus !== 'none'}
                 className={`
                   w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium text-sm transition-colors
                   ${
-                    interestStatus === 'mutual'
+                    isOwnProfile
+                      ? 'bg-gray-50 text-gray-400 border border-gray-200 cursor-not-allowed'
+                      : interestStatus === 'mutual'
                       ? 'bg-pink-50 text-pink-700 border border-pink-200 cursor-default'
                       : interestStatus === 'sent'
                       ? 'bg-gray-50 text-gray-500 border border-gray-200 cursor-not-allowed'
@@ -279,10 +284,11 @@ export function DirectoryCard({
                     interestStatus === 'mutual' ? 'fill-pink-500 text-pink-500' : ''
                   }`}
                 />
-                {interestStatus === 'mutual' && 'Mutual Interest'}
-                {interestStatus === 'sent' && 'Interest Sent'}
-                {interestStatus === 'received' && 'Interested in You'}
-                {interestStatus === 'none' && 'Express Interest'}
+                {isOwnProfile && 'Your Profile'}
+                {!isOwnProfile && interestStatus === 'mutual' && 'Mutual Interest'}
+                {!isOwnProfile && interestStatus === 'sent' && 'Interest Sent'}
+                {!isOwnProfile && interestStatus === 'received' && 'Interested in You'}
+                {!isOwnProfile && interestStatus === 'none' && 'Express Interest'}
               </button>
             </div>
           )}

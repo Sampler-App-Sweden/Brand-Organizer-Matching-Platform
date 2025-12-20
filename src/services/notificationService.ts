@@ -163,6 +163,44 @@ export async function getUserName(userId: string): Promise<string> {
 }
 
 /**
+ * Get brand name from brand_id
+ */
+async function getBrandName(brandId: string): Promise<string> {
+  try {
+    const { data, error } = await supabase
+      .from('brands')
+      .select('company_name')
+      .eq('id', brandId)
+      .maybeSingle()
+
+    if (error) throw error
+    return data?.company_name ?? 'A brand'
+  } catch (error) {
+    console.error('Failed to get brand name:', error)
+    return 'A brand'
+  }
+}
+
+/**
+ * Get organizer name from organizer_id
+ */
+async function getOrganizerName(organizerId: string): Promise<string> {
+  try {
+    const { data, error } = await supabase
+      .from('organizers')
+      .select('organizer_name')
+      .eq('id', organizerId)
+      .maybeSingle()
+
+    if (error) throw error
+    return data?.organizer_name ?? 'An organizer'
+  } catch (error) {
+    console.error('Failed to get organizer name:', error)
+    return 'An organizer'
+  }
+}
+
+/**
  * Notify both parties when a new match is created
  * Creates two separate notifications with personalized messages
  */
@@ -176,9 +214,9 @@ export async function notifyNewMatch(
     const brandUserId = await getUserIdFromBrandId(brandId)
     const organizerUserId = await getUserIdFromOrganizerId(organizerId)
 
-    // Get names for personalized messages
-    const brandName = await getUserName(brandUserId ?? '')
-    const organizerName = await getUserName(organizerUserId ?? '')
+    // Get brand and organizer names
+    const brandName = await getBrandName(brandId)
+    const organizerName = await getOrganizerName(organizerId)
 
     // Notify brand
     if (brandUserId) {
@@ -363,9 +401,9 @@ export async function notifyMutualMatch(
     const brandUserId = await getUserIdFromBrandId(brandId)
     const organizerUserId = await getUserIdFromOrganizerId(organizerId)
 
-    // Get names
-    const brandName = await getUserName(brandUserId ?? '')
-    const organizerName = await getUserName(organizerUserId ?? '')
+    // Get brand and organizer names
+    const brandName = await getBrandName(brandId)
+    const organizerName = await getOrganizerName(organizerId)
 
     // Notify brand
     if (brandUserId) {

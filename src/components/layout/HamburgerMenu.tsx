@@ -51,7 +51,7 @@ export function HamburgerMenu({
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium ${
+            className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium ${
               location.pathname === item.path
                 ? 'bg-blue-50 text-indigo-600'
                 : 'text-gray-700 hover:bg-gray-50'
@@ -70,7 +70,7 @@ export function HamburgerMenu({
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium ${
+                className={`flex items-center space-x-2 px-4 py-3 rounded-lg text-sm font-medium ${
                   location.pathname === item.path
                     ? 'bg-blue-50 text-indigo-600'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -88,7 +88,7 @@ export function HamburgerMenu({
           <div className='border-t border-gray-200 pt-2 mt-2'>
             <Link
               to='/dashboard/edit-profile'
-              className='flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg'
+              className='flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg'
               onClick={onClose}
             >
               Profile Settings
@@ -98,7 +98,7 @@ export function HamburgerMenu({
             </Link>
             <button
               onClick={handleLogout}
-              className='w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg'
+              className='w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg'
             >
               Log Out
             </button>
@@ -106,7 +106,7 @@ export function HamburgerMenu({
         ) : currentUser ? (
           <Link
             to={getDashboardLink(currentUser)}
-            className='block px-4 py-2 text-center text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700'
+            className='block px-4 py-3 text-center text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700'
             onClick={onClose}
           >
             Go to Dashboard
@@ -114,7 +114,7 @@ export function HamburgerMenu({
         ) : (
           <Link
             to='/login'
-            className='block px-4 py-2 text-center text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700'
+            className='block px-4 py-3 text-center text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700'
             onClick={onClose}
           >
             Login

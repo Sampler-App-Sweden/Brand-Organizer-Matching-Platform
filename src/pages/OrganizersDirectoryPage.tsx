@@ -96,6 +96,12 @@ export function OrganizersDirectoryPage() {
       return
     }
 
+    // Check if user is a brand
+    if (currentUser.type !== 'brand') {
+      alert('Only brands can express interest in organizers. Please create a brand profile first.')
+      return
+    }
+
     try {
       const profile = visibleProfiles.find(p => p.id === profileId)
       if (!profile) return
@@ -114,7 +120,15 @@ export function OrganizersDirectoryPage() {
       setInterestStatuses(statuses)
     } catch (error: any) {
       console.error('Failed to express interest:', error)
-      alert(error.message || 'Failed to express interest. Please try again.')
+
+      // Provide helpful error messages
+      if (error.message?.includes('Brand profile not found')) {
+        alert('Please create your brand profile before expressing interest. You can do this from your dashboard.')
+      } else if (error.message?.includes('Organizer profile not found')) {
+        alert('This organizer profile is not available.')
+      } else {
+        alert(error.message || 'Failed to express interest. Please try again.')
+      }
     }
   }
   return (
@@ -185,7 +199,7 @@ export function OrganizersDirectoryPage() {
                   <>
                     <DirectoryGrid
                       profiles={visibleProfiles}
-                      showInterestAction={!!currentUser}
+                      showInterestAction={!!currentUser && currentUser.type === 'brand'}
                       interestStatuses={interestStatuses}
                       onExpressInterest={handleExpressInterest}
                     />

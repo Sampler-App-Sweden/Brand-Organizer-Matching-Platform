@@ -7,12 +7,13 @@ import {
   getMatchesForBrand,
   getOrganizersByIds
 } from '../../services/dataService'
-import { TrendingUpIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
+import { UsersIcon, CheckCircleIcon, AlertCircleIcon, PackageIcon } from 'lucide-react'
 import { Button } from '../../components/ui'
 import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
 import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
 import { Brand, Organizer, Match } from '../../types'
 import { MatchRow } from '../dashboard/MatchRow'
+import { StatsCard } from '../../components/dashboard/StatsCard'
 
 export function BrandDashboard() {
   const { currentUser } = useAuth()
@@ -115,48 +116,28 @@ export function BrandDashboard() {
       </div>
 
       {/* Stats */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 mb-6'>
-        <div className='bg-white rounded-lg shadow-sm p-6'>
-          <div className='flex items-center'>
-            <div className='bg-indigo-100 rounded-md p-3'>
-              <TrendingUpIcon className='h-6 w-6 text-indigo-600' />
-            </div>
-            <div className='ml-4'>
-              <h3 className='text-lg font-semibold text-gray-900'>
-                Total Matches
-              </h3>
-              <p className='text-2xl font-bold text-gray-900'>
-                {matches.length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className='bg-white rounded-lg shadow-sm p-6'>
-          <div className='flex items-center'>
-            <div className='bg-yellow-100 rounded-md p-3'>
-              <AlertCircleIcon className='h-6 w-6 text-yellow-600' />
-            </div>
-            <div className='ml-4'>
-              <h3 className='text-lg font-semibold text-gray-900'>Pending</h3>
-              <p className='text-2xl font-bold text-gray-900'>
-                {pendingMatches.length}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className='bg-white rounded-lg shadow-sm p-6'>
-          <div className='flex items-center'>
-            <div className='bg-green-100 rounded-md p-3'>
-              <CheckCircleIcon className='h-6 w-6 text-green-600' />
-            </div>
-            <div className='ml-4'>
-              <h3 className='text-lg font-semibold text-gray-900'>Accepted</h3>
-              <p className='text-2xl font-bold text-gray-900'>
-                {acceptedMatches.length}
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6'>
+        <StatsCard
+          icon={UsersIcon}
+          iconColor='indigo'
+          label='Total Matches'
+          value={matches.length}
+          sublabel='Brand-organizer connections'
+        />
+        <StatsCard
+          icon={AlertCircleIcon}
+          iconColor='yellow'
+          label='Pending Matches'
+          value={pendingMatches.length}
+          sublabel='Awaiting response'
+        />
+        <StatsCard
+          icon={CheckCircleIcon}
+          iconColor='green'
+          label='Active Sponsorships'
+          value={acceptedMatches.length}
+          sublabel='Confirmed partnerships'
+        />
       </div>
 
       {/* Product Sponsorship Manager */}
