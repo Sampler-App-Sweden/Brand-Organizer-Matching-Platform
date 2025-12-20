@@ -25,28 +25,29 @@ export function HamburgerMenu({
 
   const userRole = currentUser?.type?.toLowerCase()
   let mobileLinks = getMobileNavLinks(userRole)
-  // Only show dashboard links (including dashboard) if logged in
-  const isOnDashboard =
-    location.pathname.startsWith('/dashboard') ||
-    location.pathname.startsWith('/admin')
-  // Only show dashboard links (including dashboard) if logged in and on dashboard/admin route
+
+  // Filter out dashboard links if user is not logged in
   if (!currentUser) {
-    // Remove all links that are dashboard-related (path includes '/dashboard' or '/admin')
-    mobileLinks = mobileLinks.filter(
-      (item) =>
-        !item.path.startsWith('/dashboard') && !item.path.startsWith('/admin')
-    )
-  } else if (!isOnDashboard) {
-    // If logged in but not on dashboard, only show main links (not dashboard links)
     mobileLinks = mobileLinks.filter(
       (item) =>
         !item.path.startsWith('/dashboard') && !item.path.startsWith('/admin')
     )
   }
+
+  // Separate main links from dashboard/admin links
+  const mainLinks = mobileLinks.filter(
+    (item) =>
+      !item.path.startsWith('/dashboard') && !item.path.startsWith('/admin')
+  )
+  const dashboardLinks = mobileLinks.filter(
+    (item) =>
+      item.path.startsWith('/dashboard') || item.path.startsWith('/admin')
+  )
+
   return (
     <div className='md:hidden bg-white border-t border-gray-200'>
       <nav className='px-4 py-2 space-y-1'>
-        {mobileLinks.map((item) => (
+        {mainLinks.map((item) => (
           <Link
             key={item.path}
             to={item.path}
@@ -61,6 +62,27 @@ export function HamburgerMenu({
             <span>{item.label}</span>
           </Link>
         ))}
+
+        {dashboardLinks.length > 0 && (
+          <>
+            <div className='border-t border-gray-200 my-2'></div>
+            {dashboardLinks.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium ${
+                  location.pathname === item.path
+                    ? 'bg-blue-50 text-indigo-600'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={onClose}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </Link>
+            ))}
+          </>
+        )}
 
         {showDashboardActions ? (
           <div className='border-t border-gray-200 pt-2 mt-2'>

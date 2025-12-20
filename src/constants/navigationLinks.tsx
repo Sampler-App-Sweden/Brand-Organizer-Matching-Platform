@@ -1,4 +1,15 @@
-import { BookOpenIcon, CalendarIcon, PackageIcon } from 'lucide-react'
+import {
+  BellIcon,
+  BookOpenIcon,
+  Bookmark,
+  CalendarIcon,
+  HandshakeIcon,
+  Heart,
+  HomeIcon,
+  MessageSquareIcon,
+  PackageIcon,
+  UsersIcon
+} from 'lucide-react'
 import { ReactNode } from 'react'
 
 export interface NavLink {
@@ -94,46 +105,123 @@ export const FOOTER_NAV_LINKS: NavLink[] = [
 
 /**
  * Returns mobile nav links based on user role.
+ * Matches desktop sidebar links with icons for consistency.
  * @param role 'brand' | 'organizer' | 'admin' | undefined
  */
 export function getMobileNavLinks(role?: string): NavLink[] {
-  // Main nav links (always visible)
+  // Main nav links (always visible for all users)
   const mainLinks: NavLink[] = [
     { label: 'Brands', path: '/brands' },
     { label: 'Organizers', path: '/organizers' },
     { label: 'Help', path: '/help' },
     { label: 'Contact', path: '/contact' }
-  ];
+  ]
 
-  // Dashboard-only links (not visible in dashboard sidebar for mobile)
-  let dashboardLinks: NavLink[] = [];
+  // Role-specific dashboard links (matches desktop sidebar)
+  let dashboardLinks: NavLink[] = []
   switch (role?.toLowerCase()) {
     case 'brand':
       dashboardLinks = [
-        { label: 'Sponsorships', path: '/dashboard/brand/sponsorships' },
-        { label: 'Matches', path: '/dashboard/brand/matches' },
-        { label: 'Dashboard', path: '/dashboard/brand' }
-      ];
-      break;
+        {
+          label: 'Dashboard',
+          path: '/dashboard/brand',
+          icon: <HomeIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Matches',
+          path: '/dashboard/matches',
+          icon: <UsersIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Interests',
+          path: '/dashboard/interests',
+          icon: <Heart className='h-4 w-4' />
+        },
+        {
+          label: 'Products',
+          path: '/dashboard/products',
+          icon: <PackageIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Saved',
+          path: '/dashboard/saved',
+          icon: <Bookmark className='h-4 w-4' />
+        }
+      ]
+      break
     case 'organizer':
       dashboardLinks = [
-        { label: 'Events', path: '/dashboard/organizer/events' },
-        { label: 'Sponsors', path: '/dashboard/organizer/sponsors' },
-        { label: 'Dashboard', path: '/dashboard/organizer' }
-      ];
-      break;
+        {
+          label: 'Dashboard',
+          path: '/dashboard/organizer',
+          icon: <HomeIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Events',
+          path: '/dashboard/events',
+          icon: <PackageIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Matches',
+          path: '/dashboard/matches',
+          icon: <UsersIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Interests',
+          path: '/dashboard/interests',
+          icon: <Heart className='h-4 w-4' />
+        },
+        {
+          label: 'Saved',
+          path: '/dashboard/saved',
+          icon: <Bookmark className='h-4 w-4' />
+        }
+      ]
+      break
     case 'admin':
       dashboardLinks = [
-        { label: 'Users', path: '/admin/users' },
-        { label: 'Brands', path: '/admin/brands' },
-        { label: 'Organizers', path: '/admin/organizers' },
-        { label: 'Dashboard', path: '/admin' }
-      ];
-      break;
+        {
+          label: 'Dashboard',
+          path: '/admin',
+          icon: <HomeIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Brands',
+          path: '/admin/brands',
+          icon: <UsersIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Organizers',
+          path: '/admin/organizers',
+          icon: <UsersIcon className='h-4 w-4' />
+        },
+        {
+          label: 'Matches',
+          path: '/admin/matches',
+          icon: <HandshakeIcon className='h-4 w-4' />
+        }
+      ]
+      break
     default:
-      dashboardLinks = [
-        { label: 'Dashboard', path: '/dashboard' }
-      ];
+      dashboardLinks = []
   }
-  return [...mainLinks, ...dashboardLinks];
+
+  // Common links (shown for all authenticated users)
+  const commonLinks: NavLink[] =
+    role && role !== ''
+      ? [
+          {
+            label: 'Messages',
+            path: '/dashboard/messages',
+            icon: <MessageSquareIcon className='h-4 w-4' />
+          },
+          {
+            label: 'Notifications',
+            path: '/dashboard/notifications',
+            icon: <BellIcon className='h-4 w-4' />
+          }
+        ]
+      : []
+
+  return [...mainLinks, ...dashboardLinks, ...commonLinks]
 }
