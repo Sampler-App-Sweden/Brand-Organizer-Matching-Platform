@@ -25,6 +25,7 @@ interface DirectoryCardProps {
   showInterestAction?: boolean
   interestStatus?: InterestStatus
   onExpressInterest?: (profileId: string) => void
+  isExpressingInterest?: boolean
 }
 
 export function DirectoryCard({
@@ -33,7 +34,8 @@ export function DirectoryCard({
   showSaveAction = true,
   showInterestAction = false,
   interestStatus = 'none',
-  onExpressInterest
+  onExpressInterest,
+  isExpressingInterest = false
 }: DirectoryCardProps) {
   const { currentUser } = useAuth()
   const navigate = useNavigate()
@@ -263,7 +265,7 @@ export function DirectoryCard({
             <div className='mt-4 pt-4 border-t border-gray-100'>
               <button
                 onClick={handleExpressInterest}
-                disabled={isOwnProfile || interestStatus !== 'none'}
+                disabled={isOwnProfile || interestStatus !== 'none' || isExpressingInterest}
                 className={`
                   w-full flex items-center justify-center gap-2 py-2 px-4 rounded-md font-medium text-sm transition-colors
                   ${
@@ -275,20 +277,31 @@ export function DirectoryCard({
                       ? 'bg-gray-50 text-gray-500 border border-gray-200 cursor-not-allowed'
                       : interestStatus === 'received'
                       ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 cursor-default'
+                      : isExpressingInterest
+                      ? 'bg-indigo-400 text-white border border-transparent cursor-not-allowed'
                       : 'bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent'
                   }
                 `}
               >
-                <Heart
-                  className={`h-4 w-4 ${
-                    interestStatus === 'mutual' ? 'fill-pink-500 text-pink-500' : ''
-                  }`}
-                />
-                {isOwnProfile && 'Your Profile'}
-                {!isOwnProfile && interestStatus === 'mutual' && 'Mutual Interest'}
-                {!isOwnProfile && interestStatus === 'sent' && 'Interest Sent'}
-                {!isOwnProfile && interestStatus === 'received' && 'Interested in You'}
-                {!isOwnProfile && interestStatus === 'none' && 'Express Interest'}
+                {isExpressingInterest ? (
+                  <>
+                    <span className='h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin'></span>
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Heart
+                      className={`h-4 w-4 ${
+                        interestStatus === 'mutual' ? 'fill-pink-500 text-pink-500' : ''
+                      }`}
+                    />
+                    {isOwnProfile && 'Your Profile'}
+                    {!isOwnProfile && interestStatus === 'mutual' && 'Mutual Interest'}
+                    {!isOwnProfile && interestStatus === 'sent' && 'Interest Sent'}
+                    {!isOwnProfile && interestStatus === 'received' && 'Interested in You'}
+                    {!isOwnProfile && interestStatus === 'none' && 'Express Interest'}
+                  </>
+                )}
               </button>
             </div>
           )}

@@ -105,7 +105,58 @@ export async function expressConnection(
     if (existing.status === 'accepted') {
       throw new Error('Connection already accepted')
     }
-    // If rejected or withdrawn, allow re-expressing
+    // If rejected or withdrawn, update existing connection to pending
+    if (existing.status === 'rejected' || existing.status === 'withdrawn') {
+      const { data, error } = await supabase
+        .from('connections')
+        .update({ status: 'pending' })
+        .eq('id', existing.id)
+        .select('*')
+        .single()
+
+      if (error) {
+        throw new Error(`Failed to re-express connection: ${error.message}`)
+      }
+
+      const connection = mapConnectionRowToConnection(data as ConnectionRow)
+
+      // Check for reverse connection (mutual connection)
+      const reverseConnection = await checkExistingConnection(receiverId, senderId)
+
+      if (reverseConnection && reverseConnection.status === 'pending') {
+        // Mutual connection! Update both to accepted
+        await respondToConnection(connection.id, 'accepted')
+        await respondToConnection(reverseConnection.id, 'accepted')
+
+        // Create a manual match
+        await createManualMatch(connection.brandId, connection.organizerId)
+
+        // Notify both parties of mutual match
+        await notifyMutualMatch(connection.brandId, connection.organizerId, connection.id).catch(
+          (error) => {
+            console.error('Failed to send mutual match notification:', error)
+          }
+        )
+      } else {
+        // One-way connection, notify receiver
+        let senderName: string
+        if (senderType === 'brand') {
+          const brandProfile = await getBrandById(connection.brandId)
+          senderName = brandProfile?.companyName || 'A brand'
+        } else {
+          const organizerProfile = await getOrganizerById(connection.organizerId)
+          senderName = organizerProfile?.organizerName || 'An organizer'
+        }
+
+        await notifyConnectionReceived(receiverId, senderName, connection.id).catch(
+          (error) => {
+            console.error('Failed to send connection notification:', error)
+          }
+        )
+      }
+
+      return connection
+    }
   }
 
   // Get brand and organizer IDs

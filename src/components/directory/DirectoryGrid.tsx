@@ -8,13 +8,15 @@ interface DirectoryGridProps {
   showInterestAction?: boolean
   interestStatuses?: Map<string, InterestStatus>
   onExpressInterest?: (profileId: string) => void
+  expressingInterestId?: string | null
 }
 
 export function DirectoryGrid({
   profiles,
   showInterestAction = false,
   interestStatuses,
-  onExpressInterest
+  onExpressInterest,
+  expressingInterestId
 }: DirectoryGridProps) {
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
@@ -25,6 +27,7 @@ export function DirectoryGrid({
           showInterestAction={showInterestAction}
           interestStatus={interestStatuses?.get(profile.id) || 'none'}
           onExpressInterest={onExpressInterest}
+          isExpressingInterest={expressingInterestId === profile.id}
         />
       ))}
     </div>
