@@ -8,6 +8,7 @@ interface ToastProps {
   onClose: () => void
   isVisible: boolean
 }
+
 export function Toast({
   type = 'info',
   message,

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useAuth } from '../../context/AuthContext'
+import { useNotifications } from '../../context/NotificationsContext'
 import { useProfileLoader } from '../../hooks/useProfileLoader'
 import { supabase } from '../../services/supabaseClient'
 import { ImageUpload } from '../media'
@@ -20,11 +21,7 @@ export function EditProfileForm() {
     loadProfile
   } = useProfileLoader(currentUser)
   const navigate = useNavigate()
-  const [toast, setToast] = useState({
-    show: false,
-    message: '',
-    type: 'success' as 'success' | 'error'
-  })
+  const { showToast } = useNotifications()
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -111,14 +108,6 @@ export function EditProfileForm() {
     } finally {
       setSaving(false)
     }
-  }
-
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ show: true, message, type })
-    setTimeout(
-      () => setToast({ show: false, message: '', type: 'success' }),
-      3000
-    )
   }
 
   if (loading) {
@@ -247,19 +236,6 @@ export function EditProfileForm() {
           </div>
         </form>
       </div>
-
-      {/* Toast Notification */}
-      {toast.show && (
-        <div
-          className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
-            toast.type === 'success'
-              ? 'bg-green-500 text-white'
-              : 'bg-red-500 text-white'
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
     </div>
   )
 }

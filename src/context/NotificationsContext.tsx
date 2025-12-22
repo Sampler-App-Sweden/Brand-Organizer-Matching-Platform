@@ -6,8 +6,10 @@ import {
   useEffect,
   useState
 } from 'react'
+
 import { supabase } from '../services/supabaseClient'
 import { useAuth } from './AuthContext'
+
 import type { Notification } from '../types'
 
 interface NotificationsContextType {
@@ -22,6 +24,22 @@ interface NotificationsContextType {
   createNotification: (
     notification: Omit<Notification, 'id' | 'createdAt' | 'read'>
   ) => Promise<void>
+  toast: {
+    show: boolean
+    message: string
+    type: 'success' | 'error' | 'info' | 'warning'
+  }
+  setToast: React.Dispatch<
+    React.SetStateAction<{
+      show: boolean
+      message: string
+      type: 'success' | 'error' | 'info' | 'warning'
+    }>
+  >
+  showToast: (
+    message: string,
+    type?: 'success' | 'error' | 'info' | 'warning'
+  ) => void
 }
 
 const NotificationsContext = createContext<
@@ -33,6 +51,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const userId = currentUser?.id ?? null
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState({
+    show: false,
+    message: '',
+    type: 'success' as 'success' | 'error' | 'info' | 'warning'
+  })
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
@@ -197,6 +220,15 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Show toast message
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' | 'info' | 'warning' = 'info'
+  ) => {
+    setToast({ show: true, message, type })
+    setTimeout(() => setToast({ show: false, message: '', type }), 3000)
+  }
+
   // Fetch notifications on mount and when user changes
   useEffect(() => {
     fetchNotifications()
@@ -271,7 +303,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         deleteNotification,
         clearAllNotifications,
         refreshNotifications,
-        createNotification
+        createNotification,
+        toast,
+        setToast,
+        showToast
       }}
     >
       {children}

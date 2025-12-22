@@ -5,9 +5,11 @@ import { HelpCenter } from './components/HelpCenter'
 import { HelpChat } from './components/HelpChat'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { RegistrationDebugHelper } from './components/RegistrationDebugHelper'
+import { Toast } from './components/ui'
 import { NotificationsProvider } from './context'
 import { AuthProvider } from './context/AuthContext'
 import { DraftProfileProvider } from './context/DraftProfileContext'
+import { useNotifications } from './context/NotificationsContext'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
 import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
@@ -178,6 +180,8 @@ const AppRoutes = () => {
   )
 }
 export function App() {
+  const { toast, setToast } = useNotifications()
+
   return (
     <BrowserRouter
       future={{
@@ -190,6 +194,12 @@ export function App() {
           <NotificationsProvider>
             <AppRoutes />
             <HelpChat />
+            <Toast
+              isVisible={toast.show}
+              message={toast.message}
+              type={toast.type}
+              onClose={() => setToast({ ...toast, show: false })}
+            />
             {typeof process !== 'undefined' &&
               process.env?.NODE_ENV === 'development' && (
                 <RegistrationDebugHelper />
