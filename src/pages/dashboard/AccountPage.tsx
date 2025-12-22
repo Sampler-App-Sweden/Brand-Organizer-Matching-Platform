@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
-import { User, Package, Calendar, Settings as SettingsIcon, LogOut } from 'lucide-react'
+import { Calendar, Package, Settings as SettingsIcon, User } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+
+import { EditProfileForm } from '../../components/forms/EditProfileForm'
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
-import { EditProfilePage } from './EditProfilePage'
-import { ProductsPage } from './ProductsPage'
-import { EventsPage } from './EventsPage'
 import { supabase } from '../../services/supabaseClient'
 
 type TabId = 'profile' | 'products' | 'events' | 'settings'
@@ -18,13 +17,14 @@ export function AccountPage() {
 
   // Get tab from URL or default to profile
   const tabParam = searchParams.get('tab') as TabId | null
-  const [activeTab, setActiveTab] = useState<TabId>(
-    tabParam || 'profile'
-  )
+  const [activeTab, setActiveTab] = useState<TabId>(tabParam || 'profile')
 
   // Update URL when tab changes
   useEffect(() => {
-    if (tabParam && ['profile', 'products', 'events', 'settings'].includes(tabParam)) {
+    if (
+      tabParam &&
+      ['profile', 'products', 'events', 'settings'].includes(tabParam)
+    ) {
       setActiveTab(tabParam)
     }
   }, [tabParam])
@@ -32,13 +32,6 @@ export function AccountPage() {
   const handleTabChange = (tabId: TabId) => {
     setActiveTab(tabId)
     setSearchParams({ tab: tabId })
-  }
-
-  const handleLogout = async () => {
-    if (window.confirm('Are you sure you want to log out?')) {
-      await logout()
-      navigate('/login')
-    }
   }
 
   // Define tabs based on user type
@@ -67,7 +60,7 @@ export function AccountPage() {
       icon: <SettingsIcon className='h-4 w-4' />,
       visible: true
     }
-  ].filter(tab => tab.visible)
+  ].filter((tab) => tab.visible)
 
   // Render tab content
   const renderTabContent = () => {
@@ -92,7 +85,8 @@ export function AccountPage() {
         <div className='mb-6'>
           <h1 className='text-2xl font-bold text-gray-900'>Account</h1>
           <p className='text-gray-600 mt-1'>
-            Manage your profile, {userType === 'brand' ? 'products' : 'events'}, and account settings
+            Manage your profile, {userType === 'brand' ? 'products' : 'events'},
+            and account settings
           </p>
         </div>
 
@@ -116,20 +110,11 @@ export function AccountPage() {
                 <span>{tab.label}</span>
               </button>
             ))}
-            <button
-              onClick={handleLogout}
-              className='flex items-center gap-2 py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-red-600 hover:border-red-300 font-medium text-sm transition-colors ml-auto'
-            >
-              <LogOut className='h-4 w-4' />
-              <span>Log out</span>
-            </button>
           </nav>
         </div>
 
         {/* Tab Content */}
-        <div className='flex-1'>
-          {renderTabContent()}
-        </div>
+        <div className='flex-1'>{renderTabContent()}</div>
       </div>
     </DashboardLayout>
   )
@@ -137,25 +122,7 @@ export function AccountPage() {
 
 // Profile Tab - Renders EditProfilePage content without DashboardLayout wrapper
 function ProfileTabContent() {
-  const { currentUser, refreshUser } = useAuth()
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-
-  // Import the EditProfilePage component logic here
-  // For now, we'll just render the full EditProfilePage
-  // In a production app, you'd extract the form into a reusable component
-
-  return (
-    <div>
-      <p className='text-gray-500 mb-4'>
-        This tab will contain the profile editing form. For now, you can access it via the Edit Profile page.
-      </p>
-      <p className='text-sm text-gray-400'>
-        Note: To avoid code duplication, we recommend extracting the EditProfilePage form into a reusable component.
-      </p>
-    </div>
-  )
+  return <EditProfileForm />
 }
 
 // Products Tab - For brands only
@@ -170,7 +137,8 @@ function ProductsTabContent() {
         This tab will contain the products management interface.
       </p>
       <p className='text-sm text-gray-400'>
-        Note: Navigate to /dashboard/account?tab=products after implementation is complete.
+        Note: Navigate to /dashboard/account?tab=products after implementation
+        is complete.
       </p>
     </div>
   )
@@ -184,7 +152,8 @@ function EventsTabContent() {
         This tab will contain the events management interface.
       </p>
       <p className='text-sm text-gray-400'>
-        Note: Navigate to /dashboard/account?tab=events after implementation is complete.
+        Note: Navigate to /dashboard/account?tab=events after implementation is
+        complete.
       </p>
     </div>
   )
@@ -194,7 +163,10 @@ function EventsTabContent() {
 function SettingsTabContent() {
   const { currentUser } = useAuth()
   const [loading, setLoading] = useState(false)
-  const [feedback, setFeedback] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [feedback, setFeedback] = useState<{
+    message: string
+    type: 'success' | 'error'
+  } | null>(null)
 
   // Settings state
   const [emailNotifications, setEmailNotifications] = useState(true)
@@ -211,7 +183,10 @@ function SettingsTabContent() {
     }
 
     if (newPassword.length < 6) {
-      setFeedback({ message: 'Password must be at least 6 characters', type: 'error' })
+      setFeedback({
+        message: 'Password must be at least 6 characters',
+        type: 'error'
+      })
       return
     }
 
@@ -226,8 +201,14 @@ function SettingsTabContent() {
       setFeedback({ message: 'Password updated successfully', type: 'success' })
       setNewPassword('')
       setConfirmPassword('')
-    } catch (error: any) {
-      setFeedback({ message: error.message || 'Failed to update password', type: 'error' })
+    } catch (error: unknown) {
+      setFeedback({
+        message:
+          error && typeof error === 'object' && 'message' in error
+            ? String((error as { message?: string }).message)
+            : 'Failed to update password',
+        type: 'error'
+      })
     } finally {
       setLoading(false)
     }
@@ -250,10 +231,14 @@ function SettingsTabContent() {
 
       {/* Account Information */}
       <section className='bg-white rounded-lg shadow-sm p-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-4'>Account Information</h3>
+        <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+          Account Information
+        </h3>
         <div className='space-y-3'>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Email</label>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              Email
+            </label>
             <input
               type='email'
               value={currentUser?.email || ''}
@@ -261,14 +246,22 @@ function SettingsTabContent() {
               className='w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
             />
             <p className='text-xs text-gray-500 mt-1'>
-              Your email address cannot be changed. Contact support if you need assistance.
+              Your email address cannot be changed. Contact support if you need
+              assistance.
             </p>
           </div>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Account Type</label>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              Account Type
+            </label>
             <input
               type='text'
-              value={currentUser?.type?.charAt(0).toUpperCase() + currentUser?.type?.slice(1) || ''}
+              value={
+                currentUser?.type
+                  ? currentUser.type.charAt(0).toUpperCase() +
+                    currentUser.type.slice(1)
+                  : ''
+              }
               disabled
               className='w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
             />
@@ -278,7 +271,9 @@ function SettingsTabContent() {
 
       {/* Notification Preferences */}
       <section className='bg-white rounded-lg shadow-sm p-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-4'>Notification Preferences</h3>
+        <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+          Notification Preferences
+        </h3>
         <div className='space-y-4'>
           <label className='flex items-center gap-3'>
             <input
@@ -288,8 +283,12 @@ function SettingsTabContent() {
               className='w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
             />
             <div>
-              <div className='text-sm font-medium text-gray-700'>Email Notifications</div>
-              <div className='text-xs text-gray-500'>Receive notifications about matches, interests, and messages</div>
+              <div className='text-sm font-medium text-gray-700'>
+                Email Notifications
+              </div>
+              <div className='text-xs text-gray-500'>
+                Receive notifications about matches, interests, and messages
+              </div>
             </div>
           </label>
           <label className='flex items-center gap-3'>
@@ -300,8 +299,12 @@ function SettingsTabContent() {
               className='w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
             />
             <div>
-              <div className='text-sm font-medium text-gray-700'>Marketing Emails</div>
-              <div className='text-xs text-gray-500'>Receive updates about new features and tips</div>
+              <div className='text-sm font-medium text-gray-700'>
+                Marketing Emails
+              </div>
+              <div className='text-xs text-gray-500'>
+                Receive updates about new features and tips
+              </div>
             </div>
           </label>
         </div>
@@ -309,10 +312,14 @@ function SettingsTabContent() {
 
       {/* Change Password */}
       <section className='bg-white rounded-lg shadow-sm p-6'>
-        <h3 className='text-lg font-semibold text-gray-900 mb-4'>Change Password</h3>
+        <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+          Change Password
+        </h3>
         <form onSubmit={handlePasswordChange} className='space-y-4'>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>New Password</label>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              New Password
+            </label>
             <input
               type='password'
               value={newPassword}
@@ -322,7 +329,9 @@ function SettingsTabContent() {
             />
           </div>
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Confirm Password</label>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              Confirm Password
+            </label>
             <input
               type='password'
               value={confirmPassword}
@@ -346,10 +355,13 @@ function SettingsTabContent() {
         <h3 className='text-lg font-semibold text-gray-900 mb-4'>Privacy</h3>
         <div className='space-y-3'>
           <p className='text-sm text-gray-600'>
-            Your profile is visible to {currentUser?.type === 'brand' ? 'organizers' : 'brands'} on the platform.
+            Your profile is visible to{' '}
+            {currentUser?.type === 'brand' ? 'organizers' : 'brands'} on the
+            platform.
           </p>
           <p className='text-sm text-gray-600'>
-            For privacy concerns or to delete your account, please contact support.
+            For privacy concerns or to delete your account, please contact
+            support.
           </p>
         </div>
       </section>

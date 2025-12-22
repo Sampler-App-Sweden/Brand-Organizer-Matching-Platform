@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-import { HelpChat } from './components/HelpChat'
 import { HelpCenter } from './components/HelpCenter'
+import { HelpChat } from './components/HelpChat'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { RegistrationDebugHelper } from './components/RegistrationDebugHelper'
 import { NotificationsProvider } from './context'
@@ -58,7 +58,6 @@ const AppRoutes = () => {
       <Route path='/brands' element={<BrandsDirectoryPage />} />
       <Route path='/organizers' element={<OrganizersDirectoryPage />} />
       <Route path='/profiles/:profileId' element={<ProfileDetailPage />} />
-
       {/* Brand routes */}
       <Route
         path='/dashboard/brand'
@@ -153,11 +152,26 @@ const AppRoutes = () => {
         }
       />
       {/* Redirects for backward compatibility */}
-      <Route path='/dashboard/interests' element={<Navigate to='/dashboard/connections' replace />} />
-      <Route path='/dashboard/edit-profile' element={<Navigate to='/dashboard/account' replace />} />
-      <Route path='/dashboard/matches' element={<Navigate to='/dashboard/connections?tab=mutual' replace />} />
-      <Route path='/dashboard/products' element={<Navigate to='/dashboard/account?tab=products' replace />} />
-      <Route path='/dashboard/events' element={<Navigate to='/dashboard/account?tab=events' replace />} />
+      <Route
+        path='/dashboard/interests'
+        element={<Navigate to='/dashboard/connections' replace />}
+      />
+      <Route
+        path='/dashboard/edit-profile'
+        element={<Navigate to='/dashboard/account' replace />}
+      />
+      <Route
+        path='/dashboard/matches'
+        element={<Navigate to='/dashboard/connections?tab=mutual' replace />}
+      />
+      <Route
+        path='/dashboard/products'
+        element={<Navigate to='/dashboard/account?tab=products' replace />}
+      />
+      <Route
+        path='/dashboard/events'
+        element={<Navigate to='/dashboard/account?tab=events' replace />}
+      />
       {/* Catch-all redirect */}
       <Route path='*' element={<Navigate to='/' replace />} />
     </Routes>
