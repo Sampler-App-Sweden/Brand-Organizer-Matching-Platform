@@ -44,7 +44,7 @@ export function MessagesPage() {
 
   return (
     <DashboardLayout userType={userType} mainPaddingClassName='p-0'>
-      <div className='flex flex-col flex-1 h-[calc(100vh-9rem)] min-h-0'>
+      <div className='flex flex-col h-screen overflow-hidden'>
         <div className='px-4 pt-4 pb-3'>
           <h1 className='text-xl md:text-2xl font-bold text-gray-900'>Messages</h1>
         </div>
