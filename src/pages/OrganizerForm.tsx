@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Layout } from '../components/layout'
-import { Button, StepIndicator, Toast } from '../components/ui'
+import { Button, StepIndicator, Toast, LoadingSpinner } from '../components/ui'
 import { useOrganizerForm } from '../hooks/useOrganizerForm'
 import {
   OrganizationStep,
@@ -76,7 +76,7 @@ export function OrganizerForm() {
 
           {isLoading ? (
             <div className='text-center py-12'>
-              <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto'></div>
+              <LoadingSpinner size={48} className='mx-auto' />
               <p className='mt-4 text-gray-600'>
                 Loading your organizer information...
               </p>

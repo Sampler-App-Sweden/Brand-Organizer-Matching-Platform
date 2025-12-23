@@ -9,6 +9,7 @@ import {
   ConversationFilters,
   ConversationList
 } from '../../components/messages'
+import { LoadingSpinner } from '../../components/ui'
 import { useConversations } from '../../hooks/useConversations'
 
 export function MessagesPage() {
@@ -169,9 +170,7 @@ export function MessagesPage() {
         )}
         {loading ? (
           <div className='flex-1 flex justify-center items-center'>
-            <div className='text-gray-500 text-sm'>
-              Loading conversations...
-            </div>
+            <LoadingSpinner size={64} />
           </div>
         ) : (
           <div className='flex flex-1 gap-4 overflow-hidden min-h-0 pb-4'>
@@ -179,7 +178,7 @@ export function MessagesPage() {
             <div
               className={`${
                 showMobileDetail ? 'hidden' : 'flex'
-              } ${selectionMode ? 'md:w-full' : 'md:w-1/3'} w-full bg-white rounded-lg shadow-sm overflow-hidden flex-col h-full min-h-0`}
+              } md:flex ${selectionMode ? 'md:w-full' : 'md:w-1/3'} w-full bg-white rounded-lg shadow-sm overflow-hidden flex-col h-full min-h-0`}
             >
               {conversationsError && (
                 <div className='p-3 text-sm text-red-600 border-b border-red-100 bg-red-50'>

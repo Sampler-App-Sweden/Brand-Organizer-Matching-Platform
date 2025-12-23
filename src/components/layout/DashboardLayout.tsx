@@ -27,13 +27,13 @@ export function DashboardLayout({
 
   return (
     <>
-      <div className='min-h-screen bg-gray-50 flex flex-col relative overflow-hidden'>
+      <div className='h-screen bg-gray-50 flex flex-col relative overflow-hidden'>
         <DashboardNavbar />
 
         {/* Dashboard Content Area with Sidebar */}
         <div className='flex-1 flex relative z-10'>
           {/* Sidebar */}
-          <div className='hidden md:flex flex-col bg-white bg-opacity-95 backdrop-blur-sm w-64 border-r fixed top-0 left-0 h-screen z-20'>
+          <div className='hidden md:flex flex-col bg-white bg-opacity-95 backdrop-blur-sm md:w-48 lg:w-64 border-r fixed top-0 left-0 h-screen z-20'>
             <div className='p-4 pt-20 flex flex-col h-full overflow-y-auto'>
               <div className='mb-6'>
                 <div className='text-sm font-medium text-gray-400 mb-2'>
@@ -106,7 +106,7 @@ export function DashboardLayout({
 
           {/* Main Content */}
           <main
-            className={`flex flex-col flex-1 overflow-hidden relative md:ml-64 ${mainPaddingClassName}`}
+            className={`flex flex-col flex-1 overflow-hidden relative md:ml-48 lg:ml-64 ${mainPaddingClassName}`}
           >
             <div
               className={`flex flex-col flex-1 bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 ${contentPaddingClassName}`}

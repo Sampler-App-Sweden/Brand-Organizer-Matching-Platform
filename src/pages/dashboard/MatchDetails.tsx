@@ -15,7 +15,7 @@ import {
   getConversationMessages,
   sendMessage
 } from '../../services/chatService'
-import { Button } from '../../components/ui'
+import { Button, LoadingSpinner } from '../../components/ui'
 import {
   CheckIcon,
   XIcon,
@@ -149,7 +149,7 @@ export function MatchDetails() {
     return (
       <DashboardLayout userType={userType}>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-gray-500'>Loading...</div>
+          <LoadingSpinner size={64} />
         </div>
       </DashboardLayout>
     )

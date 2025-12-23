@@ -8,7 +8,7 @@ import {
   getOrganizersByIds
 } from '../../services/dataService'
 import { UsersIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
-import { Button } from '../../components/ui'
+import { Button, LoadingSpinner } from '../../components/ui'
 import { ProductSponsorshipSummary } from '../../components/sponsorship/ProductSponsorshipSummary'
 import { SponsorshipOfferSummary } from '../../components/sponsorship/SponsorshipOfferSummary'
 import { Brand, Organizer, Match } from '../../types'
@@ -73,7 +73,7 @@ export function BrandDashboard() {
     return (
       <DashboardLayout userType='brand'>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-gray-500'>Loading...</div>
+          <LoadingSpinner size={64} />
         </div>
       </DashboardLayout>
     )

@@ -19,6 +19,7 @@ import { EventDisplayCard } from '../components/profile/EventDisplayCard'
 import { ProductDetailModal } from '../components/profile/ProductDetailModal'
 import { ProductDisplayCard } from '../components/profile/ProductDisplayCard'
 import { Button } from '../components/ui/Button'
+import { LoadingSpinner } from '../components/ui'
 import { InterestButton } from '../components/directory/InterestButton'
 import { useAuth } from '../context/AuthContext'
 import { getBrandByUserId, getOrganizerByUserId } from '../services/dataService'
@@ -188,7 +189,7 @@ export function ProfileDetailPage() {
         </div>
         {loading ? (
           <div className='flex items-center justify-center h-64'>
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500'></div>
+            <LoadingSpinner size={64} />
           </div>
         ) : error ? (
           <div className='bg-white rounded-lg shadow-sm p-10 text-center'>

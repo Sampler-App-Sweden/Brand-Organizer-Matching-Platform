@@ -11,7 +11,7 @@ import { StatsCard } from '../../components/dashboard/StatsCard'
 import { OrganizerEventsSummary } from '../../components/events/OrganizerEventsSummary'
 import { DashboardLayout } from '../../components/layout'
 import { OrganizerSponsorshipSummary } from '../../components/sponsorship/OrganizerSponsorshipSummary'
-import { Button } from '../../components/ui'
+import { Button, LoadingSpinner } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { useOrganizerDashboard } from '../../hooks/useOrganizerDashboard'
 import { getBrandById, getBrandsByIds } from '../../services/dataService'
@@ -51,7 +51,7 @@ export function OrganizerDashboard() {
     return (
       <DashboardLayout userType='organizer'>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-gray-500'>Loading...</div>
+          <LoadingSpinner size={64} />
         </div>
       </DashboardLayout>
     )

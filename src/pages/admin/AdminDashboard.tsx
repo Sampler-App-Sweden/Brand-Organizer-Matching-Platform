@@ -8,6 +8,7 @@ import {
   UsersTable
 } from '../../components/admin'
 import { DashboardLayout } from '../../components/layout'
+import { LoadingSpinner } from '../../components/ui'
 import { useAdminDashboardData } from '../../hooks/useAdminDashboardData'
 import { filterData, sortData } from '../../utils/adminDashboardUtils'
 
@@ -41,7 +42,7 @@ export function AdminDashboard() {
     return (
       <DashboardLayout userType='admin'>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-gray-500'>Loading...</div>
+          <LoadingSpinner size={64} />
         </div>
       </DashboardLayout>
     )

@@ -2,6 +2,7 @@ import { FilterIcon, StarIcon, XIcon } from 'lucide-react'
 
 import { CollaborationCard } from '../components/inspiration/CollaborationCard'
 import { DashboardLayout } from '../components/layout'
+import { LoadingSpinner } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { useInspirationBoard } from '../hooks/useInspirationBoard'
 
@@ -131,7 +132,7 @@ export function InspirationBoardPage() {
       )}
       {loading ? (
         <div className='flex justify-center items-center h-64'>
-          <div className='inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600'></div>
+          <LoadingSpinner size={64} />
         </div>
       ) : filteredCollaborations.length === 0 ? (
         <div className='bg-white rounded-lg shadow-sm p-8 text-center'>

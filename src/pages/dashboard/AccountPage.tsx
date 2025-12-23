@@ -1,20 +1,21 @@
-import {
-  Calendar,
-  Handshake,
-  Package,
-  User
-} from 'lucide-react'
+import { Calendar, Handshake, Package, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { EditProfileForm } from '../../components/forms/EditProfileForm'
 import { DashboardLayout } from '../../components/layout'
-import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
-import { OrganizerSponsorshipPanel } from '../../components/sponsorship/OrganizerSponsorshipPanel'
-import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
-import { EventsManager } from '../../components/events/EventsManager'
+import {
+  BrandSponsorshipPanel,
+  OrganizerSponsorshipPanel,
+  ProductSponsorshipManager
+} from '../../components/sponsorship'
+import { EventsManager } from '../../components/events'
 import { useAuth } from '../../context/AuthContext'
-import { getBrandByUserId, getOrganizerByUserId } from '../../services/dataService'
+import {
+  getBrandByUserId,
+  getOrganizerByUserId
+} from '../../services/dataService'
+import { LoadingSpinner } from '../../components/ui'
 
 type TabId = 'profile' | 'products' | 'events' | 'sponsorship'
 
@@ -50,9 +51,7 @@ export function AccountPage() {
   useEffect(() => {
     if (
       tabParam &&
-      ['profile', 'products', 'events', 'sponsorship'].includes(
-        tabParam
-      )
+      ['profile', 'products', 'events', 'sponsorship'].includes(tabParam)
     ) {
       setActiveTab(tabParam)
     }
@@ -97,7 +96,9 @@ export function AccountPage() {
       case 'profile':
         return <ProfileTabContent />
       case 'products':
-        return userType === 'brand' ? <ProductsTabContent brandId={brandId} /> : null
+        return userType === 'brand' ? (
+          <ProductsTabContent brandId={brandId} />
+        ) : null
       case 'sponsorship':
         if (userType === 'brand') {
           return <BrandSponsorshipTabContent brandId={brandId} />
@@ -106,7 +107,9 @@ export function AccountPage() {
         }
         return null
       case 'events':
-        return userType === 'organizer' ? <EventsTabContent organizerId={organizerId} /> : null
+        return userType === 'organizer' ? (
+          <EventsTabContent organizerId={organizerId} />
+        ) : null
       default:
         return <ProfileTabContent />
     }
@@ -119,7 +122,10 @@ export function AccountPage() {
         <div className='mb-4 sm:mb-6'>
           <h1 className='text-2xl font-bold text-gray-900'>Account</h1>
           <p className='text-gray-600 mt-1 hidden sm:block'>
-            Manage your profile{userType === 'brand' ? ', products, and sponsorship offerings' : ', events, and sponsorship needs'}
+            Manage your profile
+            {userType === 'brand'
+              ? ', products, and sponsorship offerings'
+              : ', events, and sponsorship needs'}
           </p>
         </div>
 
@@ -177,8 +183,8 @@ function ProfileTabContent() {
 function ProductsTabContent({ brandId }: { brandId: string | null }) {
   if (!brandId) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-        <LoadingSpinner size={64} />
+      <div className='fixed inset-0 flex items-center justify-center bg-white z-50'>
+        <LoadingSpinner size={48} />
       </div>
     )
   }
@@ -195,8 +201,8 @@ function ProductsTabContent({ brandId }: { brandId: string | null }) {
 function EventsTabContent({ organizerId }: { organizerId: string | null }) {
   if (!organizerId) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-        <LoadingSpinner size={64} />
+      <div className='fixed inset-0 flex items-center justify-center bg-white z-50'>
+        <LoadingSpinner size={48} />
       </div>
     )
   }
@@ -208,8 +214,8 @@ function EventsTabContent({ organizerId }: { organizerId: string | null }) {
 function BrandSponsorshipTabContent({ brandId }: { brandId: string | null }) {
   if (!brandId) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-        <LoadingSpinner size={64} />
+      <div className='fixed inset-0 flex items-center justify-center bg-white z-50'>
+        <LoadingSpinner size={48} />
       </div>
     )
   }
@@ -225,11 +231,15 @@ function BrandSponsorshipTabContent({ brandId }: { brandId: string | null }) {
 }
 
 // Sponsorship Tab - For organizers
-function OrganizerSponsorshipTabContent({ organizerId }: { organizerId: string | null }) {
+function OrganizerSponsorshipTabContent({
+  organizerId
+}: {
+  organizerId: string | null
+}) {
   if (!organizerId) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-        <LoadingSpinner size={64} />
+      <div className='fixed inset-0 flex items-center justify-center bg-white z-50'>
+        <LoadingSpinner size={48} />
       </div>
     )
   }

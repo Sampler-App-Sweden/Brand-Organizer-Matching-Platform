@@ -2,6 +2,7 @@ import { FilterIcon, PackageIcon, SearchIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Layout } from '../components/layout'
+import { LoadingSpinner } from '../components/ui'
 import { getProfiles, ProfileOverview } from '../services/profileService'
 
 export function ProfilesExplorer() {
@@ -166,7 +167,7 @@ export function ProfilesExplorer() {
         {/* Results */}
         {loading ? (
           <div className='flex justify-center items-center h-64'>
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500'></div>
+            <LoadingSpinner size={64} />
           </div>
         ) : filteredProfiles.length === 0 ? (
           <div className='bg-white rounded-lg shadow-sm p-8 text-center'>

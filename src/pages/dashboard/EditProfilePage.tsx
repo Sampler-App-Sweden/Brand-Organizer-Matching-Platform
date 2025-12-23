@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { DashboardLayout } from '../../components/layout'
-import { FormField } from '../../components/ui'
-import { Button } from '../../components/ui'
+import { FormField, Button, LoadingSpinner } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { ImageUpload } from '../../components/media/ImageUpload'
 import {
@@ -249,7 +248,7 @@ export function EditProfilePage() {
     return (
       <DashboardLayout userType={currentUser?.type || 'brand'}>
         <div className='flex justify-center items-center h-64'>
-          <div className='text-gray-500'>Loading...</div>
+          <LoadingSpinner size={64} />
         </div>
       </DashboardLayout>
     )

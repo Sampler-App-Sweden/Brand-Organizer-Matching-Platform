@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 
 import { DirectoryCard } from '../../components/directory/DirectoryCard'
 import { DashboardLayout } from '../../components/layout'
+import { LoadingSpinner } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { getSavedCollaborations } from '../../services/collaborationService'
 import { getSavedProfiles } from '../../services/savedProfilesService'
@@ -103,7 +104,7 @@ export function SavedItemsPage() {
 
       {loading ? (
         <div className='flex justify-center items-center h-64'>
-          <div className='inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600'></div>
+          <LoadingSpinner size={48} />
         </div>
       ) : isEmpty ? (
         <div className='bg-white rounded-lg shadow-sm p-8 text-center'>

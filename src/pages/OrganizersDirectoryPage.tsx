@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { DirectoryFilters } from '../components/directory/DirectoryFilters'
 import { DirectoryFilterParams } from '../components/directory/directoryFilterTypes'
 import { DirectoryGrid } from '../components/directory/DirectoryGrid'
-import { Pagination } from '../components/ui'
+import { Pagination, LoadingSpinner } from '../components/ui'
 import { filterProfilesByRole } from '../components/directory/profileDirectoryUtils'
 import { Layout } from '../components/layout'
 import { getProfiles, ProfileOverview } from '../services/profileService'
@@ -195,7 +195,7 @@ export function OrganizersDirectoryPage() {
                 </h2>
                 {loading ? (
                   <div className='flex justify-center items-center h-64'>
-                    <div className='inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600'></div>
+                    <LoadingSpinner size={64} />
                   </div>
                 ) : visibleProfiles.length === 0 ? (
                   <div className='bg-gray-50 rounded-lg p-8 text-center'>

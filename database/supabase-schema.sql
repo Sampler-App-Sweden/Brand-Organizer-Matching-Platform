@@ -438,7 +438,11 @@ CREATE TABLE IF NOT EXISTS public.conversations (
   brand_id UUID REFERENCES public.brands ON DELETE CASCADE,
   organizer_id UUID REFERENCES public.organizers ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
-  last_activity TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+  last_activity TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  archived BOOLEAN DEFAULT false,
+  read_only BOOLEAN DEFAULT false,
+  archived_at TIMESTAMP WITH TIME ZONE,
+  archived_by UUID REFERENCES auth.users ON DELETE SET NULL
 );
 -- Enable RLS
 ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
@@ -937,6 +941,35 @@ CREATE POLICY "Allow users to start conversations"
   WITH CHECK (
     brand_id IN (SELECT id FROM public.brands WHERE user_id = auth.uid())
     OR organizer_id IN (SELECT id FROM public.organizers WHERE user_id = auth.uid())
+  );
+
+DROP POLICY IF EXISTS "Allow users to update their conversations" ON public.conversations;
+CREATE POLICY "Allow users to update their conversations"
+  ON public.conversations FOR UPDATE
+  USING (
+    auth.uid() IN (
+      SELECT user_id FROM public.brands WHERE id = brand_id
+      UNION
+      SELECT user_id FROM public.organizers WHERE id = organizer_id
+    )
+  )
+  WITH CHECK (
+    auth.uid() IN (
+      SELECT user_id FROM public.brands WHERE id = brand_id
+      UNION
+      SELECT user_id FROM public.organizers WHERE id = organizer_id
+    )
+  );
+
+DROP POLICY IF EXISTS "Allow users to delete their conversations" ON public.conversations;
+CREATE POLICY "Allow users to delete their conversations"
+  ON public.conversations FOR DELETE
+  USING (
+    auth.uid() IN (
+      SELECT user_id FROM public.brands WHERE id = brand_id
+      UNION
+      SELECT user_id FROM public.organizers WHERE id = organizer_id
+    )
   );
 
 -- Messages policies
