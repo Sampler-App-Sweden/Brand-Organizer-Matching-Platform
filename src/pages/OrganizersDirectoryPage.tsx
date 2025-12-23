@@ -9,7 +9,10 @@ import { Pagination, LoadingSpinner } from '../components/ui'
 import { filterProfilesByRole } from '../components/directory/profileDirectoryUtils'
 import { Layout } from '../components/layout'
 import { getProfiles, ProfileOverview } from '../services/profileService'
-import { getBatchConnectionStatuses, expressConnection } from '../services/connectionService'
+import {
+  getBatchConnectionStatuses,
+  expressConnection
+} from '../services/connectionService'
 import { useAuth } from '../context/AuthContext'
 
 type InterestStatus = 'none' | 'sent' | 'received' | 'mutual'
@@ -20,8 +23,12 @@ export function OrganizersDirectoryPage() {
   const [visibleProfiles, setVisibleProfiles] = useState<ProfileOverview[]>([])
   const [loading, setLoading] = useState(true)
   const [totalPages, setTotalPages] = useState(1)
-  const [interestStatuses, setInterestStatuses] = useState<Map<string, InterestStatus>>(new Map())
-  const [expressingInterest, setExpressingInterest] = useState<string | null>(null)
+  const [interestStatuses, setInterestStatuses] = useState<
+    Map<string, InterestStatus>
+  >(new Map())
+  const [expressingInterest, setExpressingInterest] = useState<string | null>(
+    null
+  )
   const [queryParams, setQueryParams] = useState<DirectoryFilterParams>({
     page: 1,
     limit: 12,
@@ -45,11 +52,7 @@ export function OrganizersDirectoryPage() {
 
   useEffect(() => {
     const limit = queryParams.limit ?? 12
-    const filtered = filterProfilesByRole(
-      profiles,
-      queryParams,
-      'Organizer'
-    )
+    const filtered = filterProfilesByRole(profiles, queryParams, 'Organizer')
     setTotalPages(Math.max(1, Math.ceil(filtered.length / limit)))
     const page = queryParams.page ?? 1
     const start = (page - 1) * limit
@@ -65,8 +68,11 @@ export function OrganizersDirectoryPage() {
       }
 
       try {
-        const profileUserIds = visibleProfiles.map(p => p.id)
-        const statuses = await getBatchConnectionStatuses(currentUser.id, profileUserIds)
+        const profileUserIds = visibleProfiles.map((p) => p.id)
+        const statuses = await getBatchConnectionStatuses(
+          currentUser.id,
+          profileUserIds
+        )
         setInterestStatuses(statuses)
       } catch (error) {
         console.error('Failed to fetch interest statuses:', error)
@@ -99,7 +105,9 @@ export function OrganizersDirectoryPage() {
 
     // Check if user is a brand
     if (currentUser.type !== 'brand') {
-      alert('Only brands can express interest in organizers. Please create a brand profile first.')
+      alert(
+        'Only brands can express interest in organizers. Please create a brand profile first.'
+      )
       return
     }
 
@@ -110,27 +118,27 @@ export function OrganizersDirectoryPage() {
 
     try {
       setExpressingInterest(profileId)
-      const profile = visibleProfiles.find(p => p.id === profileId)
+      const profile = visibleProfiles.find((p) => p.id === profileId)
       if (!profile) return
 
       // Current user must be a brand to express interest in organizers
-      await expressConnection(
-        currentUser.id,
-        'brand',
-        profile.id,
-        'organizer'
-      )
+      await expressConnection(currentUser.id, 'brand', profile.id, 'organizer')
 
       // Refresh interest statuses
-      const profileUserIds = visibleProfiles.map(p => p.id)
-      const statuses = await getBatchConnectionStatuses(currentUser.id, profileUserIds)
+      const profileUserIds = visibleProfiles.map((p) => p.id)
+      const statuses = await getBatchConnectionStatuses(
+        currentUser.id,
+        profileUserIds
+      )
       setInterestStatuses(statuses)
     } catch (error: any) {
       console.error('Failed to express interest:', error)
 
       // Provide helpful error messages
       if (error.message?.includes('Brand profile not found')) {
-        alert('Please create your brand profile before expressing interest. You can do this from your dashboard.')
+        alert(
+          'Please create your brand profile before expressing interest. You can do this from your dashboard.'
+        )
       } else if (error.message?.includes('Organizer profile not found')) {
         alert('This organizer profile is not available.')
       } else if (error.message?.includes('Connection already expressed')) {
@@ -146,8 +154,10 @@ export function OrganizersDirectoryPage() {
     <Layout>
       <div className='bg-white min-h-screen'>
         {/* Hero Section */}
-        <section className='bg-gradient-to-r from-indigo-50 to-purple-50 py-12 md:py-20'>
-          <div className='container mx-auto px-4'>
+        <section className='relative py-20 bg-gradient-to-br from-white via-indigo-50 to-blue-100 overflow-hidden'>
+          <div className='absolute -top-32 -right-32 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-indigo-300/20 rounded-full blur-3xl animate-float1' />
+          <div className='absolute -bottom-32 -left-32 w-96 h-96 bg-gradient-to-tr from-indigo-400/30 to-purple-300/20 rounded-full blur-3xl animate-float2' />
+          <div className='container mx-auto px-4 relative z-10'>
             <div className='max-w-4xl mx-auto text-center'>
               <h1 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>
                 Discover Event Organizers
@@ -160,21 +170,39 @@ export function OrganizersDirectoryPage() {
               <div className='flex flex-wrap justify-center gap-4'>
                 <Link
                   to='/register'
-                  className='inline-flex items-center px-6 py-3 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors'
+                  className='bg-brand-primary text-white px-6 py-3 rounded-md font-medium flex items-center justify-center transition-all duration-300 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] hover:-translate-y-1 border border-indigo-700/30 hover:bg-indigo-800 group relative overflow-hidden backdrop-blur-sm'
                 >
-                  <SparklesIcon className='h-5 w-5 mr-2' />
-                  Register as a Brand
+                  <span className='relative z-10 flex items-center'>
+                    <SparklesIcon className='h-5 w-5 mr-2' />
+                    Register as a Brand
+                  </span>
+                  <span className='absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-400 opacity-0 group-hover:opacity-20 transition-opacity'></span>
                 </Link>
                 <Link
                   to='/community'
-                  className='inline-flex items-center px-6 py-3 rounded-md bg-white text-indigo-600 font-medium border border-indigo-200 hover:bg-indigo-50 transition-colors'
+                  className='bg-white text-indigo-700 px-6 py-3 rounded-md font-medium transition-all duration-300 shadow-sm hover:shadow-2xl hover:-translate-y-1 border border-indigo-100 hover:bg-indigo-50 group relative overflow-hidden'
                 >
-                  View Community
-                  <ArrowRightIcon className='h-4 w-4 ml-2' />
+                  <span className='relative z-10 flex items-center'>
+                    View Community
+                    <ArrowRightIcon className='h-4 w-4 ml-2' />
+                  </span>
+                  <span className='absolute inset-0 bg-gradient-to-br from-indigo-100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity'></span>
                 </Link>
               </div>
             </div>
           </div>
+          <style>{`
+            @keyframes float1 {
+              0%, 100% { transform: translateY(0) scale(1); }
+              50% { transform: translateY(-20px) scale(1.05); }
+            }
+            @keyframes float2 {
+              0%, 100% { transform: translateY(0) scale(1); }
+              50% { transform: translateY(20px) scale(1.07); }
+            }
+            .animate-float1 { animation: float1 8s ease-in-out infinite; }
+            .animate-float2 { animation: float2 10s ease-in-out infinite; }
+          `}</style>
         </section>
         {/* Directory Section */}
         <section className='py-12'>
@@ -210,7 +238,9 @@ export function OrganizersDirectoryPage() {
                   <>
                     <DirectoryGrid
                       profiles={visibleProfiles}
-                      showInterestAction={!!currentUser && currentUser.type === 'brand'}
+                      showInterestAction={
+                        !!currentUser && currentUser.type === 'brand'
+                      }
                       interestStatuses={interestStatuses}
                       onExpressInterest={handleExpressInterest}
                       expressingInterestId={expressingInterest}

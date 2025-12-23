@@ -58,13 +58,13 @@ export function TechHero({
           <div className='flex flex-col sm:flex-row justify-center gap-4'>
             <Link
               to={ctaLink}
-              className='bg-brand-primary hover:bg-brand-secondary text-white px-6 py-3 rounded-md font-medium flex items-center justify-center transition-colors relative overflow-hidden group tech-pulse'
+              className='bg-brand-primary text-white px-6 py-3 rounded-md font-medium flex items-center justify-center transition-all duration-300 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] hover:-translate-y-1 border border-indigo-700/30 hover:bg-indigo-800 group relative overflow-hidden backdrop-blur-sm'
             >
               <span className='relative z-10 flex items-center'>
                 <SparklesIcon className='h-5 w-5 mr-2' />
                 {ctaText}
               </span>
-              <span className='absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity'></span>
+              <span className='absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-400 opacity-0 group-hover:opacity-20 transition-opacity'></span>
             </Link>
             {secondaryCtaText && secondaryCtaLink && (
               <Link
