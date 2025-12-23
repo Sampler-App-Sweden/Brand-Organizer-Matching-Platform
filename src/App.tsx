@@ -38,6 +38,7 @@ import './styles/tech-effects.css'
 // Alias to avoid undefined references in route configs
 const Contact = ContactPage
 
+// Component defining all application routes
 const AppRoutes = () => {
   useEffect(() => {
     // Initialize sample collaborations
@@ -179,9 +180,28 @@ const AppRoutes = () => {
     </Routes>
   )
 }
-export function App() {
-  const { toast, setToast } = useNotifications()
 
+// Separate component to use hooks
+function AppContent() {
+  const { toast, setToast } = useNotifications()
+  return (
+    <>
+      <AppRoutes />
+      <HelpChat />
+      <Toast
+        isVisible={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
+      {typeof process !== 'undefined' &&
+        process.env?.NODE_ENV === 'development' && <RegistrationDebugHelper />}
+    </>
+  )
+}
+
+// Main application component with context providers and routing
+export function App() {
   return (
     <BrowserRouter
       future={{
@@ -192,18 +212,7 @@ export function App() {
       <AuthProvider>
         <DraftProfileProvider>
           <NotificationsProvider>
-            <AppRoutes />
-            <HelpChat />
-            <Toast
-              isVisible={toast.show}
-              message={toast.message}
-              type={toast.type}
-              onClose={() => setToast({ ...toast, show: false })}
-            />
-            {typeof process !== 'undefined' &&
-              process.env?.NODE_ENV === 'development' && (
-                <RegistrationDebugHelper />
-              )}
+            <AppContent />
           </NotificationsProvider>
         </DraftProfileProvider>
       </AuthProvider>

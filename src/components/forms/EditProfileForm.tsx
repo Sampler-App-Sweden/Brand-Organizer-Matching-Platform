@@ -7,6 +7,7 @@ import { useProfileLoader } from '../../hooks/useProfileLoader'
 import { supabase } from '../../services/supabaseClient'
 import { ImageUpload } from '../media'
 import { Button, FormField } from '../ui'
+import LoadingSpinner from '../ui/LoadingSpinner'
 
 export function EditProfileForm() {
   const { currentUser, refreshUser } = useAuth()
@@ -111,11 +112,7 @@ export function EditProfileForm() {
   }
 
   if (loading) {
-    return (
-      <div className='flex justify-center items-center h-64'>
-        <div className='text-gray-500'>Loading...</div>
-      </div>
-    )
+    return <LoadingSpinner size={64} className='mx-auto my-20' />
   }
 
   return (
