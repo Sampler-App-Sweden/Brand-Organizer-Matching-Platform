@@ -47,6 +47,7 @@ export function useBrandSponsorship(brandId?: string) {
   const [status, setStatus] = useState<'draft' | 'published' | null>(null)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<FeedbackState>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
 
   useEffect(() => {
     if (!brandId) {
@@ -82,6 +83,7 @@ export function useBrandSponsorship(brandId?: string) {
           setCustomMix(offer.customMix)
           setStatus(offer.status)
           setUpdatedAt(offer.updatedAt)
+          setIsEditMode(false)
         } else {
           setSelectedTypes([])
           setProductDetails(createDefaultProductDetails())
@@ -91,6 +93,7 @@ export function useBrandSponsorship(brandId?: string) {
           setCustomMix(createDefaultCustomMix())
           setStatus(null)
           setUpdatedAt(null)
+          setIsEditMode(true)
         }
         setFeedback(null)
       } catch (error) {
@@ -133,6 +136,15 @@ export function useBrandSponsorship(brandId?: string) {
         ? prev.filter((id) => id !== typeId)
         : [...prev, typeId]
     )
+  }
+
+  const resetState = () => {
+    setSelectedTypes([])
+    setProductDetails(createDefaultProductDetails())
+    setDiscountDetails(createDefaultDiscountDetails())
+    setFinancialDetails(createDefaultFinancialDetails())
+    setOtherDetails(createDefaultOtherDetails())
+    setCustomMix(createDefaultCustomMix())
   }
 
   const handleCustomMixChange = (
@@ -197,6 +209,8 @@ export function useBrandSponsorship(brandId?: string) {
             ? 'Draft saved successfully.'
             : 'Offer published successfully.'
       })
+      // Switch to display mode after successful save
+      setIsEditMode(false)
     } catch (error) {
       console.error(error)
       setFeedback({
@@ -216,6 +230,7 @@ export function useBrandSponsorship(brandId?: string) {
     handleCustomMixChange,
     handleSave,
     handleTypeToggle,
+    isEditMode,
     isSubmitting,
     loading,
     otherDetails,
@@ -223,6 +238,7 @@ export function useBrandSponsorship(brandId?: string) {
     selectedTypes,
     setDiscountDetails,
     setFinancialDetails,
+    setIsEditMode,
     setOtherDetails,
     setProductDetails,
     sponsorshipTypes,

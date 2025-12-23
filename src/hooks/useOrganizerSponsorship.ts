@@ -64,6 +64,7 @@ export function useOrganizerSponsorship(organizerId?: string) {
   const [status, setStatus] = useState<'draft' | 'published' | null>(null)
   const [updatedAt, setUpdatedAt] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<FeedbackState>(null)
+  const [isEditMode, setIsEditMode] = useState(false)
 
   useEffect(() => {
     if (!organizerId) {
@@ -81,10 +82,12 @@ export function useOrganizerSponsorship(organizerId?: string) {
         if (!isMounted) return
         if (request) {
           hydrateFromRequest(request)
+          setIsEditMode(false)
         } else {
           resetState()
           setStatus(null)
           setUpdatedAt(null)
+          setIsEditMode(true)
         }
         setFeedback(null)
       } catch (error) {
@@ -203,6 +206,8 @@ export function useOrganizerSponsorship(organizerId?: string) {
             ? 'Draft saved successfully.'
             : 'Request published successfully.'
       })
+      // Switch to display mode after successful save
+      setIsEditMode(false)
     } catch (error) {
       console.error(error)
       setFeedback({
@@ -226,6 +231,7 @@ export function useOrganizerSponsorship(organizerId?: string) {
     status,
     updatedAt,
     feedback,
+    isEditMode,
     setProductDetails,
     setDiscountDetails,
     setFinancialDetails,
@@ -233,6 +239,7 @@ export function useOrganizerSponsorship(organizerId?: string) {
     setOtherDetails,
     handleTypeToggle,
     handleAllocationChange,
-    handleSave
+    handleSave,
+    setIsEditMode
   }
 }

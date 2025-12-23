@@ -11,7 +11,6 @@ import { Button } from '../ui'
 import { useBrandSponsorship } from '../../hooks/useBrandSponsorship'
 import { type SponsorshipTypeId } from '../../types/sponsorship'
 import { clampNumber } from '../../utils/validation'
-import { toTitleCase } from '../../utils/formatting'
 import { SponsorshipTypeCard } from './SponsorshipTypeCard'
 
 interface BrandSponsorshipPanelProps {
@@ -25,6 +24,7 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
     financialDetails,
     handleSave,
     handleTypeToggle,
+    isEditMode,
     isSubmitting,
     loading,
     otherDetails,
@@ -32,6 +32,7 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
     selectedTypes,
     setDiscountDetails,
     setFinancialDetails,
+    setIsEditMode,
     setOtherDetails,
     setProductDetails,
     sponsorshipTypes,
@@ -56,27 +57,178 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
       </div>
     )
   }
+
+  // Display mode - show saved data with edit button
+  if (!isEditMode && status && selectedTypes.length > 0) {
+    return (
+      <div className='space-y-4'>
+        {/* Header with status and edit button */}
+        <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4'>
+          <div className='flex items-center gap-3'>
+            <div
+              className={`px-3 py-1 rounded-full text-xs font-medium ${
+                status === 'published'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-yellow-100 text-yellow-700'
+              }`}
+            >
+              {status === 'published' ? 'Published' : 'Draft'}
+            </div>
+            {updatedAt && (
+              <span className='text-xs text-gray-500'>
+                Updated {new Date(updatedAt).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+          <Button
+            variant='outline'
+            onClick={() => setIsEditMode(true)}
+            className='flex items-center gap-2 w-full sm:w-auto justify-center'
+          >
+            Edit
+          </Button>
+        </div>
+
+        {/* Sponsorship types grid */}
+        <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+          {sponsorshipTypes
+            .filter((type) => selectedTypes.includes(type.id))
+            .map((type) => (
+              <div
+                key={type.id}
+                className='flex items-start gap-3 p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg'
+              >
+                <type.icon className='h-5 w-5 text-purple-600 flex-shrink-0' />
+                <div className='min-w-0 flex-1'>
+                  <p className='font-medium text-gray-900 text-sm'>{type.name}</p>
+                  <p className='text-xs text-gray-600 mt-0.5 line-clamp-2'>
+                    {type.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+        </div>
+
+        {/* Details cards */}
+        <div className='space-y-3'>
+          {selectedTypes.includes('product') && productDetails.name && (
+            <div className='bg-white border border-gray-200 rounded-lg p-4'>
+              <div className='flex items-start gap-3'>
+                <PackageIcon className='h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5' />
+                <div className='min-w-0 flex-1'>
+                  <p className='font-medium text-gray-900 text-sm'>
+                    {productDetails.name}
+                  </p>
+                  {productDetails.quantity && (
+                    <p className='text-xs text-gray-600 mt-1'>
+                      {productDetails.quantity} units available
+                    </p>
+                  )}
+                  {productDetails.description && (
+                    <p className='text-sm text-gray-700 mt-2'>
+                      {productDetails.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {selectedTypes.includes('discount') && discountDetails.code && (
+            <div className='bg-white border border-gray-200 rounded-lg p-4'>
+              <div className='flex items-start gap-3'>
+                <PercentIcon className='h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5' />
+                <div className='min-w-0 flex-1'>
+                  <p className='font-medium text-gray-900 text-sm'>
+                    {discountDetails.value}% off
+                  </p>
+                  <div className='flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-600'>
+                    <span>Code: {discountDetails.code}</span>
+                    {discountDetails.validFrom && (
+                      <span>From {discountDetails.validFrom}</span>
+                    )}
+                    {discountDetails.validTo && (
+                      <span>To {discountDetails.validTo}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {selectedTypes.includes('financial') && financialDetails.amount && (
+            <div className='bg-white border border-gray-200 rounded-lg p-4'>
+              <div className='flex items-start gap-3'>
+                <DollarSignIcon className='h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5' />
+                <div className='min-w-0 flex-1'>
+                  <p className='font-medium text-gray-900 text-sm'>
+                    €{financialDetails.amount}
+                  </p>
+                  <p className='text-xs text-gray-600 mt-1'>
+                    {financialDetails.terms}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {selectedTypes.includes('other') && otherDetails.title && (
+            <div className='bg-white border border-gray-200 rounded-lg p-4'>
+              <div className='flex items-start gap-3'>
+                <PlusCircleIcon className='h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5' />
+                <div className='min-w-0 flex-1'>
+                  <p className='font-medium text-gray-900 text-sm'>
+                    {otherDetails.title}
+                  </p>
+                  <p className='text-sm text-gray-700 mt-1'>
+                    {otherDetails.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {feedback && (
+          <div
+            className={`rounded-lg border px-4 py-3 text-sm ${
+              feedback.type === 'success'
+                ? 'border-green-200 bg-green-50 text-green-700'
+                : 'border-red-200 bg-red-50 text-red-700'
+            }`}
+          >
+            {feedback.message}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Edit mode - show full form
   return (
-    <div className='mb-8'>
-      <h2 className='text-xl font-bold text-gray-900 mb-6'>
-        Choose Your Sponsorship Type
-      </h2>
+    <div className='space-y-4 sm:space-y-6'>
+      {/* Status badge */}
       {status && (
-        <div className='mb-4 text-sm text-gray-600'>
-          Current status:{' '}
-          <span
-            className={
+        <div className='flex items-center gap-3'>
+          <div
+            className={`px-3 py-1 rounded-full text-xs font-medium ${
               status === 'published'
-                ? 'text-green-600 font-medium'
-                : 'text-yellow-600 font-medium'
-            }
+                ? 'bg-green-100 text-green-700'
+                : 'bg-yellow-100 text-yellow-700'
+            }`}
           >
             {status === 'published' ? 'Published' : 'Draft'}
-          </span>
-          {updatedAt && ` • Last saved ${new Date(updatedAt).toLocaleString()}`}
+          </div>
+          {updatedAt && (
+            <span className='text-xs text-gray-500'>
+              Updated {new Date(updatedAt).toLocaleDateString()}
+            </span>
+          )}
         </div>
       )}
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
+
+      {/* Sponsorship type selection */}
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4'>
         {sponsorshipTypes.map((type) => (
           <SponsorshipTypeCard
             key={type.id}
@@ -91,7 +243,7 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
       </div>
       {/* Input fields for selected sponsorship types */}
       {selectedTypes.length > 0 && (
-        <div className='space-y-8 mb-8'>
+        <div className='space-y-4'>
           {selectedTypes.includes('product') && (
             <div className='bg-gray-50 p-6 rounded-lg border border-gray-200 relative'>
               <div className='absolute -top-3 -left-3 w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center'>
@@ -329,96 +481,69 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
           )}
         </div>
       )}
-      {/* Preview summary panel */}
+      {/* Preview - simplified without nested cards */}
       {selectedTypes.length > 0 && (
-        <div className='bg-indigo-50 p-6 rounded-lg border border-indigo-100 mb-8 relative overflow-hidden'>
-          <div className='absolute top-0 right-0 w-24 h-24 bg-indigo-100 rounded-full -mr-12 -mt-12 opacity-50'></div>
-          <h3 className='text-lg font-medium text-gray-900 mb-4 flex items-center'>
-            <span className='text-indigo-500 mr-2'>✧</span>
-            Sponsorship Summary
-          </h3>
-          <div className='relative z-10'>
-            <p className='text-gray-700 mb-4'>You're offering:</p>
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              {selectedTypes.includes('product') && (
-                <div className='bg-white p-4 rounded-lg shadow-sm border border-indigo-100'>
-                  <div className='flex items-center mb-2'>
-                    <PackageIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    <span className='font-medium text-gray-900'>Product</span>
-                  </div>
-                  <div className='text-sm text-gray-500'>
-                    {productDetails.name && `${productDetails.name}`}
-                    {productDetails.quantity &&
-                      ` (${productDetails.quantity} units)`}
-                  </div>
-                </div>
-              )}
-              {selectedTypes.includes('discount') && (
-                <div className='bg-white p-4 rounded-lg shadow-sm border border-indigo-100'>
-                  <div className='flex items-center mb-2'>
-                    <PercentIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    <span className='font-medium text-gray-900'>Discount</span>
-                  </div>
-                  <div className='text-sm text-gray-500'>
-                    {discountDetails.value &&
-                      `${discountDetails.value}% off`}
-                    {discountDetails.code && ` (${discountDetails.code})`}
-                  </div>
-                </div>
-              )}
-              {selectedTypes.includes('financial') && (
-                <div className='bg-white p-4 rounded-lg shadow-sm border border-indigo-100'>
-                  <div className='flex items-center mb-2'>
-                    <DollarSignIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    <span className='font-medium text-gray-900'>Financial</span>
-                  </div>
-                  <div className='text-sm text-gray-500'>
-                    {financialDetails.amount &&
-                      `€${financialDetails.amount}`}
-                  </div>
-                </div>
-              )}
-              {selectedTypes.includes('other') && (
-                <div className='bg-white p-4 rounded-lg shadow-sm border border-indigo-100'>
-                  <div className='flex items-center mb-2'>
-                    <PlusCircleIcon className='h-5 w-5 text-indigo-500 mr-2' />
-                    <span className='font-medium text-gray-900'>
-                      {otherDetails.title ? toTitleCase(otherDetails.title) : 'Other'}
-                    </span>
-                  </div>
-                  <div className='text-sm text-gray-500'>
-                    {otherDetails.description || 'Custom sponsorship'}
-                  </div>
-                </div>
-              )}
-            </div>
+        <div className='bg-gradient-to-br from-indigo-50 to-purple-50 p-4 sm:p-6 rounded-lg border border-indigo-200'>
+          <p className='text-sm font-medium text-gray-700 mb-3'>Preview</p>
+          <div className='space-y-2'>
+            {selectedTypes.includes('product') && productDetails.name && (
+              <div className='flex items-center gap-2 text-sm text-gray-700'>
+                <PackageIcon className='h-4 w-4 text-indigo-600 flex-shrink-0' />
+                <span className='font-medium'>{productDetails.name}</span>
+                {productDetails.quantity && (
+                  <span className='text-gray-500'>({productDetails.quantity} units)</span>
+                )}
+              </div>
+            )}
+            {selectedTypes.includes('discount') && discountDetails.value && (
+              <div className='flex items-center gap-2 text-sm text-gray-700'>
+                <PercentIcon className='h-4 w-4 text-indigo-600 flex-shrink-0' />
+                <span className='font-medium'>{discountDetails.value}% off</span>
+                {discountDetails.code && (
+                  <span className='text-gray-500'>({discountDetails.code})</span>
+                )}
+              </div>
+            )}
+            {selectedTypes.includes('financial') && financialDetails.amount && (
+              <div className='flex items-center gap-2 text-sm text-gray-700'>
+                <DollarSignIcon className='h-4 w-4 text-indigo-600 flex-shrink-0' />
+                <span className='font-medium'>€{financialDetails.amount}</span>
+              </div>
+            )}
+            {selectedTypes.includes('other') && otherDetails.title && (
+              <div className='flex items-center gap-2 text-sm text-gray-700'>
+                <PlusCircleIcon className='h-4 w-4 text-indigo-600 flex-shrink-0' />
+                <span className='font-medium'>{otherDetails.title}</span>
+              </div>
+            )}
           </div>
         </div>
       )}
+
       {/* Action buttons */}
-      <div className='flex justify-end space-x-4'>
+      <div className='flex flex-col sm:flex-row gap-3 sm:justify-end'>
         <Button
           variant='outline'
-          className='flex items-center hover:bg-indigo-50 transition-colors'
+          className='flex items-center justify-center gap-2 hover:bg-indigo-50 transition-colors w-full sm:w-auto'
           onClick={() => handleSave('draft')}
           disabled={isSubmitting || selectedTypes.length === 0 || !brandId}
         >
-          <SaveIcon className='h-4 w-4 mr-2' />
+          <SaveIcon className='h-4 w-4' />
           Save Draft
         </Button>
         <Button
           variant='primary'
-          className='flex items-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 shadow-md hover:shadow-lg transition-all'
+          className='flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 shadow-md hover:shadow-lg transition-all w-full sm:w-auto'
           onClick={() => handleSave('published')}
           disabled={isSubmitting || selectedTypes.length === 0 || !brandId}
         >
-          <SendIcon className='h-4 w-4 mr-2' />
+          <SendIcon className='h-4 w-4' />
           Publish Offer
         </Button>
       </div>
       {feedback && (
         <div
-          className={`mt-4 rounded-md border px-4 py-2 text-sm ${
+          className={`rounded-lg border px-4 py-3 text-sm ${
             feedback.type === 'success'
               ? 'border-green-200 bg-green-50 text-green-700'
               : 'border-red-200 bg-red-50 text-red-700'

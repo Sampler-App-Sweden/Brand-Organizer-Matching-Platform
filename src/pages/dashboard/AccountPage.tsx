@@ -177,8 +177,8 @@ function ProfileTabContent() {
 function ProductsTabContent({ brandId }: { brandId: string | null }) {
   if (!brandId) {
     return (
-      <div className='text-center py-8 text-gray-500'>
-        Loading brand information...
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <LoadingSpinner size={64} />
       </div>
     )
   }
@@ -195,8 +195,8 @@ function ProductsTabContent({ brandId }: { brandId: string | null }) {
 function EventsTabContent({ organizerId }: { organizerId: string | null }) {
   if (!organizerId) {
     return (
-      <div className='text-center py-8 text-gray-500'>
-        Loading organizer information...
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <LoadingSpinner size={64} />
       </div>
     )
   }
@@ -208,8 +208,8 @@ function EventsTabContent({ organizerId }: { organizerId: string | null }) {
 function BrandSponsorshipTabContent({ brandId }: { brandId: string | null }) {
   if (!brandId) {
     return (
-      <div className='text-center py-8 text-gray-500'>
-        Loading brand information...
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <LoadingSpinner size={64} />
       </div>
     )
   }
@@ -228,8 +228,8 @@ function BrandSponsorshipTabContent({ brandId }: { brandId: string | null }) {
 function OrganizerSponsorshipTabContent({ organizerId }: { organizerId: string | null }) {
   if (!organizerId) {
     return (
-      <div className='text-center py-8 text-gray-500'>
-        Loading organizer information...
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <LoadingSpinner size={64} />
       </div>
     )
   }

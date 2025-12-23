@@ -112,7 +112,11 @@ export function EditProfileForm() {
   }
 
   if (loading) {
-    return <LoadingSpinner size={64} className='mx-auto my-20' />
+    return (
+      <div className='fixed inset-0 flex items-center justify-center bg-white z-50'>
+        <LoadingSpinner size={64} />
+      </div>
+    )
   }
 
   return (
