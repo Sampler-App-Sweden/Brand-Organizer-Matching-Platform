@@ -23,15 +23,17 @@ export function ProductCard({
 }: ProductCardProps) {
   return (
     <div
-      className={`bg-white rounded-lg border overflow-hidden shadow-sm transition-all ${
+      className={`bg-white rounded-lg border overflow-hidden shadow-sm transition-all flex flex-col relative ${
         isDragging ? 'opacity-50 border-indigo-300' : 'border-gray-200'
-      } hover:shadow-md hover:border-indigo-100`}
+      } hover:shadow-md hover:border-indigo-100 group`}
       draggable
       onDragStart={() => onDragStart(product.id)}
       onDragOver={(e) => onDragOver(e, product.id)}
       onDragEnd={onDragEnd}
+      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
     >
-      <div className='relative'>
+      <div className='flex flex-col flex-1 relative'>
+        {/* Drag handle and status */}
         <div
           className='absolute top-2 left-2 cursor-move text-gray-400 hover:text-gray-600 z-10'
           title='Drag to reorder'
@@ -47,7 +49,8 @@ export function ProductCard({
         >
           {product.status === 'online' ? 'Online' : 'Hidden'}
         </div>
-        <div className='h-40 bg-gray-100 relative overflow-hidden'>
+        {/* Image */}
+        <div className='h-40 bg-gray-100 relative overflow-hidden rounded-t-lg'>
           {product.images.length > 0 ? (
             <img
               src={product.images[0].url}
@@ -65,35 +68,38 @@ export function ProductCard({
             </div>
           )}
         </div>
-        <div className='p-4'>
+        {/* Main content */}
+        <div className='p-4 flex flex-col flex-1'>
           <h3 className='font-medium text-gray-900 mb-1'>{product.name}</h3>
           <p className='text-sm text-gray-600 line-clamp-2 mb-2'>
             {product.goals}
           </p>
-          <div className='flex justify-between items-center'>
-            <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800'>
-              {product.quantity} {product.unit}
-            </span>
-            <div className='flex space-x-1'>
-              <button
-                onClick={() => onEdit(product)}
-                className='p-1 text-gray-500 hover:text-indigo-600 transition-colors'
-                title='Edit'
-              >
-                <EditIcon className='h-4 w-4' />
-              </button>
-              <button
-                onClick={() => onDelete(product.id)}
-                className='p-1 text-gray-500 hover:text-red-600 transition-colors'
-                title='Delete'
-              >
-                <TrashIcon className='h-4 w-4' />
-              </button>
-            </div>
+          <div className='flex-1' />
+        </div>
+        {/* Bottom row: quantity, edit/delete, border */}
+        <div className='px-4 pb-2 pt-0 w-full flex items-center justify-between'>
+          <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800'>
+            {product.quantity} {product.unit}
+          </span>
+          <div className='flex space-x-1'>
+            <button
+              onClick={() => onEdit(product)}
+              className='p-1 text-gray-500 hover:text-indigo-600 transition-colors'
+              title='Edit'
+            >
+              <EditIcon className='h-4 w-4' />
+            </button>
+            <button
+              onClick={() => onDelete(product.id)}
+              className='p-1 text-gray-500 hover:text-red-600 transition-colors'
+              title='Delete'
+            >
+              <TrashIcon className='h-4 w-4' />
+            </button>
           </div>
         </div>
+        <div className='w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500' />
       </div>
-      <div className='h-1 w-full bg-gradient-to-r from-transparent via-indigo-200 to-transparent'></div>
     </div>
   )
 }
