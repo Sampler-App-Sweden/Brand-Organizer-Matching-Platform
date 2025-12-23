@@ -27,11 +27,10 @@ export function DashboardLayout({
 
   return (
     <>
-      <div className='h-screen bg-gray-50 flex flex-col relative overflow-hidden'>
-        <DashboardNavbar />
-
+      <DashboardNavbar />
+      <div className='min-h-screen bg-gray-50 flex flex-col relative pt-16'>
         {/* Dashboard Content Area with Sidebar */}
-        <div className='flex-1 flex relative z-10'>
+        <div className='flex-1 flex relative z-10 min-h-0'>
           {/* Sidebar */}
           <div className='hidden md:flex flex-col bg-white bg-opacity-95 backdrop-blur-sm md:w-48 lg:w-64 border-r fixed top-0 left-0 h-screen z-20'>
             <div className='p-4 pt-20 flex flex-col h-full overflow-y-auto'>
@@ -109,7 +108,7 @@ export function DashboardLayout({
             className={`flex flex-col flex-1 overflow-hidden relative md:ml-48 lg:ml-64 ${mainPaddingClassName}`}
           >
             <div
-              className={`flex flex-col flex-1 bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 ${contentPaddingClassName}`}
+              className={`flex-1 min-h-0 bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100 overflow-y-auto ${contentPaddingClassName}`}
             >
               {children}
             </div>

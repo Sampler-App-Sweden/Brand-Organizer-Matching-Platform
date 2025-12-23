@@ -133,7 +133,7 @@ export function MessagesPage() {
 
   return (
     <DashboardLayout userType={userType} mainPaddingClassName='p-0'>
-      <div className='flex flex-col h-screen overflow-hidden'>
+      <div className='flex flex-col h-full overflow-hidden'>
         <div className='px-4 pt-4 pb-3'>
           <div className='flex items-center justify-between'>
             <h1 className='text-xl md:text-2xl font-bold text-gray-900'>
