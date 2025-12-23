@@ -15,7 +15,7 @@ import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
 import { ContactPage } from './pages/ContactPage'
-import { BrandDashboard, OrganizerDashboard } from './pages/dashboard'
+import { BrandDashboard, OrganizerDashboard, SettingsPage } from './pages/dashboard'
 import { AccountPage } from './pages/dashboard/AccountPage'
 import { ConnectionsPage } from './pages/dashboard/ConnectionsPage'
 import { MatchDetails } from './pages/dashboard/MatchDetails'
@@ -142,6 +142,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/dashboard/settings'
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         }
       />

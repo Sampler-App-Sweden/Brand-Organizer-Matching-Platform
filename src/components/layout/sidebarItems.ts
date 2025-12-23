@@ -6,6 +6,7 @@ import {
   HomeIcon,
   LogOut,
   MessageSquareIcon,
+  Settings,
   UsersIcon
 } from 'lucide-react'
 import { createElement, ReactElement } from 'react'
@@ -36,6 +37,11 @@ export const sidebarItems: SidebarCollection = {
       matchExact: true
     },
     {
+      label: 'Account',
+      icon: createElement(UsersIcon, { className: 'h-5 w-5' }),
+      path: '/dashboard/account'
+    },
+    {
       label: 'Connections',
       icon: createElement(Heart, { className: 'h-5 w-5' }),
       path: '/dashboard/connections'
@@ -52,6 +58,11 @@ export const sidebarItems: SidebarCollection = {
       icon: createElement(HomeIcon, { className: 'h-5 w-5' }),
       path: '/dashboard/organizer',
       matchExact: true
+    },
+    {
+      label: 'Account',
+      icon: createElement(UsersIcon, { className: 'h-5 w-5' }),
+      path: '/dashboard/account'
     },
     {
       label: 'Connections',
@@ -99,9 +110,9 @@ export const sidebarItems: SidebarCollection = {
       path: '/dashboard/notifications'
     },
     {
-      label: 'Account',
-      icon: createElement(UsersIcon, { className: 'h-5 w-5' }),
-      path: '/dashboard/account'
+      label: 'Settings',
+      icon: createElement(Settings, { className: 'h-5 w-5' }),
+      path: '/dashboard/settings'
     },
     {
       label: 'Log out',
