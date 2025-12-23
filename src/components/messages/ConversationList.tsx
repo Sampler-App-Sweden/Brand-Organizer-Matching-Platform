@@ -1,4 +1,3 @@
-import { PhaseBadge } from './PhaseBadge'
 import type { EnhancedConversation } from '../../types/messages'
 
 interface ConversationListProps {
@@ -17,7 +16,7 @@ export function ConversationList({
   if (conversations.length === 0) {
     return (
       <div className='overflow-y-auto flex-1'>
-        <div className='p-6 text-center text-gray-500'>
+        <div className='p-6 text-center text-gray-500 text-sm'>
           No conversations found
         </div>
       </div>
@@ -46,76 +45,51 @@ export function ConversationList({
               }`}
               onClick={() => onSelectConversation(conversation.id)}
             >
-              <div className='p-4'>
-                <div className='flex justify-between items-start mb-2'>
-                  <div className='flex items-center'>
-                    <div className='h-10 w-10 rounded-full overflow-hidden mr-3 bg-gray-200'>
-                      {partnerLogo ? (
-                        <img
-                          src={partnerLogo}
-                          alt={partnerName}
-                          className='h-full w-full object-cover'
-                        />
-                      ) : (
-                        <div className='h-full w-full flex items-center justify-center bg-indigo-100 text-indigo-800 font-bold'>
-                          {partnerName.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className='font-medium text-gray-900'>
-                        {partnerName}
-                      </h3>
-                      <div className='flex items-center'>
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                            userType === 'brand'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }`}
-                        >
-                          {userType === 'brand' ? 'Organizer' : 'Brand'}
-                        </span>
+              <div className='p-3'>
+                <div className='flex items-start gap-3'>
+                  <div className='h-12 w-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0'>
+                    {partnerLogo ? (
+                      <img
+                        src={partnerLogo}
+                        alt={partnerName}
+                        className='h-full w-full object-cover'
+                      />
+                    ) : (
+                      <div className='h-full w-full flex items-center justify-center bg-indigo-100 text-indigo-800 font-bold text-sm'>
+                        {partnerName.charAt(0)}
                       </div>
-                    </div>
-                  </div>
-                  {conversation.unreadCount > 0 && (
-                    <span className='inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full'>
-                      {conversation.unreadCount}
-                    </span>
-                  )}
-                </div>
-                <div className='mb-2'>
-                  <p className='text-sm text-gray-900 font-medium'>
-                    {conversation.reference}
-                  </p>
-                </div>
-                <div className='flex justify-between items-center'>
-                  <div className='flex items-center gap-2'>
-                    <PhaseBadge phase={conversation.phase} />
-                    {conversation.archived && (
-                      <span className='inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700'>
-                        Archived
-                      </span>
                     )}
                   </div>
-                  <span className='text-xs text-gray-500'>
-                    {conversation.lastMessageTime &&
-                      new Date(
-                        conversation.lastMessageTime
-                      ).toLocaleDateString()}
-                  </span>
-                </div>
-                {conversation.awaitingReply && (
-                  <div className='mt-2'>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-amber-700 bg-amber-100'>
-                      Awaiting reply
-                    </span>
+                  <div className='flex-1 min-w-0'>
+                    <div className='flex items-start justify-between mb-1'>
+                      <h3 className='font-medium text-gray-900 text-sm truncate'>
+                        {partnerName}
+                      </h3>
+                      {conversation.unreadCount > 0 && (
+                        <span className='ml-2 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-indigo-600 rounded-full flex-shrink-0'>
+                          {conversation.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                    <p className='text-xs text-gray-600 truncate mb-1'>
+                      {conversation.reference}
+                    </p>
+                    <p className='text-sm text-gray-800 truncate mb-1'>
+                      {conversation.lastMessage}
+                    </p>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-xs text-gray-500'>
+                        {conversation.lastMessageTime &&
+                          new Date(
+                            conversation.lastMessageTime
+                          ).toLocaleDateString()}
+                      </span>
+                      {conversation.archived && (
+                        <span className='text-xs text-gray-500'>Archived</span>
+                      )}
+                    </div>
                   </div>
-                )}
-                <p className='mt-2 text-sm text-gray-600 truncate'>
-                  {conversation.lastMessage}
-                </p>
+                </div>
               </div>
             </li>
           )

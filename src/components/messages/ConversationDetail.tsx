@@ -1,12 +1,9 @@
-import { Archive, MessageSquareIcon, PaperclipIcon, SendIcon } from 'lucide-react'
+import { Archive, MessageSquareIcon, SendIcon } from 'lucide-react'
 import type { FormEvent } from 'react'
 
 import { Button } from '../ui'
 import type { Message } from '../../services/chatService'
-import type {
-  ConversationPhase,
-  EnhancedConversation
-} from '../../types/messages'
+import type { EnhancedConversation } from '../../types/messages'
 import { ConversationHeader } from './ConversationHeader'
 import { MessageBubble } from './MessageBubble'
 
@@ -22,8 +19,8 @@ interface ConversationDetailProps {
   sendingMessage: boolean
   onMessageChange: (value: string) => void
   onSendMessage: (event: FormEvent<HTMLFormElement>) => void
-  onPhaseChange: (phase: ConversationPhase) => void
   hasPartnerInfo: boolean
+  onBack?: () => void
 }
 
 export function ConversationDetail({
@@ -38,8 +35,8 @@ export function ConversationDetail({
   sendingMessage,
   onMessageChange,
   onSendMessage,
-  onPhaseChange,
-  hasPartnerInfo
+  hasPartnerInfo,
+  onBack
 }: ConversationDetailProps) {
   if (!activeConversation || !hasPartnerInfo) {
     return (
@@ -57,7 +54,7 @@ export function ConversationDetail({
         partnerDisplayName={partnerDisplayName}
         partnerInitial={partnerInitial}
         userType={userType}
-        onPhaseChange={onPhaseChange}
+        onBack={onBack}
       />
       {activeConversation.readOnly && (
         <div className='bg-yellow-50 border-b border-yellow-200 px-4 py-3'>
@@ -96,39 +93,28 @@ export function ConversationDetail({
           ))
         )}
       </div>
-      <div className='border-t border-gray-200 p-3 pb-2'>
-        <form onSubmit={onSendMessage} className='flex items-end'>
-          <div className='flex-1 border rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500'>
-            <textarea
-              className='block w-full border-0 resize-none py-3 px-4 focus:outline-none focus:ring-0 sm:text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed'
-              placeholder={
-                activeConversation.readOnly
-                  ? 'This conversation is archived'
-                  : 'Type a message...'
-              }
-              rows={2}
-              value={newMessage}
-              onChange={(e) => onMessageChange(e.target.value)}
-              disabled={activeConversation.readOnly}
-            />
-            <div className='flex items-center justify-between p-2 border-t border-gray-200'>
-              <button
-                type='button'
-                className='p-1 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500'
-              >
-                <PaperclipIcon className='h-5 w-5' />
-              </button>
-              <Button
-                type='submit'
-                variant='primary'
-                disabled={!newMessage.trim() || sendingMessage || activeConversation.readOnly}
-                className='flex items-center'
-              >
-                <SendIcon className='h-4 w-4 mr-1' />
-                {sendingMessage ? 'Sending...' : 'Send'}
-              </Button>
-            </div>
-          </div>
+      <div className='border-t border-gray-200 p-3'>
+        <form onSubmit={onSendMessage} className='flex gap-2'>
+          <textarea
+            className='flex-1 border border-gray-300 rounded-lg resize-none py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed'
+            placeholder={
+              activeConversation.readOnly
+                ? 'This conversation is archived'
+                : 'Type a message...'
+            }
+            rows={2}
+            value={newMessage}
+            onChange={(e) => onMessageChange(e.target.value)}
+            disabled={activeConversation.readOnly}
+          />
+          <Button
+            type='submit'
+            variant='primary'
+            disabled={!newMessage.trim() || sendingMessage || activeConversation.readOnly}
+            className='flex items-center self-end px-4'
+          >
+            <SendIcon className='h-4 w-4' />
+          </Button>
         </form>
         {messageError && (
           <div className='mt-2 text-sm text-red-600'>{messageError}</div>
