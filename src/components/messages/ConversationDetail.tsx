@@ -52,7 +52,7 @@ export function ConversationDetail({
   }
 
   return (
-    <>
+    <div className='flex flex-col h-full'>
       <ConversationHeader
         conversation={activeConversation}
         partnerDisplayName={partnerDisplayName}
@@ -99,7 +99,7 @@ export function ConversationDetail({
           ))
         )}
       </div>
-      {/* Message input at bottom */}
+      {/* Message input fixed at bottom */}
       <div className='border-t border-gray-200 p-3'>
         <form onSubmit={onSendMessage} className='flex gap-2'>
           <textarea
@@ -127,6 +127,6 @@ export function ConversationDetail({
           <div className='mt-2 text-sm text-red-600'>{messageError}</div>
         )}
       </div>
-    </>
+    </div>
   )
 }

@@ -100,33 +100,6 @@ const hydrateConversations = async (
   )
 }
 
-const fetchConversationById = async (
-  conversationId: string
-): Promise<Conversation | null> => {
-  const { data, error } = await supabase
-    .from('conversations')
-    .select('*')
-    .eq('id', conversationId)
-    .maybeSingle()
-
-  if (error) {
-    throw new Error(`Failed to load conversation: ${error.message}`)
-  }
-
-  if (!data) return null
-
-  const messages = await getConversationMessages(conversationId)
-  return mapConversationRow(data as ConversationRow, messages)
-}
-
-const shouldTriggerAIResponse = (content: string) => {
-  const lowered = content.toLowerCase()
-  return (
-    lowered.includes('?') ||
-    lowered.includes('help') ||
-    lowered.includes('suggest')
-  )
-}
 
 /**
  * Check if two users can start a conversation
@@ -265,27 +238,6 @@ export const sendMessage = async (
     console.error('Failed to create message notification:', error)
   })
 
-  if (shouldTriggerAIResponse(content)) {
-    const conversation = await fetchConversationById(conversationId)
-    if (conversation) {
-      const aiResponse = generateAIResponse(content, senderType)
-
-      const { error: aiError } = await supabase.from('messages').insert({
-        conversation_id: conversationId,
-        sender_id: null,
-        sender_type: 'ai',
-        content: aiResponse
-      })
-
-      if (!aiError) {
-        await supabase
-          .from('conversations')
-          .update({ last_activity: new Date().toISOString() })
-          .eq('id', conversationId)
-      }
-    }
-  }
-
   return message
 }
 
@@ -375,67 +327,6 @@ export const getConversationsBySenderId = async (
   return hydrateConversations(conversationRows as ConversationRow[])
 }
 
-// Generate AI response based on message content
-const generateAIResponse = (
-  message: string,
-  senderType: 'brand' | 'organizer'
-): string => {
-  const lowercaseMessage = message.toLowerCase()
-  // Pricing and budget questions
-  if (
-    lowercaseMessage.includes('price') ||
-    lowercaseMessage.includes('cost') ||
-    lowercaseMessage.includes('budget')
-  ) {
-    if (senderType === 'brand') {
-      return 'Based on similar events, I recommend discussing specific sponsorship tiers. You might consider asking about their standard packages and what each level includes in terms of visibility and engagement opportunities.'
-    } else {
-      return "When discussing pricing with brands, it's helpful to offer clear sponsorship tiers with specific benefits for each level. Consider asking about their budget range to tailor your proposal accordingly."
-    }
-  }
-  // Timeline questions
-  if (
-    lowercaseMessage.includes('when') ||
-    lowercaseMessage.includes('timeline') ||
-    lowercaseMessage.includes('deadline')
-  ) {
-    return "It's important to establish a clear timeline for this partnership. I suggest discussing key dates including: decision deadline, materials needed by, and any promotional lead time required."
-  }
-  // Value proposition questions
-  if (
-    lowercaseMessage.includes('benefit') ||
-    lowercaseMessage.includes('value') ||
-    lowercaseMessage.includes('offer')
-  ) {
-    if (senderType === 'brand') {
-      return 'When evaluating this opportunity, consider asking about: attendee engagement metrics from past events, demographic breakdown, and specific visibility opportunities for your brand.'
-    } else {
-      return "To effectively communicate your value, highlight specific metrics from past events like attendee satisfaction rates, demographic details, and engagement statistics that would appeal to this brand's target audience."
-    }
-  }
-  // Logistics questions
-  if (
-    lowercaseMessage.includes('logistics') ||
-    lowercaseMessage.includes('setup') ||
-    lowercaseMessage.includes('requirements')
-  ) {
-    return 'Logistics are crucial for a successful partnership. I recommend discussing: space requirements, setup/breakdown times, staffing needs, and any technical specifications needed for your activation.'
-  }
-  // Contract and terms questions
-  if (
-    lowercaseMessage.includes('contract') ||
-    lowercaseMessage.includes('terms') ||
-    lowercaseMessage.includes('agreement')
-  ) {
-    return "For a smooth partnership, it's good to clarify terms early. Consider discussing: payment schedule, cancellation policies, exclusivity clauses, and deliverables timeline."
-  }
-  // Default helpful response
-  if (senderType === 'brand') {
-    return 'As you continue this conversation, consider asking about specific audience demographics, engagement opportunities, and how your brand will be showcased at the event. Would you like me to suggest some specific questions to ask the organizer?'
-  } else {
-    return "To move this partnership forward, consider providing more details about your event's unique value proposition and specific ways this brand can connect with your audience. Would you like me to suggest some talking points to highlight with this potential sponsor?"
-  }
-}
 
 // Archive a conversation (mark as read-only and archived)
 export const archiveConversation = async (

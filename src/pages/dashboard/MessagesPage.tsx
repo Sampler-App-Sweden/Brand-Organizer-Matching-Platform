@@ -1,4 +1,3 @@
-import { CheckSquare } from 'lucide-react'
 import { useState } from 'react'
 
 import { DashboardLayout } from '../../components/layout'
@@ -6,7 +5,6 @@ import {
   BulkActionsToolbar,
   ConfirmDialog,
   ConversationDetail,
-  ConversationFilters,
   ConversationList
 } from '../../components/messages'
 import { LoadingSpinner } from '../../components/ui'
@@ -84,11 +82,6 @@ export function MessagesPage() {
   }
 
   // Bulk selection handlers
-  const handleEnterSelectionMode = () => {
-    setSelectionMode(true)
-    setSelectedConversationIds([])
-  }
-
   const handleCancelSelection = () => {
     setSelectionMode(false)
     setSelectedConversationIds([])
@@ -134,22 +127,6 @@ export function MessagesPage() {
   return (
     <DashboardLayout userType={userType} mainPaddingClassName='p-0'>
       <div className='flex flex-col h-full overflow-hidden'>
-        <div className='px-4 pt-4 pb-3'>
-          <div className='flex items-center justify-between'>
-            <h1 className='text-xl md:text-2xl font-bold text-gray-900'>
-              Messages
-            </h1>
-            {!selectionMode && filteredConversations.length > 0 && (
-              <button
-                onClick={handleEnterSelectionMode}
-                className='flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors'
-              >
-                <CheckSquare className='h-4 w-4' />
-                Select
-              </button>
-            )}
-          </div>
-        </div>
         {selectionMode ? (
           <BulkActionsToolbar
             selectedCount={selectedConversationIds.length}
@@ -161,11 +138,37 @@ export function MessagesPage() {
             onCancel={handleCancelSelection}
           />
         ) : (
-          <div className='px-4'>
-            <ConversationFilters
-              sortBy={sortBy}
-              onSortChange={(value) => setSortBy(value)}
-            />
+          <div className='px-4 pt-4 pb-3'>
+            <div className='flex items-center justify-between'>
+              <h1 className='text-xl md:text-2xl font-bold text-gray-900'>
+                Messages
+              </h1>
+              <div className='flex items-center gap-2'>
+                <span className='text-sm font-medium text-gray-700'>Sort:</span>
+                <div className='flex rounded-md overflow-hidden border border-gray-300'>
+                  <button
+                    className={`px-3 py-1.5 text-sm transition-colors ${
+                      sortBy === 'recent'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setSortBy('recent')}
+                  >
+                    Recent
+                  </button>
+                  <button
+                    className={`px-3 py-1.5 text-sm transition-colors ${
+                      sortBy === 'unread'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setSortBy('unread')}
+                  >
+                    Unread
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
         {loading ? (
