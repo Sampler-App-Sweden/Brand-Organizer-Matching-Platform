@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { DashboardLayout } from '../../components/layout'
 import {
@@ -11,6 +12,7 @@ import { LoadingSpinner } from '../../components/ui'
 import { useConversations } from '../../hooks/useConversations'
 
 export function MessagesPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const {
     userType,
     loading,
@@ -38,6 +40,30 @@ export function MessagesPage() {
   } = useConversations()
 
   const [showMobileDetail, setShowMobileDetail] = useState(false)
+
+  // Auto-select conversation from URL query parameter
+  useEffect(() => {
+    const conversationId = searchParams.get('conversation')
+    if (conversationId && !loading) {
+      // Check if conversation exists in the list
+      const conversationExists = filteredConversations.some(
+        (c) => c.id === conversationId
+      )
+      if (conversationExists) {
+        selectConversation(conversationId)
+        setShowMobileDetail(true)
+        // Remove the query parameter after selecting
+        searchParams.delete('conversation')
+        setSearchParams(searchParams, { replace: true })
+      }
+    }
+  }, [
+    searchParams,
+    setSearchParams,
+    selectConversation,
+    loading,
+    filteredConversations
+  ])
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedConversationIds, setSelectedConversationIds] = useState<

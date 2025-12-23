@@ -89,104 +89,93 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
           </Button>
         </div>
 
-        {/* Sponsorship types grid */}
+        {/* Sponsorship types grid with details */}
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
           {sponsorshipTypes
             .filter((type) => selectedTypes.includes(type.id))
-            .map((type) => (
-              <div
-                key={type.id}
-                className='flex items-start gap-3 p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg'
-              >
-                <type.icon className='h-5 w-5 text-purple-600 flex-shrink-0' />
-                <div className='min-w-0 flex-1'>
-                  <p className='font-medium text-gray-900 text-sm'>{type.name}</p>
-                  <p className='text-xs text-gray-600 mt-0.5 line-clamp-2'>
-                    {type.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-        </div>
+            .map((type) => {
+              // Get details for this type
+              let detailsContent = null
 
-        {/* Details cards */}
-        <div className='space-y-3'>
-          {selectedTypes.includes('product') && productDetails.name && (
-            <div className='bg-white border border-gray-200 rounded-lg p-4'>
-              <div className='flex items-start gap-3'>
-                <PackageIcon className='h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5' />
-                <div className='min-w-0 flex-1'>
-                  <p className='font-medium text-gray-900 text-sm'>
-                    {productDetails.name}
-                  </p>
-                  {productDetails.quantity && (
+              if (type.id === 'financial' && financialDetails.amount) {
+                detailsContent = (
+                  <div className='mt-3 pt-3 border-t border-purple-200'>
+                    <p className='font-semibold text-gray-900 text-base'>
+                      {financialDetails.amount} SEK
+                    </p>
                     <p className='text-xs text-gray-600 mt-1'>
-                      {productDetails.quantity} units available
+                      {financialDetails.terms}
                     </p>
-                  )}
-                  {productDetails.description && (
-                    <p className='text-sm text-gray-700 mt-2'>
-                      {productDetails.description}
+                  </div>
+                )
+              } else if (type.id === 'product' && productDetails.name) {
+                detailsContent = (
+                  <div className='mt-3 pt-3 border-t border-purple-200'>
+                    <p className='font-semibold text-gray-900 text-sm'>
+                      {productDetails.name}
                     </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {selectedTypes.includes('discount') && discountDetails.code && (
-            <div className='bg-white border border-gray-200 rounded-lg p-4'>
-              <div className='flex items-start gap-3'>
-                <PercentIcon className='h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5' />
-                <div className='min-w-0 flex-1'>
-                  <p className='font-medium text-gray-900 text-sm'>
-                    {discountDetails.value}% off
-                  </p>
-                  <div className='flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-600'>
-                    <span>Code: {discountDetails.code}</span>
-                    {discountDetails.validFrom && (
-                      <span>From {discountDetails.validFrom}</span>
+                    {productDetails.quantity && (
+                      <p className='text-xs text-gray-600 mt-1'>
+                        {productDetails.quantity} units available
+                      </p>
                     )}
-                    {discountDetails.validTo && (
-                      <span>To {discountDetails.validTo}</span>
+                    {productDetails.description && (
+                      <p className='text-xs text-gray-600 mt-1 line-clamp-2'>
+                        {productDetails.description}
+                      </p>
                     )}
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
+                )
+              } else if (type.id === 'discount' && discountDetails.code) {
+                detailsContent = (
+                  <div className='mt-3 pt-3 border-t border-purple-200'>
+                    <p className='font-semibold text-gray-900 text-sm'>
+                      {discountDetails.value}% off
+                    </p>
+                    <div className='flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-gray-600'>
+                      <span>Code: {discountDetails.code}</span>
+                      {discountDetails.validFrom && (
+                        <span>From {discountDetails.validFrom}</span>
+                      )}
+                      {discountDetails.validTo && (
+                        <span>To {discountDetails.validTo}</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              } else if (type.id === 'other' && otherDetails.title) {
+                detailsContent = (
+                  <div className='mt-3 pt-3 border-t border-purple-200'>
+                    <p className='font-semibold text-gray-900 text-sm'>
+                      {otherDetails.title}
+                    </p>
+                    {otherDetails.description && (
+                      <p className='text-xs text-gray-600 mt-1 line-clamp-2'>
+                        {otherDetails.description}
+                      </p>
+                    )}
+                  </div>
+                )
+              }
 
-          {selectedTypes.includes('financial') && financialDetails.amount && (
-            <div className='bg-white border border-gray-200 rounded-lg p-4'>
-              <div className='flex items-start gap-3'>
-                <DollarSignIcon className='h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5' />
-                <div className='min-w-0 flex-1'>
-                  <p className='font-medium text-gray-900 text-sm'>
-                    €{financialDetails.amount}
-                  </p>
-                  <p className='text-xs text-gray-600 mt-1'>
-                    {financialDetails.terms}
-                  </p>
+              return (
+                <div
+                  key={type.id}
+                  className='flex flex-col p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg'
+                >
+                  <div className='flex items-start gap-3'>
+                    <type.icon className='h-5 w-5 text-purple-600 flex-shrink-0' />
+                    <div className='min-w-0 flex-1'>
+                      <p className='font-medium text-gray-900 text-sm'>{type.name}</p>
+                      <p className='text-xs text-gray-600 mt-0.5'>
+                        {type.description}
+                      </p>
+                    </div>
+                  </div>
+                  {detailsContent}
                 </div>
-              </div>
-            </div>
-          )}
-
-          {selectedTypes.includes('other') && otherDetails.title && (
-            <div className='bg-white border border-gray-200 rounded-lg p-4'>
-              <div className='flex items-start gap-3'>
-                <PlusCircleIcon className='h-5 w-5 text-indigo-600 flex-shrink-0 mt-0.5' />
-                <div className='min-w-0 flex-1'>
-                  <p className='font-medium text-gray-900 text-sm'>
-                    {otherDetails.title}
-                  </p>
-                  <p className='text-sm text-gray-700 mt-1'>
-                    {otherDetails.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+              )
+            })}
         </div>
 
         {feedback && (
@@ -393,7 +382,7 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>
-                    Amount (€)
+                    Amount (SEK)
                   </label>
                   <input
                     type='number'
@@ -507,7 +496,7 @@ export function BrandSponsorshipPanel({ brandId }: BrandSponsorshipPanelProps) {
             {selectedTypes.includes('financial') && financialDetails.amount && (
               <div className='flex items-center gap-2 text-sm text-gray-700'>
                 <DollarSignIcon className='h-4 w-4 text-indigo-600 flex-shrink-0' />
-                <span className='font-medium'>€{financialDetails.amount}</span>
+                <span className='font-medium'>{financialDetails.amount} SEK</span>
               </div>
             )}
             {selectedTypes.includes('other') && otherDetails.title && (

@@ -22,7 +22,7 @@ export function generateMatchPreview(
   }
   if (selectedTypes.includes('financial')) {
     const amount = financialDetails.maxAmount || '1,000'
-    items.push(`€${amount} grant`)
+    items.push(`${amount} SEK grant`)
   }
   if (selectedTypes.includes('media')) {
     items.push('Media/PR placements')

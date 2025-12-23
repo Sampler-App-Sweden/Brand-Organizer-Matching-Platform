@@ -1,6 +1,9 @@
+import { Link } from 'react-router-dom'
+
 import { DashboardLayout } from '../../components/layout'
 import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context'
+import { getNotificationLink } from '../../utils/notifications'
 
 export function NotificationsPage() {
   const { currentUser } = useAuth()
@@ -49,47 +52,68 @@ export function NotificationsPage() {
           </div>
         ) : (
           <div className='space-y-3'>
-            {notifications.map((n) => (
-              <div
-                key={n.id}
-                className={`flex items-start justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm ${
-                  n.read ? 'opacity-80' : ''
-                }`}
-              >
-                <div>
-                  <div className='flex items-center gap-2'>
+            {notifications.map((n) => {
+              const link = getNotificationLink(n.type, n.relatedId, userType)
+              const NotificationWrapper = link ? Link : 'div'
+              const wrapperProps = link
+                ? {
+                    to: link,
+                    onClick: () => !n.read && markAsRead(n.id)
+                  }
+                : {}
+
+              return (
+                <div
+                  key={n.id}
+                  className={`flex items-start justify-between rounded-lg border border-gray-200 bg-white shadow-sm ${
+                    n.read ? 'opacity-80' : ''
+                  }`}
+                >
+                  <NotificationWrapper
+                    {...wrapperProps}
+                    className={`flex-1 p-4 ${link ? 'hover:bg-gray-50 cursor-pointer transition-colors' : ''}`}
+                  >
+                    <div>
+                      <div className='flex items-center gap-2'>
+                        {!n.read && (
+                          <span className='h-2 w-2 rounded-full bg-indigo-600'></span>
+                        )}
+                        <p className='text-sm text-gray-500'>
+                          {n.createdAt.toLocaleString()}
+                        </p>
+                      </div>
+                      <h3 className='text-base font-semibold text-gray-900'>
+                        {n.title}
+                      </h3>
+                      <p className='text-sm text-gray-700 mt-1'>{n.message}</p>
+                      {link && (
+                        <p className='text-xs text-indigo-600 mt-2'>
+                          Click to view →
+                        </p>
+                      )}
+                    </div>
+                  </NotificationWrapper>
+                  <div className='flex flex-col gap-2 items-end p-4'>
                     {!n.read && (
-                      <span className='h-2 w-2 rounded-full bg-indigo-600'></span>
+                      <button
+                        type='button'
+                        onClick={() => markAsRead(n.id)}
+                        className='text-sm text-indigo-600 hover:text-indigo-800'
+                      >
+                        Mark read
+                      </button>
                     )}
-                    <p className='text-sm text-gray-500'>
-                      {n.createdAt.toLocaleString()}
-                    </p>
-                  </div>
-                  <h3 className='text-base font-semibold text-gray-900'>
-                    {n.title}
-                  </h3>
-                  <p className='text-sm text-gray-700 mt-1'>{n.message}</p>
-                </div>
-                <div className='flex flex-col gap-2 items-end'>
-                  {!n.read && (
                     <button
                       type='button'
-                      onClick={() => markAsRead(n.id)}
-                      className='text-sm text-indigo-600 hover:text-indigo-800'
+                      onClick={() => deleteNotification(n.id)}
+                      className='text-sm text-red-600 hover:text-red-800'
                     >
-                      Mark read
+                      Delete
                     </button>
-                  )}
-                  <button
-                    type='button'
-                    onClick={() => deleteNotification(n.id)}
-                    className='text-sm text-red-600 hover:text-red-800'
-                  >
-                    Delete
-                  </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
