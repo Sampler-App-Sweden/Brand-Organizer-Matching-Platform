@@ -23,7 +23,7 @@ export function TechHero({
   videoSpeed = 0.5
 }: TechHeroProps) {
   return (
-    <div className='bg-white relative overflow-hidden height-full'>
+    <div className='bg-white relative overflow-hidden min-h-screen flex items-center justify-center'>
       {/* Background Video */}
       {videoSrc && (
         <>
@@ -44,7 +44,7 @@ export function TechHero({
           <div className='absolute inset-0 backdrop-blur-md bg-black/10'></div>
         </>
       )}
-      <div className='container mx-auto px-4 py-16 md:py-24 relative z-10'>
+      <div className='container mx-auto px-4 py-16 md:py-24 relative z-10 flex flex-col justify-center min-h-screen'>
         <div className='max-w-3xl mx-auto text-center'>
           <div className='inline-block mb-3 bg-indigo-100 text-brand-secondary px-3 py-1 rounded-full text-sm font-medium animate-pulse'>
             AI-Powered Matching Technology

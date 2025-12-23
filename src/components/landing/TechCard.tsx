@@ -18,32 +18,32 @@ export function TechCard({
 }: TechCardProps) {
   return (
     <div
-      className={`bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 ${
+      className={`bg-white rounded-2xl border border-indigo-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden group relative p-8 flex flex-col items-start ${
         onClick ? 'cursor-pointer' : ''
-      } ${className} relative overflow-hidden group`}
+      } ${className}`}
       onClick={onClick}
+      style={{ minHeight: 160 }}
     >
-      {/* Animated background gradient */}
-      <div className='absolute inset-0 bg-gradient-to-br from-indigo-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity'></div>
-
-      <div className='p-6 relative z-10'>
-        {icon && (
-          <div className='bg-indigo-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4 text-indigo-600 group-hover:scale-110 transition-transform relative overflow-hidden'>
-            <div className='relative z-10'>{icon}</div>
-            <div className='absolute inset-0 bg-gradient-to-br from-indigo-100 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity'></div>
-          </div>
-        )}
-        <h3 className='text-xl font-semibold text-gray-900 mb-2 group-hover:text-indigo-700 transition-colors'>
-          {title}
-        </h3>
-        {description && (
-          <p className='text-gray-600 group-hover:text-gray-700 transition-colors'>
-            {description}
-          </p>
-        )}
-      </div>
+      {/* Glow ring */}
+      <div className='absolute -top-6 -left-6 w-24 h-24 bg-gradient-to-br from-indigo-400/40 to-purple-300/30 rounded-full blur-2xl opacity-0 group-hover:opacity-80 transition-opacity duration-500' />
+      {/* Icon with gradient ring - top left */}
+      {icon && (
+        <div className='relative mb-5' style={{ alignSelf: 'flex-start' }}>
+          <span className='inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 shadow-lg ring-4 ring-indigo-200/40 group-hover:scale-110 transition-transform duration-300'>
+            <span className='text-white text-3xl'>{icon}</span>
+          </span>
+        </div>
+      )}
+      <h3 className='text-2xl font-bold text-gray-900 mb-2 group-hover:text-indigo-700 transition-colors duration-300 text-left'>
+        {title}
+      </h3>
+      {description && (
+        <p className='text-gray-600 text-base group-hover:text-gray-800 transition-colors duration-300 text-left'>
+          {description}
+        </p>
+      )}
       {footer && (
-        <div className='border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-lg relative z-10 group-hover:bg-gray-100 transition-colors'>
+        <div className='border-t border-gray-100 px-6 py-4 bg-gray-50 rounded-b-lg relative z-10 group-hover:bg-gray-100 transition-colors w-full'>
           {footer}
         </div>
       )}
