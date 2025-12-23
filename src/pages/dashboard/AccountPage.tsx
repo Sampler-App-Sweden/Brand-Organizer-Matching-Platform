@@ -1,18 +1,26 @@
-import { Calendar, Package, Settings as SettingsIcon, User } from 'lucide-react'
+import {
+  Calendar,
+  Handshake,
+  Package,
+  Settings as SettingsIcon,
+  User
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 
 import { EditProfileForm } from '../../components/forms/EditProfileForm'
 import { DashboardLayout } from '../../components/layout'
+import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
+import { OrganizerSponsorshipPanel } from '../../components/sponsorship/OrganizerSponsorshipPanel'
+import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabaseClient'
 
-type TabId = 'profile' | 'products' | 'events' | 'settings'
+type TabId = 'profile' | 'products' | 'events' | 'settings' | 'sponsorship'
 
 export function AccountPage() {
-  const { currentUser, logout } = useAuth()
+  const { currentUser } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const navigate = useNavigate()
   const userType = currentUser?.type
 
   // Get tab from URL or default to profile
@@ -23,7 +31,9 @@ export function AccountPage() {
   useEffect(() => {
     if (
       tabParam &&
-      ['profile', 'products', 'events', 'settings'].includes(tabParam)
+      ['profile', 'products', 'events', 'settings', 'sponsorship'].includes(
+        tabParam
+      )
     ) {
       setActiveTab(tabParam)
     }
@@ -49,6 +59,12 @@ export function AccountPage() {
       visible: userType === 'brand'
     },
     {
+      id: 'sponsorship' as TabId,
+      label: 'Sponsorship',
+      icon: <Handshake className='h-4 w-4' />,
+      visible: userType === 'brand' || userType === 'organizer'
+    },
+    {
       id: 'events' as TabId,
       label: 'Events',
       icon: <Calendar className='h-4 w-4' />,
@@ -69,6 +85,13 @@ export function AccountPage() {
         return <ProfileTabContent />
       case 'products':
         return userType === 'brand' ? <ProductsTabContent /> : null
+      case 'sponsorship':
+        if (userType === 'brand') {
+          return <BrandSponsorshipTabContent />
+        } else if (userType === 'organizer') {
+          return <OrganizerSponsorshipTabContent />
+        }
+        return null
       case 'events':
         return userType === 'organizer' ? <EventsTabContent /> : null
       case 'settings':
@@ -127,19 +150,12 @@ function ProfileTabContent() {
 
 // Products Tab - For brands only
 function ProductsTabContent() {
-  // The ProductsPage component already includes DashboardLayout
-  // We need to render only its content
-  // For now, we'll note this needs refactoring
+  const { currentUser } = useAuth()
 
   return (
-    <div>
-      <p className='text-gray-500 mb-4'>
-        This tab will contain the products management interface.
-      </p>
-      <p className='text-sm text-gray-400'>
-        Note: Navigate to /dashboard/account?tab=products after implementation
-        is complete.
-      </p>
+    <div className='space-y-8'>
+      <h2 className='text-xl font-semibold mb-4'>Product Catalog</h2>
+      <ProductSponsorshipManager brandId={currentUser?.id} />
     </div>
   )
 }
@@ -147,7 +163,7 @@ function ProductsTabContent() {
 // Events Tab - For organizers only
 function EventsTabContent() {
   return (
-    <div>
+    <div className='space-y-8'>
       <p className='text-gray-500 mb-4'>
         This tab will contain the events management interface.
       </p>
@@ -155,6 +171,32 @@ function EventsTabContent() {
         Note: Navigate to /dashboard/account?tab=events after implementation is
         complete.
       </p>
+    </div>
+  )
+}
+
+// Sponsorship Tab - For brands
+function BrandSponsorshipTabContent() {
+  const { currentUser } = useAuth()
+
+  return (
+    <div className='space-y-8'>
+      <div>
+        <h2 className='text-xl font-semibold mb-4'>Sponsorship Offerings</h2>
+        <BrandSponsorshipPanel brandId={currentUser?.id} />
+      </div>
+    </div>
+  )
+}
+
+// Sponsorship Tab - For organizers
+function OrganizerSponsorshipTabContent() {
+  const { currentUser } = useAuth()
+
+  return (
+    <div className='space-y-8'>
+      <h2 className='text-xl font-semibold mb-4'>Sponsorship Needs</h2>
+      <OrganizerSponsorshipPanel organizerId={currentUser?.id} />
     </div>
   )
 }

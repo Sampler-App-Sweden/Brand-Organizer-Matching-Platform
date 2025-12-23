@@ -21,6 +21,7 @@ export function BrandsDirectoryPage() {
   const [loading, setLoading] = useState(true)
   const [totalPages, setTotalPages] = useState(1)
   const [interestStatuses, setInterestStatuses] = useState<Map<string, InterestStatus>>(new Map())
+  const [expressingInterest, setExpressingInterest] = useState<string | null>(null)
   const [queryParams, setQueryParams] = useState<DirectoryFilterParams>({
     page: 1,
     limit: 12,
@@ -98,7 +99,13 @@ export function BrandsDirectoryPage() {
       return
     }
 
+    // Prevent multiple simultaneous requests
+    if (expressingInterest) {
+      return
+    }
+
     try {
+      setExpressingInterest(profileId)
       const profile = visibleProfiles.find(p => p.id === profileId)
       if (!profile) return
 
@@ -122,9 +129,13 @@ export function BrandsDirectoryPage() {
         alert('Please create your organizer profile before expressing interest. You can do this from your dashboard.')
       } else if (error.message?.includes('Brand profile not found')) {
         alert('This brand profile is not available.')
+      } else if (error.message?.includes('Connection already expressed')) {
+        alert('You have already expressed interest in this brand.')
       } else {
         alert(error.message || 'Failed to express interest. Please try again.')
       }
+    } finally {
+      setExpressingInterest(null)
     }
   }
   return (
@@ -198,6 +209,7 @@ export function BrandsDirectoryPage() {
                       showInterestAction={!!currentUser && currentUser.type === 'organizer'}
                       interestStatuses={interestStatuses}
                       onExpressInterest={handleExpressInterest}
+                      expressingInterestId={expressingInterest}
                     />
                     <div className='mt-8'>
                       <Pagination

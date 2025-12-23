@@ -7,10 +7,10 @@ import {
   getMatchesForBrand,
   getOrganizersByIds
 } from '../../services/dataService'
-import { UsersIcon, CheckCircleIcon, AlertCircleIcon, PackageIcon } from 'lucide-react'
+import { UsersIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
 import { Button } from '../../components/ui'
-import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsorshipPanel'
-import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
+import { ProductSponsorshipSummary } from '../../components/sponsorship/ProductSponsorshipSummary'
+import { SponsorshipOfferSummary } from '../../components/sponsorship/SponsorshipOfferSummary'
 import { Brand, Organizer, Match } from '../../types'
 import { MatchRow } from '../dashboard/MatchRow'
 import { StatsCard } from '../../components/dashboard/StatsCard'
@@ -140,14 +140,14 @@ export function BrandDashboard() {
         />
       </div>
 
-      {/* Product Sponsorship Manager */}
-      <div className='mb-8'>
-        <ProductSponsorshipManager brandId={brand.id} />
+      {/* Sponsorship Offer Summary */}
+      <div className='mb-6'>
+        <SponsorshipOfferSummary brandId={brand.id} />
       </div>
 
-      {/* Brand Sponsorship Panel */}
-      <div className='mb-8'>
-        <BrandSponsorshipPanel brandId={brand.id} />
+      {/* Product Sponsorship Summary */}
+      <div className='mb-6'>
+        <ProductSponsorshipSummary brandId={brand.id} />
       </div>
 
       {/* Recent matches */}
