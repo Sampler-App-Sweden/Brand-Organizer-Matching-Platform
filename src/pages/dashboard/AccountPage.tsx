@@ -14,6 +14,7 @@ import { BrandSponsorshipPanel } from '../../components/sponsorship/BrandSponsor
 import { OrganizerSponsorshipPanel } from '../../components/sponsorship/OrganizerSponsorshipPanel'
 import { ProductSponsorshipManager } from '../../components/sponsorship/ProductSponsorshipManager'
 import { useAuth } from '../../context/AuthContext'
+import { getBrandByUserId, getOrganizerByUserId } from '../../services/dataService'
 import { supabase } from '../../services/supabaseClient'
 
 type TabId = 'profile' | 'products' | 'events' | 'settings' | 'sponsorship'
@@ -22,6 +23,25 @@ export function AccountPage() {
   const { currentUser } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const userType = currentUser?.type
+  const [brandId, setBrandId] = useState<string | null>(null)
+  const [organizerId, setOrganizerId] = useState<string | null>(null)
+
+  // Fetch brand or organizer ID based on user type
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!currentUser) return
+
+      if (userType === 'brand') {
+        const brand = await getBrandByUserId(currentUser.id)
+        setBrandId(brand?.id || null)
+      } else if (userType === 'organizer') {
+        const organizer = await getOrganizerByUserId(currentUser.id)
+        setOrganizerId(organizer?.id || null)
+      }
+    }
+
+    fetchUserData()
+  }, [currentUser, userType])
 
   // Get tab from URL or default to profile
   const tabParam = searchParams.get('tab') as TabId | null
@@ -84,12 +104,12 @@ export function AccountPage() {
       case 'profile':
         return <ProfileTabContent />
       case 'products':
-        return userType === 'brand' ? <ProductsTabContent /> : null
+        return userType === 'brand' ? <ProductsTabContent brandId={brandId} /> : null
       case 'sponsorship':
         if (userType === 'brand') {
-          return <BrandSponsorshipTabContent />
+          return <BrandSponsorshipTabContent brandId={brandId} />
         } else if (userType === 'organizer') {
-          return <OrganizerSponsorshipTabContent />
+          return <OrganizerSponsorshipTabContent organizerId={organizerId} />
         }
         return null
       case 'events':
@@ -149,13 +169,19 @@ function ProfileTabContent() {
 }
 
 // Products Tab - For brands only
-function ProductsTabContent() {
-  const { currentUser } = useAuth()
+function ProductsTabContent({ brandId }: { brandId: string | null }) {
+  if (!brandId) {
+    return (
+      <div className='text-center py-8 text-gray-500'>
+        Loading brand information...
+      </div>
+    )
+  }
 
   return (
     <div className='space-y-8'>
       <h2 className='text-xl font-semibold mb-4'>Product Catalog</h2>
-      <ProductSponsorshipManager brandId={currentUser?.id} />
+      <ProductSponsorshipManager brandId={brandId} />
     </div>
   )
 }
@@ -176,27 +202,39 @@ function EventsTabContent() {
 }
 
 // Sponsorship Tab - For brands
-function BrandSponsorshipTabContent() {
-  const { currentUser } = useAuth()
+function BrandSponsorshipTabContent({ brandId }: { brandId: string | null }) {
+  if (!brandId) {
+    return (
+      <div className='text-center py-8 text-gray-500'>
+        Loading brand information...
+      </div>
+    )
+  }
 
   return (
     <div className='space-y-8'>
       <div>
         <h2 className='text-xl font-semibold mb-4'>Sponsorship Offerings</h2>
-        <BrandSponsorshipPanel brandId={currentUser?.id} />
+        <BrandSponsorshipPanel brandId={brandId} />
       </div>
     </div>
   )
 }
 
 // Sponsorship Tab - For organizers
-function OrganizerSponsorshipTabContent() {
-  const { currentUser } = useAuth()
+function OrganizerSponsorshipTabContent({ organizerId }: { organizerId: string | null }) {
+  if (!organizerId) {
+    return (
+      <div className='text-center py-8 text-gray-500'>
+        Loading organizer information...
+      </div>
+    )
+  }
 
   return (
     <div className='space-y-8'>
       <h2 className='text-xl font-semibold mb-4'>Sponsorship Needs</h2>
-      <OrganizerSponsorshipPanel organizerId={currentUser?.id} />
+      <OrganizerSponsorshipPanel organizerId={organizerId} />
     </div>
   )
 }
