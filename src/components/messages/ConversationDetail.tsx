@@ -21,6 +21,8 @@ interface ConversationDetailProps {
   onSendMessage: (event: FormEvent<HTMLFormElement>) => void
   hasPartnerInfo: boolean
   onBack?: () => void
+  onArchive?: () => void
+  onDelete?: () => void
 }
 
 export function ConversationDetail({
@@ -36,7 +38,9 @@ export function ConversationDetail({
   onMessageChange,
   onSendMessage,
   hasPartnerInfo,
-  onBack
+  onBack,
+  onArchive,
+  onDelete
 }: ConversationDetailProps) {
   if (!activeConversation || !hasPartnerInfo) {
     return (
@@ -55,6 +59,8 @@ export function ConversationDetail({
         partnerInitial={partnerInitial}
         userType={userType}
         onBack={onBack}
+        onArchive={onArchive}
+        onDelete={onDelete}
       />
       {activeConversation.readOnly && (
         <div className='bg-yellow-50 border-b border-yellow-200 px-4 py-3'>

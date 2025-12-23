@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useAuth } from '../context/AuthContext'
 import {
+  archiveConversation as archiveConversationService,
+  deleteConversation as deleteConversationService,
   getBrandConversations,
   getConversationMessages,
   getConversationsBySenderId,
@@ -274,6 +276,74 @@ export function useConversations() {
     )
   }, [selectedConversation])
 
+  const handleArchiveConversation = useCallback(async (conversationId: string) => {
+    if (!currentUser) return
+
+    try {
+      const result = await archiveConversationService(conversationId, currentUser.id)
+
+      if (!result.success) {
+        setConversationsError(result.error || 'Failed to archive conversation')
+        return false
+      }
+
+      // Update local state
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === conversationId
+            ? {
+                ...conv,
+                archived: true,
+                readOnly: true,
+                archivedAt: new Date(),
+                archivedBy: currentUser.id
+              }
+            : conv
+        )
+      )
+
+      // Clear selection if the archived conversation was selected
+      if (selectedConversation === conversationId) {
+        setSelectedConversation(null)
+        setMessages([])
+        setPartnerInfo(null)
+      }
+
+      return true
+    } catch (error) {
+      console.error('Failed to archive conversation:', error)
+      setConversationsError('Failed to archive conversation. Please try again.')
+      return false
+    }
+  }, [currentUser, selectedConversation])
+
+  const handleDeleteConversation = useCallback(async (conversationId: string) => {
+    try {
+      const result = await deleteConversationService(conversationId)
+
+      if (!result.success) {
+        setConversationsError(result.error || 'Failed to delete conversation')
+        return false
+      }
+
+      // Remove from local state
+      setConversations((prev) => prev.filter((conv) => conv.id !== conversationId))
+
+      // Clear selection if the deleted conversation was selected
+      if (selectedConversation === conversationId) {
+        setSelectedConversation(null)
+        setMessages([])
+        setPartnerInfo(null)
+      }
+
+      return true
+    } catch (error) {
+      console.error('Failed to delete conversation:', error)
+      setConversationsError('Failed to delete conversation. Please try again.')
+      return false
+    }
+  }, [selectedConversation])
+
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === selectedConversation),
     [conversations, selectedConversation]
@@ -305,6 +375,8 @@ export function useConversations() {
     sendingMessage,
     sendMessage: handleSendMessage,
     updatePhase: handlePhaseUpdate,
+    archiveConversation: handleArchiveConversation,
+    deleteConversation: handleDeleteConversation,
     phaseFilter,
     setPhaseFilter,
     sortBy,

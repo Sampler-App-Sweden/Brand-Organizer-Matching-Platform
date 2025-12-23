@@ -436,3 +436,62 @@ const generateAIResponse = (
     return "To move this partnership forward, consider providing more details about your event's unique value proposition and specific ways this brand can connect with your audience. Would you like me to suggest some talking points to highlight with this potential sponsor?"
   }
 }
+
+// Archive a conversation (mark as read-only and archived)
+export const archiveConversation = async (
+  conversationId: string,
+  userId: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('conversations')
+      .update({
+        archived: true,
+        read_only: true,
+        archived_at: new Date().toISOString(),
+        archived_by: userId
+      })
+      .eq('id', conversationId)
+
+    if (error) {
+      return {
+        success: false,
+        error: `Failed to archive conversation: ${error.message}`
+      }
+    }
+
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: `Unexpected error archiving conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+// Delete a conversation permanently (hard delete)
+export const deleteConversation = async (
+  conversationId: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    // Delete the conversation (messages will cascade delete if foreign key is configured)
+    const { error } = await supabase
+      .from('conversations')
+      .delete()
+      .eq('id', conversationId)
+
+    if (error) {
+      return {
+        success: false,
+        error: `Failed to delete conversation: ${error.message}`
+      }
+    }
+
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: `Unexpected error deleting conversation: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}

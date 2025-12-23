@@ -5,6 +5,7 @@ import {
   ConversationFilters,
   ConversationList
 } from '../../components/messages'
+import { ConfirmDialog } from '../../components/messages/ConfirmDialog'
 import { DashboardLayout } from '../../components/layout'
 import { useConversations } from '../../hooks/useConversations'
 
@@ -27,11 +28,14 @@ export function MessagesPage() {
     setNewMessage,
     sendingMessage,
     sendMessage,
+    archiveConversation,
+    deleteConversation,
     sortBy,
     setSortBy
   } = useConversations()
 
   const [showMobileDetail, setShowMobileDetail] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleSelectConversation = (conversationId: string) => {
     selectConversation(conversationId)
@@ -40,6 +44,33 @@ export function MessagesPage() {
 
   const handleBackToList = () => {
     setShowMobileDetail(false)
+  }
+
+  const handleArchive = async () => {
+    if (!activeConversation) return
+    await archiveConversation(activeConversation.id)
+    // On mobile, go back to list after archiving
+    if (showMobileDetail) {
+      setShowMobileDetail(false)
+    }
+  }
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!activeConversation) return
+    setShowDeleteConfirm(false)
+    await deleteConversation(activeConversation.id)
+    // On mobile, go back to list after deleting
+    if (showMobileDetail) {
+      setShowMobileDetail(false)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false)
   }
 
   return (
@@ -59,7 +90,7 @@ export function MessagesPage() {
             <div className='text-gray-500 text-sm'>Loading conversations...</div>
           </div>
         ) : (
-          <div className='flex flex-1 gap-4 overflow-hidden min-h-0 px-4 pb-4'>
+          <div className='flex flex-1 gap-4 overflow-hidden min-h-0 pb-4'>
             {/* Mobile: show list or detail based on state */}
             <div className={`${showMobileDetail ? 'hidden' : 'flex'} md:flex md:w-1/3 w-full bg-white rounded-lg shadow-sm overflow-hidden flex-col h-full min-h-0`}>
               {conversationsError && (
@@ -90,11 +121,25 @@ export function MessagesPage() {
                 onSendMessage={sendMessage}
                 hasPartnerInfo={hasPartnerInfo}
                 onBack={handleBackToList}
+                onArchive={handleArchive}
+                onDelete={handleDeleteClick}
               />
             </div>
           </div>
         )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete Conversation"
+        message="Are you sure you want to delete this conversation? This action cannot be undone and all messages will be permanently deleted."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </DashboardLayout>
   )
 }
