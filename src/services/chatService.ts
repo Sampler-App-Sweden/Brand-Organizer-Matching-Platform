@@ -495,3 +495,69 @@ export const deleteConversation = async (
     }
   }
 }
+
+// Bulk archive conversations
+export const bulkArchiveConversations = async (
+  conversationIds: string[],
+  userId: string
+): Promise<{ success: boolean; error?: string; count?: number }> => {
+  try {
+    if (conversationIds.length === 0) {
+      return { success: true, count: 0 }
+    }
+
+    const { error, count } = await supabase
+      .from('conversations')
+      .update({
+        archived: true,
+        read_only: true,
+        archived_at: new Date().toISOString(),
+        archived_by: userId
+      })
+      .in('id', conversationIds)
+
+    if (error) {
+      return {
+        success: false,
+        error: `Failed to archive conversations: ${error.message}`
+      }
+    }
+
+    return { success: true, count: count || conversationIds.length }
+  } catch (error) {
+    return {
+      success: false,
+      error: `Unexpected error archiving conversations: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}
+
+// Bulk delete conversations permanently
+export const bulkDeleteConversations = async (
+  conversationIds: string[]
+): Promise<{ success: boolean; error?: string; count?: number }> => {
+  try {
+    if (conversationIds.length === 0) {
+      return { success: true, count: 0 }
+    }
+
+    const { error, count } = await supabase
+      .from('conversations')
+      .delete()
+      .in('id', conversationIds)
+
+    if (error) {
+      return {
+        success: false,
+        error: `Failed to delete conversations: ${error.message}`
+      }
+    }
+
+    return { success: true, count: count || conversationIds.length }
+  } catch (error) {
+    return {
+      success: false,
+      error: `Unexpected error deleting conversations: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }
+  }
+}

@@ -5,13 +5,19 @@ interface ConversationListProps {
   selectedConversation: string | null
   onSelectConversation: (conversationId: string) => void
   userType: 'brand' | 'organizer'
+  selectionMode?: boolean
+  selectedConversationIds?: string[]
+  onToggleSelection?: (conversationId: string) => void
 }
 
 export function ConversationList({
   conversations,
   selectedConversation,
   onSelectConversation,
-  userType
+  userType,
+  selectionMode = false,
+  selectedConversationIds = [],
+  onToggleSelection
 }: ConversationListProps) {
   if (conversations.length === 0) {
     return (
@@ -36,20 +42,42 @@ export function ConversationList({
               ? conversation.organizerLogo
               : conversation.brandLogo
           const isUnread = conversation.unreadCount > 0
+          const isSelected = selectedConversationIds.includes(conversation.id)
+
+          const handleClick = () => {
+            if (selectionMode && onToggleSelection) {
+              onToggleSelection(conversation.id)
+            } else {
+              onSelectConversation(conversation.id)
+            }
+          }
+
           return (
             <li
               key={conversation.id}
               className={`hover:bg-gray-50 cursor-pointer transition-colors relative ${
-                selectedConversation === conversation.id
+                !selectionMode && selectedConversation === conversation.id
                   ? 'bg-indigo-50 border-l-4 border-indigo-600'
+                  : isSelected
+                  ? 'bg-indigo-100'
                   : isUnread
                   ? 'bg-indigo-50/30'
                   : ''
               }`}
-              onClick={() => onSelectConversation(conversation.id)}
+              onClick={handleClick}
             >
               <div className='p-3'>
                 <div className='flex items-start gap-3'>
+                  {selectionMode && (
+                    <div className='flex items-center'>
+                      <input
+                        type='checkbox'
+                        checked={isSelected}
+                        onChange={() => {}}
+                        className='h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500'
+                      />
+                    </div>
+                  )}
                   <div className='relative'>
                     <div className='h-12 w-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0'>
                       {partnerLogo ? (

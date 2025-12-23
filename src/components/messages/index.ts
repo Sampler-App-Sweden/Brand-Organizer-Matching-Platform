@@ -1,6 +1,8 @@
+export { ConfirmDialog } from './ConfirmDialog'
 export { ConversationDetail } from './ConversationDetail'
 export { ConversationHeader } from './ConversationHeader'
 export { ConversationFilters } from './ConversationFilters'
 export { ConversationList } from './ConversationList'
 export { MessageBubble } from './MessageBubble'
 export { PhaseBadge } from './PhaseBadge'
+export { BulkActionsToolbar } from './BulkActionsToolbar'

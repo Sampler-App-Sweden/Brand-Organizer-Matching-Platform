@@ -5,6 +5,8 @@ import { useAuth } from '../context/AuthContext'
 import {
   archiveConversation as archiveConversationService,
   deleteConversation as deleteConversationService,
+  bulkArchiveConversations as bulkArchiveConversationsService,
+  bulkDeleteConversations as bulkDeleteConversationsService,
   getBrandConversations,
   getConversationMessages,
   getConversationsBySenderId,
@@ -344,6 +346,76 @@ export function useConversations() {
     }
   }, [selectedConversation])
 
+  const handleBulkArchiveConversations = useCallback(async (conversationIds: string[]) => {
+    if (!currentUser || conversationIds.length === 0) return false
+
+    try {
+      const result = await bulkArchiveConversationsService(conversationIds, currentUser.id)
+
+      if (!result.success) {
+        setConversationsError(result.error || 'Failed to archive conversations')
+        return false
+      }
+
+      // Update local state
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conversationIds.includes(conv.id)
+            ? {
+                ...conv,
+                archived: true,
+                readOnly: true,
+                archivedAt: new Date(),
+                archivedBy: currentUser.id
+              }
+            : conv
+        )
+      )
+
+      // Clear selection if any archived conversation was selected
+      if (selectedConversation && conversationIds.includes(selectedConversation)) {
+        setSelectedConversation(null)
+        setMessages([])
+        setPartnerInfo(null)
+      }
+
+      return true
+    } catch (error) {
+      console.error('Failed to bulk archive conversations:', error)
+      setConversationsError('Failed to archive conversations. Please try again.')
+      return false
+    }
+  }, [currentUser, selectedConversation])
+
+  const handleBulkDeleteConversations = useCallback(async (conversationIds: string[]) => {
+    if (conversationIds.length === 0) return false
+
+    try {
+      const result = await bulkDeleteConversationsService(conversationIds)
+
+      if (!result.success) {
+        setConversationsError(result.error || 'Failed to delete conversations')
+        return false
+      }
+
+      // Remove from local state
+      setConversations((prev) => prev.filter((conv) => !conversationIds.includes(conv.id)))
+
+      // Clear selection if any deleted conversation was selected
+      if (selectedConversation && conversationIds.includes(selectedConversation)) {
+        setSelectedConversation(null)
+        setMessages([])
+        setPartnerInfo(null)
+      }
+
+      return true
+    } catch (error) {
+      console.error('Failed to bulk delete conversations:', error)
+      setConversationsError('Failed to delete conversations. Please try again.')
+      return false
+    }
+  }, [selectedConversation])
+
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === selectedConversation),
     [conversations, selectedConversation]
@@ -377,6 +449,8 @@ export function useConversations() {
     updatePhase: handlePhaseUpdate,
     archiveConversation: handleArchiveConversation,
     deleteConversation: handleDeleteConversation,
+    bulkArchiveConversations: handleBulkArchiveConversations,
+    bulkDeleteConversations: handleBulkDeleteConversations,
     phaseFilter,
     setPhaseFilter,
     sortBy,
