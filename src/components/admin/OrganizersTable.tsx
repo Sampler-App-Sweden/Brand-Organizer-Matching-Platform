@@ -1,12 +1,5 @@
 import React from 'react'
-
-interface Organizer {
-  id: string
-  organizerName: string
-  contactName: string
-  email: string
-  location: string
-}
+import type { Organizer } from '../../types'
 
 interface OrganizersTableProps {
   organizers: Organizer[]

@@ -1,18 +1,10 @@
 import React from 'react'
 
 import { Table } from '../ui'
-
-interface Brand {
-  id: string
-  companyName: string
-  contactName: string
-  industry: string
-  budget: string
-  createdAt: string
-}
+import type { Brand } from '../../types'
 
 interface BrandsTableProps {
-  brands: Brand[]
+  brands: Array<Brand & { createdAt: string }>
   handleSort: (field: string) => void
   currentSort?: { field: string; direction: 'asc' | 'desc' }
   renderSortIcon?: (field: string) => React.ReactNode
