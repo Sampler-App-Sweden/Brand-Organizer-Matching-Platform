@@ -327,7 +327,7 @@ export async function saveDraftEvent(
   eventId: string,
   organizerId: string
 ): Promise<Event> {
-  const { data, error } = await supabase
+  const { data, error} = await supabase
     .from('organizer_events')
     .update({ status: 'draft' })
     .eq('id', eventId)
@@ -340,4 +340,26 @@ export async function saveDraftEvent(
   }
 
   return mapEventRow(data as EventRow)
+}
+
+/**
+ * Admin-only: Get all events from all organizers
+ */
+export async function getAllEvents(): Promise<Event[]> {
+  try {
+    const { data, error } = await supabase
+      .from('organizer_events')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Failed to load all events:', error.message)
+      return []
+    }
+
+    return (data as EventRow[]).map(mapEventRow)
+  } catch (error) {
+    console.error('Error fetching all events:', error)
+    return []
+  }
 }

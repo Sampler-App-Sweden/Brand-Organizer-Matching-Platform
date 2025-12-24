@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandsTable } from '../../components/admin'
+import { ProductsTable } from '../../components/admin/ProductsTable'
 import { EditBrandModal } from '../../components/admin/EditBrandModal'
 import { DashboardLayout } from '../../components/layout'
 import { LoadingSpinner } from '../../components/ui'
 import { getAllBrands, updateBrand } from '../../services/dataService'
+import { getAllProducts, ProductWithBrand } from '../../services/sponsorshipService'
 import { filterData, sortData } from '../../utils/adminDashboardUtils'
 import type { Brand } from '../../types'
 
 export function AllBrandsPage() {
   const [brands, setBrands] = useState<Brand[]>([])
+  const [products, setProducts] = useState<ProductWithBrand[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [brandsSearchTerm, setBrandsSearchTerm] = useState('')
+  const [productsSearchTerm, setProductsSearchTerm] = useState('')
   const [sortField, setSortField] = useState<string>('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
@@ -19,17 +23,21 @@ export function AllBrandsPage() {
   const [activeTab, setActiveTab] = useState<'brands' | 'products'>('brands')
 
   useEffect(() => {
-    const loadBrands = async () => {
+    const loadData = async () => {
       try {
-        const brandsData = await getAllBrands()
+        const [brandsData, productsData] = await Promise.all([
+          getAllBrands(),
+          getAllProducts()
+        ])
         setBrands(brandsData)
+        setProducts(productsData)
       } catch (error) {
-        console.error('Error loading brands:', error)
+        console.error('Error loading data:', error)
       } finally {
         setLoading(false)
       }
     }
-    loadBrands()
+    loadData()
   }, [])
 
   const handleSort = (field: string) => {
@@ -99,7 +107,7 @@ export function AllBrandsPage() {
   }
 
   const filteredAndSortedBrands = sortData(
-    filterData(brands, searchTerm),
+    filterData(brands, brandsSearchTerm),
     sortField,
     sortDirection
   ).map((brand) => ({
@@ -109,6 +117,15 @@ export function AllBrandsPage() {
         ? brand.createdAt
         : brand.createdAt.toISOString()
   }))
+
+  const filteredAndSortedProducts = sortData(
+    filterData(products, productsSearchTerm),
+    sortField,
+    sortDirection
+  )
+
+  // Create a map of brand IDs to brand names for the ProductsTable
+  const brandsMap = new Map(brands.map((brand) => [brand.id, brand.companyName]))
 
   return (
     <DashboardLayout userType='admin'>
@@ -150,7 +167,7 @@ export function AllBrandsPage() {
                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
             } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors`}
           >
-            Products
+            Products ({products.length})
           </button>
         </nav>
       </div>
@@ -159,9 +176,13 @@ export function AllBrandsPage() {
       <div className='mb-4 flex items-center gap-4'>
         <input
           type='text'
-          placeholder='Search brands...'
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={activeTab === 'brands' ? 'Search brands...' : 'Search products...'}
+          value={activeTab === 'brands' ? brandsSearchTerm : productsSearchTerm}
+          onChange={(e) =>
+            activeTab === 'brands'
+              ? setBrandsSearchTerm(e.target.value)
+              : setProductsSearchTerm(e.target.value)
+          }
           className='flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
         />
         <button
@@ -185,11 +206,13 @@ export function AllBrandsPage() {
       )}
 
       {activeTab === 'products' && (
-        <div className='bg-white rounded-lg shadow-sm p-8 text-center'>
-          <p className='text-gray-500'>
-            Products functionality coming soon. This will show all products from
-            all brands.
-          </p>
+        <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
+          <ProductsTable
+            products={filteredAndSortedProducts}
+            brandsMap={brandsMap}
+            handleSort={handleSort}
+            renderSortIcon={renderSortIcon}
+          />
         </div>
       )}
 

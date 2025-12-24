@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { OrganizersTable } from '../../components/admin'
+import { EventsTable } from '../../components/admin/EventsTable'
 import { EditOrganizerModal } from '../../components/admin/EditOrganizerModal'
 import { DashboardLayout } from '../../components/layout'
 import { LoadingSpinner } from '../../components/ui'
 import { getAllOrganizers, updateOrganizer } from '../../services/dataService'
+import { getAllEvents } from '../../services/eventsService'
 import { filterData, sortData } from '../../utils/adminDashboardUtils'
 import type { Organizer } from '../../types'
+import type { Event } from '../../types/event'
 
 export function AllOrganizersPage() {
   const [organizers, setOrganizers] = useState<Organizer[]>([])
+  const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [organizersSearchTerm, setOrganizersSearchTerm] = useState('')
+  const [eventsSearchTerm, setEventsSearchTerm] = useState('')
   const [sortField, setSortField] = useState<string>('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [editingOrganizer, setEditingOrganizer] = useState<Organizer | null>(
@@ -23,17 +28,21 @@ export function AllOrganizersPage() {
   )
 
   useEffect(() => {
-    const loadOrganizers = async () => {
+    const loadData = async () => {
       try {
-        const organizersData = await getAllOrganizers()
+        const [organizersData, eventsData] = await Promise.all([
+          getAllOrganizers(),
+          getAllEvents()
+        ])
         setOrganizers(organizersData)
+        setEvents(eventsData)
       } catch (error) {
-        console.error('Error loading organizers:', error)
+        console.error('Error loading data:', error)
       } finally {
         setLoading(false)
       }
     }
-    loadOrganizers()
+    loadData()
   }, [])
 
   const handleSort = (field: string) => {
@@ -103,9 +112,20 @@ export function AllOrganizersPage() {
   }
 
   const filteredAndSortedOrganizers = sortData(
-    filterData(organizers, searchTerm),
+    filterData(organizers, organizersSearchTerm),
     sortField,
     sortDirection
+  )
+
+  const filteredAndSortedEvents = sortData(
+    filterData(events, eventsSearchTerm),
+    sortField,
+    sortDirection
+  )
+
+  // Create a map of organizer IDs to organizer names for the EventsTable
+  const organizersMap = new Map(
+    organizers.map((org) => [org.id, org.organizerName])
   )
 
   return (
@@ -148,7 +168,7 @@ export function AllOrganizersPage() {
                 : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
             } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors`}
           >
-            Events
+            Events ({events.length})
           </button>
         </nav>
       </div>
@@ -157,9 +177,17 @@ export function AllOrganizersPage() {
       <div className='mb-4 flex items-center gap-4'>
         <input
           type='text'
-          placeholder='Search organizers...'
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={
+            activeTab === 'organizers' ? 'Search organizers...' : 'Search events...'
+          }
+          value={
+            activeTab === 'organizers' ? organizersSearchTerm : eventsSearchTerm
+          }
+          onChange={(e) =>
+            activeTab === 'organizers'
+              ? setOrganizersSearchTerm(e.target.value)
+              : setEventsSearchTerm(e.target.value)
+          }
           className='flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
         />
         <button
@@ -183,11 +211,13 @@ export function AllOrganizersPage() {
       )}
 
       {activeTab === 'events' && (
-        <div className='bg-white rounded-lg shadow-sm p-8 text-center'>
-          <p className='text-gray-500'>
-            Events functionality coming soon. This will show all events from all
-            organizers.
-          </p>
+        <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
+          <EventsTable
+            events={filteredAndSortedEvents}
+            organizersMap={organizersMap}
+            handleSort={handleSort}
+            renderSortIcon={renderSortIcon}
+          />
         </div>
       )}
 

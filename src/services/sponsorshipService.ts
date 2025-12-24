@@ -597,3 +597,32 @@ export async function saveOrganizerSponsorshipRequest(
 
   return savedRequest
 }
+
+export interface ProductWithBrand extends SponsorshipProduct {
+  brandId: string
+}
+
+/**
+ * Admin-only: Get all products from all brands
+ */
+export async function getAllProducts(): Promise<ProductWithBrand[]> {
+  try {
+    const { data, error } = await supabase
+      .from('sponsorship_products')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Failed to load all products:', error.message)
+      return []
+    }
+
+    return (data as SponsorshipProductRow[]).map((row) => ({
+      ...mapProductRow(row),
+      brandId: row.brand_id
+    }))
+  } catch (error) {
+    console.error('Error fetching all products:', error)
+    return []
+  }
+}
