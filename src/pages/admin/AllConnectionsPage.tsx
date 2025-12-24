@@ -23,7 +23,26 @@ export function AllConnectionsPage() {
         const connectionsData = await getAllConnections()
         const enhancedConnections =
           await getBatchEnhancedConnections(connectionsData)
-        setConnections(enhancedConnections)
+
+        // Deduplicate mutual connections - only show one connection per brand-organizer pair
+        const uniqueConnections = new Map<string, EnhancedConnection>()
+        enhancedConnections.forEach((connection) => {
+          const key = `${connection.brandId}|${connection.organizerId}`
+          const existing = uniqueConnections.get(key)
+
+          // Keep the connection if:
+          // 1. No existing connection for this pair
+          // 2. Or this connection is mutual and existing is not
+          // 3. Or both are mutual and this one was created first
+          if (!existing ||
+              (connection.isMutual && !existing.isMutual) ||
+              (connection.isMutual && existing.isMutual && connection.createdAt < existing.createdAt)) {
+            uniqueConnections.set(key, connection)
+          }
+        })
+
+        const deduplicatedConnections = Array.from(uniqueConnections.values())
+        setConnections(deduplicatedConnections)
       } catch (error) {
         console.error('Error loading connections:', error)
       } finally {

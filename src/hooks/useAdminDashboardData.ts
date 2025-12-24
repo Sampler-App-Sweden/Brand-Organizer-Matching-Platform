@@ -54,12 +54,28 @@ export function useAdminDashboardData() {
             getAllConnections()
           ])
         const enhancedConnections = await getBatchEnhancedConnections(connectionsData)
+
+        // Deduplicate mutual connections - only show one connection per brand-organizer pair
+        const uniqueConnections = new Map<string, EnhancedConnection>()
+        enhancedConnections.forEach((connection) => {
+          const key = `${connection.brandId}|${connection.organizerId}`
+          const existing = uniqueConnections.get(key)
+
+          if (!existing ||
+              (connection.isMutual && !existing.isMutual) ||
+              (connection.isMutual && existing.isMutual && connection.createdAt < existing.createdAt)) {
+            uniqueConnections.set(key, connection)
+          }
+        })
+
+        const deduplicatedConnections = Array.from(uniqueConnections.values())
+
         setUsers(usersData)
         setBrands(brandsData)
         setOrganizers(organizersData)
         setMatches(matchesData)
         setTickets(ticketsData)
-        setConnections(enhancedConnections)
+        setConnections(deduplicatedConnections)
       } catch (error) {
         console.error('Error loading admin dashboard data:', error)
       } finally {
