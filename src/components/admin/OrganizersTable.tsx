@@ -39,9 +39,9 @@ export function OrganizersTable({
             </th>
             <th
               className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('location')}
+              onClick={() => handleSort('city')}
             >
-              Location {renderSortIcon('location')}
+              City {renderSortIcon('city')}
             </th>
             {onEdit && (
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
@@ -63,7 +63,7 @@ export function OrganizersTable({
                 {organizer.email}
               </td>
               <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {organizer.location}
+                {organizer.city}
               </td>
               {onEdit && (
                 <td className='px-6 py-4 whitespace-nowrap text-sm'>

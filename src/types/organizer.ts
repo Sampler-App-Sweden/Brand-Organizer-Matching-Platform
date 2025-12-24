@@ -24,6 +24,7 @@ export interface Organizer {
   financialSponsorshipOffers: string
   offeringTypes: string[]
   brandVisibility: string
+  productSampling: string
   contentCreation: string
   leadGeneration: string
   productFeedback: string

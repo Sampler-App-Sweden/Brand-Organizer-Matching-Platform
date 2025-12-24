@@ -111,6 +111,17 @@ export function OfferingsStep({
         />
       )}
 
+      {formData.offeringTypes.includes('product_sampling') && (
+        <FormField
+          label='Product Sampling Details'
+          id='productSampling'
+          textarea
+          placeholder='Describe product sampling opportunities for sponsors'
+          value={formData.productSampling}
+          onChange={onChange}
+        />
+      )}
+
       {formData.offeringTypes.includes('content_creation') && (
         <FormField
           label='Content Creation Details'
