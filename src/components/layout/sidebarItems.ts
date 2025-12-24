@@ -96,6 +96,11 @@ export const sidebarItems: SidebarCollection = {
       label: 'Matches',
       icon: createElement(HandshakeIcon, { className: 'h-5 w-5' }),
       path: '/admin/matches'
+    },
+    {
+      label: 'Connections',
+      icon: createElement(Heart, { className: 'h-5 w-5' }),
+      path: '/admin/connections'
     }
   ],
   common: [
