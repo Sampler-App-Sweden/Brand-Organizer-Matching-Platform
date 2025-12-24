@@ -4,6 +4,7 @@ import {
   HandshakeIcon,
   Heart,
   HomeIcon,
+  LifeBuoy,
   LogOut,
   MessageSquareIcon,
   Settings,
@@ -101,6 +102,11 @@ export const sidebarItems: SidebarCollection = {
       label: 'Connections',
       icon: createElement(Heart, { className: 'h-5 w-5' }),
       path: '/admin/connections'
+    },
+    {
+      label: 'Support Tickets',
+      icon: createElement(LifeBuoy, { className: 'h-5 w-5' }),
+      path: '/admin/tickets'
     }
   ],
   common: [
