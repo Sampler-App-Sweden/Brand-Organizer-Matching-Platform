@@ -17,12 +17,14 @@ interface BrandsTableProps {
   handleSort: (field: string) => void
   currentSort?: { field: string; direction: 'asc' | 'desc' }
   renderSortIcon?: (field: string) => React.ReactNode
+  onEdit?: (brand: Brand) => void
 }
 
 export function BrandsTable({
   brands,
   handleSort,
-  currentSort
+  currentSort,
+  onEdit
 }: BrandsTableProps) {
   return (
     <Table variant='simple' size='md'>
@@ -76,6 +78,7 @@ export function BrandsTable({
           >
             Created At
           </Table.HeadCell>
+          {onEdit && <Table.HeadCell>Actions</Table.HeadCell>}
         </Table.Row>
       </Table.Head>
       <Table.Body>
@@ -93,10 +96,22 @@ export function BrandsTable({
             <Table.Cell>
               {new Date(brand.createdAt).toLocaleDateString()}
             </Table.Cell>
+            {onEdit && (
+              <Table.Cell>
+                <button
+                  onClick={() => onEdit(brand)}
+                  className='text-blue-600 hover:text-blue-800 font-medium text-sm'
+                >
+                  Edit
+                </button>
+              </Table.Cell>
+            )}
           </Table.Row>
         ))}
         {brands.length === 0 && (
-          <Table.EmptyState colSpan={6}>No brands found</Table.EmptyState>
+          <Table.EmptyState colSpan={onEdit ? 7 : 6}>
+            No brands found
+          </Table.EmptyState>
         )}
       </Table.Body>
     </Table>

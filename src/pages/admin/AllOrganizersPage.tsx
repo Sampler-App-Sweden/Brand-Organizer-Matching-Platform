@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { OrganizersTable } from '../../components/admin'
+import { EditOrganizerModal } from '../../components/admin/EditOrganizerModal'
 import { DashboardLayout } from '../../components/layout'
 import { LoadingSpinner } from '../../components/ui'
-import { getAllOrganizers } from '../../services/dataService'
+import { getAllOrganizers, updateOrganizer } from '../../services/dataService'
 import { filterData, sortData } from '../../utils/adminDashboardUtils'
 import type { Organizer } from '../../types'
 
@@ -13,6 +14,13 @@ export function AllOrganizersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortField, setSortField] = useState<string>('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [editingOrganizer, setEditingOrganizer] = useState<Organizer | null>(
+    null
+  )
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<'organizers' | 'events'>(
+    'organizers'
+  )
 
   useEffect(() => {
     const loadOrganizers = async () => {
@@ -53,6 +61,35 @@ export function AllOrganizersPage() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  const handleEdit = (organizer: Organizer) => {
+    setEditingOrganizer(organizer)
+    setIsEditModalOpen(true)
+  }
+
+  const handleSave = async (
+    organizerId: string,
+    updatedData: Partial<Organizer>
+  ) => {
+    const organizerToUpdate = organizers.find((o) => o.id === organizerId)
+    if (!organizerToUpdate) return
+
+    const fullOrganizerData: Omit<Organizer, 'id' | 'createdAt'> = {
+      ...organizerToUpdate,
+      ...updatedData,
+      createdAt: undefined as any
+    }
+    delete (fullOrganizerData as any).id
+    delete (fullOrganizerData as any).createdAt
+
+    await updateOrganizer(organizerId, fullOrganizerData)
+
+    // Reload organizers to get updated data
+    const updatedOrganizers = await getAllOrganizers()
+    setOrganizers(updatedOrganizers)
+    setIsEditModalOpen(false)
+    setEditingOrganizer(null)
   }
 
   if (loading) {
@@ -113,8 +150,20 @@ export function AllOrganizersPage() {
           organizers={filteredAndSortedOrganizers}
           handleSort={handleSort}
           renderSortIcon={renderSortIcon}
+          onEdit={handleEdit}
         />
       </div>
+
+      {/* Edit Modal */}
+      <EditOrganizerModal
+        organizer={editingOrganizer}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setEditingOrganizer(null)
+        }}
+        onSave={handleSave}
+      />
     </DashboardLayout>
   )
 }

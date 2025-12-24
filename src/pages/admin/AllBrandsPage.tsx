@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { BrandsTable } from '../../components/admin'
+import { EditBrandModal } from '../../components/admin/EditBrandModal'
 import { DashboardLayout } from '../../components/layout'
 import { LoadingSpinner } from '../../components/ui'
-import { getAllBrands } from '../../services/dataService'
+import { getAllBrands, updateBrand } from '../../services/dataService'
 import { filterData, sortData } from '../../utils/adminDashboardUtils'
 import type { Brand } from '../../types'
 
@@ -13,6 +14,8 @@ export function AllBrandsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortField, setSortField] = useState<string>('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   useEffect(() => {
     const loadBrands = async () => {
@@ -53,6 +56,35 @@ export function AllBrandsPage() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  const handleEdit = (brand: Brand) => {
+    setEditingBrand(brand)
+    setIsEditModalOpen(true)
+  }
+
+  const handleSave = async (
+    brandId: string,
+    updatedData: Partial<Brand>
+  ) => {
+    const brandToUpdate = brands.find((b) => b.id === brandId)
+    if (!brandToUpdate) return
+
+    const fullBrandData: Omit<Brand, 'id' | 'createdAt'> = {
+      ...brandToUpdate,
+      ...updatedData,
+      createdAt: undefined as any
+    }
+    delete (fullBrandData as any).id
+    delete (fullBrandData as any).createdAt
+
+    await updateBrand(brandId, fullBrandData)
+
+    // Reload brands to get updated data
+    const updatedBrands = await getAllBrands()
+    setBrands(updatedBrands)
+    setIsEditModalOpen(false)
+    setEditingBrand(null)
   }
 
   if (loading) {
@@ -119,8 +151,20 @@ export function AllBrandsPage() {
           brands={filteredAndSortedBrands}
           handleSort={handleSort}
           renderSortIcon={renderSortIcon}
+          onEdit={handleEdit}
         />
       </div>
+
+      {/* Edit Modal */}
+      <EditBrandModal
+        brand={editingBrand}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setEditingBrand(null)
+        }}
+        onSave={handleSave}
+      />
     </DashboardLayout>
   )
 }

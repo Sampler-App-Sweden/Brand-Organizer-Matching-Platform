@@ -190,6 +190,14 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path='/admin/tickets'
+        element={
+          <ProtectedRoute requiredType='admin'>
+            <AllTicketsPage />
+          </ProtectedRoute>
+        }
+      />
       {/* Redirects for backward compatibility */}
       <Route
         path='/dashboard/interests'

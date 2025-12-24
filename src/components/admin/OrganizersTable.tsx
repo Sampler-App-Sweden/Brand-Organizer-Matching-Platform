@@ -14,12 +14,14 @@ interface OrganizersTableProps {
   organizers: Organizer[]
   handleSort: (field: string) => void
   renderSortIcon: (field: string) => React.ReactNode
+  onEdit?: (organizer: Organizer) => void
 }
 
 export function OrganizersTable({
   organizers,
   handleSort,
-  renderSortIcon
+  renderSortIcon,
+  onEdit
 }: OrganizersTableProps) {
   return (
     <div className='overflow-x-auto'>
@@ -62,6 +64,11 @@ export function OrganizersTable({
             >
               Attendees {renderSortIcon('attendeeCount')}
             </th>
+            {onEdit && (
+              <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className='bg-white divide-y divide-gray-200'>
@@ -85,12 +92,22 @@ export function OrganizersTable({
               <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
                 {organizer.attendeeCount}
               </td>
+              {onEdit && (
+                <td className='px-6 py-4 whitespace-nowrap text-sm'>
+                  <button
+                    onClick={() => onEdit(organizer)}
+                    className='text-blue-600 hover:text-blue-800 font-medium'
+                  >
+                    Edit
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
           {organizers.length === 0 && (
             <tr>
               <td
-                colSpan={6}
+                colSpan={onEdit ? 7 : 6}
                 className='px-6 py-4 text-center text-sm text-gray-500'
               >
                 No organizers found
