@@ -1004,3 +1004,19 @@ export async function getBatchEnhancedConnections(
     }
   })
 }
+
+/**
+ * Get all connections (admin only)
+ */
+export async function getAllConnections(): Promise<Connection[]> {
+  const { data, error } = await supabase
+    .from('connections')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw new Error(`Failed to fetch all connections: ${error.message}`)
+  }
+
+  return (data as ConnectionRow[]).map(mapConnectionRowToConnection)
+}

@@ -1,5 +1,5 @@
 
-type TabType = 'users' | 'brands' | 'organizers' | 'matches' | 'tickets';
+type TabType = 'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections';
 
 import { Dispatch, SetStateAction } from 'react';
 
@@ -9,6 +9,7 @@ interface AdminDashboardStatsProps {
   organizersCount: number;
   matchesCount: number;
   ticketsCount: number;
+  connectionsCount: number;
   activeTab: TabType;
   setActiveTab: Dispatch<SetStateAction<TabType>>;
 }
@@ -19,10 +20,11 @@ export const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
   organizersCount,
   matchesCount,
   ticketsCount,
+  connectionsCount,
   activeTab,
   setActiveTab
 }) => (
-  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6'>
+  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-6'>
     <div
       className={`bg-white rounded-lg shadow-sm p-6 cursor-pointer ${
         activeTab === 'users' ? 'ring-2 ring-indigo-500' : ''
@@ -92,6 +94,20 @@ export const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
             Support Tickets
           </h3>
           <p className='text-2xl font-bold text-gray-900'>{ticketsCount}</p>
+        </div>
+      </div>
+    </div>
+    <div
+      className={`bg-white rounded-lg shadow-sm p-6 cursor-pointer ${
+        activeTab === 'connections' ? 'ring-2 ring-indigo-500' : ''
+      }`}
+      onClick={() => setActiveTab('connections')}
+    >
+      <div className='flex items-center'>
+        <div className='bg-pink-100 rounded-md p-3'>🔗</div>
+        <div className='ml-4'>
+          <h3 className='text-lg font-semibold text-gray-900'>Connections</h3>
+          <p className='text-2xl font-bold text-gray-900'>{connectionsCount}</p>
         </div>
       </div>
     </div>

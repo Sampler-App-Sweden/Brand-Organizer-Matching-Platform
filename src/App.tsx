@@ -15,6 +15,7 @@ import { AllBrandsPage } from './pages/admin/AllBrandsPage'
 import { AllOrganizersPage } from './pages/admin/AllOrganizersPage'
 import { AllMatchesPage } from './pages/admin/AllMatchesPage'
 import { AllTicketsPage } from './pages/admin/AllTicketsPage'
+import { AllConnectionsPage } from './pages/admin/AllConnectionsPage'
 import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
@@ -195,6 +196,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredType='admin'>
             <AllTicketsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/admin/connections'
+        element={
+          <ProtectedRoute requiredType='admin'>
+            <AllConnectionsPage />
           </ProtectedRoute>
         }
       />

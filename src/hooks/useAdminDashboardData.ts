@@ -9,7 +9,11 @@ import {
   getAllOrganizers,
   getAllMatches
 } from '../services/dataService'
-import type { Brand, Organizer, Match } from '../types'
+import {
+  getAllConnections,
+  getBatchEnhancedConnections
+} from '../services/connectionService'
+import type { Brand, Organizer, Match, EnhancedConnection } from '../types'
 import type { UserInfo } from '../types/edgeFunctions'
 
 export function useAdminDashboardData() {
@@ -18,8 +22,9 @@ export function useAdminDashboardData() {
   const [organizers, setOrganizers] = useState<Organizer[]>([])
   const [matches, setMatches] = useState<Match[]>([])
   const [tickets, setTickets] = useState<SupportTicket[]>([])
+  const [connections, setConnections] = useState<EnhancedConnection[]>([])
   const [activeTab, setActiveTab] = useState<
-    'users' | 'brands' | 'organizers' | 'matches' | 'tickets'
+    'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections'
   >('users')
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -40,18 +45,21 @@ export function useAdminDashboardData() {
     const loadData = async () => {
       try {
         const usersData = JSON.parse(localStorage.getItem('users') || '[]')
-        const [brandsData, organizersData, matchesData, ticketsData] =
+        const [brandsData, organizersData, matchesData, ticketsData, connectionsData] =
           await Promise.all([
             getAllBrands(),
             getAllOrganizers(),
             getAllMatches(),
-            getAllSupportTickets()
+            getAllSupportTickets(),
+            getAllConnections()
           ])
+        const enhancedConnections = await getBatchEnhancedConnections(connectionsData)
         setUsers(usersData)
         setBrands(brandsData)
         setOrganizers(organizersData)
         setMatches(matchesData)
         setTickets(ticketsData)
+        setConnections(enhancedConnections)
       } catch (error) {
         console.error('Error loading admin dashboard data:', error)
       } finally {
@@ -71,7 +79,7 @@ export function useAdminDashboardData() {
   }
 
   const exportData = (
-    dataType: 'users' | 'brands' | 'organizers' | 'matches' | 'tickets'
+    dataType: 'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections'
   ) => {
     let data
     let filename
@@ -96,6 +104,10 @@ export function useAdminDashboardData() {
         data = tickets
         filename = 'support-tickets.json'
         break
+      case 'connections':
+        data = connections
+        filename = 'connections.json'
+        break
     }
     const jsonString = JSON.stringify(data, null, 2)
     const blob = new Blob([jsonString], { type: 'application/json' })
@@ -110,7 +122,7 @@ export function useAdminDashboardData() {
   }
 
   const emailData = async (
-    dataType: 'users' | 'brands' | 'organizers' | 'matches' | 'tickets'
+    dataType: 'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections'
   ) => {
     setIsExporting(true)
     setExportFeedback({
@@ -140,6 +152,10 @@ export function useAdminDashboardData() {
       case 'tickets':
         data = tickets
         subject = 'SponsrAI Support Tickets Data Export'
+        break
+      case 'connections':
+        data = connections
+        subject = 'SponsrAI Connections Data Export'
         break
     }
     try {
@@ -173,6 +189,7 @@ export function useAdminDashboardData() {
     organizers,
     matches,
     tickets,
+    connections,
     activeTab,
     setActiveTab,
     loading,

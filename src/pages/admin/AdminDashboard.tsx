@@ -5,7 +5,8 @@ import {
   MatchesTable,
   OrganizersTable,
   TicketsTable,
-  UsersTable
+  UsersTable,
+  ConnectionsTable
 } from '../../components/admin'
 import { DashboardLayout } from '../../components/layout'
 import { LoadingSpinner } from '../../components/ui'
@@ -19,6 +20,7 @@ export function AdminDashboard() {
     organizers,
     matches,
     tickets,
+    connections,
     activeTab,
     setActiveTab,
     loading,
@@ -64,6 +66,7 @@ export function AdminDashboard() {
         organizersCount={organizers.length}
         matchesCount={matches.length}
         ticketsCount={tickets.length}
+        connectionsCount={connections.length}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
@@ -141,6 +144,17 @@ export function AdminDashboard() {
           <TicketsTable
             tickets={sortData(
               filterData(tickets, searchTerm),
+              sortField,
+              sortDirection
+            )}
+            handleSort={handleSort}
+            renderSortIcon={renderSortIcon}
+          />
+        )}
+        {activeTab === 'connections' && (
+          <ConnectionsTable
+            connections={sortData(
+              filterData(connections, searchTerm),
               sortField,
               sortDirection
             )}
