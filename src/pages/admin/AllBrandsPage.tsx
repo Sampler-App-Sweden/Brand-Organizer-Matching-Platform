@@ -16,6 +16,7 @@ export function AllBrandsPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState<'brands' | 'products'>('brands')
 
   useEffect(() => {
     const loadBrands = async () => {
@@ -128,6 +129,32 @@ export function AllBrandsPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className='mb-6 border-b border-gray-200'>
+        <nav className='-mb-px flex space-x-8'>
+          <button
+            onClick={() => setActiveTab('brands')}
+            className={`${
+              activeTab === 'brands'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+            } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors`}
+          >
+            Brands ({brands.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`${
+              activeTab === 'products'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+            } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors`}
+          >
+            Products
+          </button>
+        </nav>
+      </div>
+
       {/* Search and Export */}
       <div className='mb-4 flex items-center gap-4'>
         <input
@@ -145,15 +172,26 @@ export function AllBrandsPage() {
         </button>
       </div>
 
-      {/* Brands Table */}
-      <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
-        <BrandsTable
-          brands={filteredAndSortedBrands}
-          handleSort={handleSort}
-          renderSortIcon={renderSortIcon}
-          onEdit={handleEdit}
-        />
-      </div>
+      {/* Content based on active tab */}
+      {activeTab === 'brands' && (
+        <div className='bg-white rounded-lg shadow-sm overflow-hidden'>
+          <BrandsTable
+            brands={filteredAndSortedBrands}
+            handleSort={handleSort}
+            renderSortIcon={renderSortIcon}
+            onEdit={handleEdit}
+          />
+        </div>
+      )}
+
+      {activeTab === 'products' && (
+        <div className='bg-white rounded-lg shadow-sm p-8 text-center'>
+          <p className='text-gray-500'>
+            Products functionality coming soon. This will show all products from
+            all brands.
+          </p>
+        </div>
+      )}
 
       {/* Edit Modal */}
       <EditBrandModal
