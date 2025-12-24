@@ -3,11 +3,9 @@ import React from 'react'
 interface Organizer {
   id: string
   organizerName: string
-  eventName: string
-  eventType: string
-  eventDate: string
+  contactName: string
+  email: string
   location: string
-  attendeeCount: string
 }
 
 interface OrganizersTableProps {
@@ -36,33 +34,21 @@ export function OrganizersTable({
             </th>
             <th
               className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('eventName')}
+              onClick={() => handleSort('contactName')}
             >
-              Event {renderSortIcon('eventName')}
+              Contact {renderSortIcon('contactName')}
             </th>
             <th
               className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('eventType')}
+              onClick={() => handleSort('email')}
             >
-              Type {renderSortIcon('eventType')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('eventDate')}
-            >
-              Date {renderSortIcon('eventDate')}
+              Email {renderSortIcon('email')}
             </th>
             <th
               className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
               onClick={() => handleSort('location')}
             >
               Location {renderSortIcon('location')}
-            </th>
-            <th
-              className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer'
-              onClick={() => handleSort('attendeeCount')}
-            >
-              Attendees {renderSortIcon('attendeeCount')}
             </th>
             {onEdit && (
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
@@ -78,19 +64,13 @@ export function OrganizersTable({
                 {organizer.organizerName}
               </td>
               <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {organizer.eventName}
+                {organizer.contactName}
               </td>
               <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {organizer.eventType}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {new Date(organizer.eventDate).toLocaleDateString()}
+                {organizer.email}
               </td>
               <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
                 {organizer.location}
-              </td>
-              <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                {organizer.attendeeCount}
               </td>
               {onEdit && (
                 <td className='px-6 py-4 whitespace-nowrap text-sm'>
@@ -107,7 +87,7 @@ export function OrganizersTable({
           {organizers.length === 0 && (
             <tr>
               <td
-                colSpan={onEdit ? 7 : 6}
+                colSpan={onEdit ? 5 : 4}
                 className='px-6 py-4 text-center text-sm text-gray-500'
               >
                 No organizers found

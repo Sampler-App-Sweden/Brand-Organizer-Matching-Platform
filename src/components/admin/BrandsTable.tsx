@@ -7,7 +7,6 @@ interface Brand {
   companyName: string
   contactName: string
   industry: string
-  productName: string
   budget: string
   createdAt: string
 }
@@ -56,14 +55,6 @@ export function BrandsTable({
           </Table.HeadCell>
           <Table.HeadCell
             sortable
-            sortField='productName'
-            onSort={handleSort}
-            currentSort={currentSort}
-          >
-            Product
-          </Table.HeadCell>
-          <Table.HeadCell
-            sortable
             sortField='budget'
             onSort={handleSort}
             currentSort={currentSort}
@@ -91,7 +82,6 @@ export function BrandsTable({
             </Table.Cell>
             <Table.Cell>{brand.contactName}</Table.Cell>
             <Table.Cell>{brand.industry}</Table.Cell>
-            <Table.Cell>{brand.productName}</Table.Cell>
             <Table.Cell>{brand.budget}</Table.Cell>
             <Table.Cell>
               {new Date(brand.createdAt).toLocaleDateString()}
@@ -109,7 +99,7 @@ export function BrandsTable({
           </Table.Row>
         ))}
         {brands.length === 0 && (
-          <Table.EmptyState colSpan={onEdit ? 7 : 6}>
+          <Table.EmptyState colSpan={onEdit ? 6 : 5}>
             No brands found
           </Table.EmptyState>
         )}
