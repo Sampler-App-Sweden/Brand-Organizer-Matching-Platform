@@ -124,10 +124,12 @@ export function Home() {
         <div className='absolute -top-32 -right-32 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-indigo-300/20 rounded-full blur-3xl animate-float1' />
         <div className='absolute -bottom-32 -left-32 w-96 h-96 bg-gradient-to-tr from-indigo-400/30 to-purple-300/20 rounded-full blur-3xl animate-float2' />
         <div className='container mx-auto px-4 relative z-10'>
-          <h2 className='text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12 tracking-tight relative inline-block'>
-            <span className='relative z-10'>How It Works</span>
-            <span className='absolute -z-10 w-full h-2 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200 bottom-1 left-0 rounded-lg blur-sm opacity-80' />
-          </h2>
+          <div className='text-center mb-12'>
+            <h2 className='text-3xl md:text-4xl font-bold text-gray-900 tracking-tight relative inline-block'>
+              <span className='relative z-10'>How It Works</span>
+              <span className='absolute -z-10 w-full h-2 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200 bottom-1 left-1/2 -translate-x-1/2 rounded-lg blur-sm opacity-80' />
+            </h2>
+          </div>
           <div className='grid md:grid-cols-2 gap-10 mb-12'>
             <TechCard
               title='For Brands'

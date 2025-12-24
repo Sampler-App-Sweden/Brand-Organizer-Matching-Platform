@@ -79,13 +79,12 @@ export function AllBrandsPage() {
     const brandToUpdate = brands.find((b) => b.id === brandId)
     if (!brandToUpdate) return
 
+    // Destructure to exclude id and createdAt
+    const { id, createdAt, ...brandDataWithoutIdAndDate } = brandToUpdate
     const fullBrandData: Omit<Brand, 'id' | 'createdAt'> = {
-      ...brandToUpdate,
-      ...updatedData,
-      createdAt: undefined as any
+      ...brandDataWithoutIdAndDate,
+      ...updatedData
     }
-    delete (fullBrandData as any).id
-    delete (fullBrandData as any).createdAt
 
     await updateBrand(brandId, fullBrandData)
 

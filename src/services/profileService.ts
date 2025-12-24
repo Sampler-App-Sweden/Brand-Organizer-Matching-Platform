@@ -22,6 +22,7 @@ export interface ProfileOverview {
   email: string
   logoURL?: string | null
   description?: string | null
+  city?: string | null
   created_at: string
   updated_at: string
   whatTheySeek: {
@@ -41,6 +42,7 @@ type ProfileOverviewRow = {
   email: string
   logo_url?: string | null
   description?: string | null
+  city?: string | null
   created_at: string
   updated_at: string
   what_they_seek?: Record<string, unknown> | null
@@ -80,6 +82,7 @@ const mapRowToProfile = (row: ProfileOverviewRow): ProfileOverview => ({
   email: row.email,
   logoURL: row.logo_url,
   description: row.description,
+  city: row.city,
   created_at: row.created_at,
   updated_at: row.updated_at,
   whatTheySeek: normalizeWhatTheySeek(row)

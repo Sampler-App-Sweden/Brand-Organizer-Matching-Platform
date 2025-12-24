@@ -34,6 +34,7 @@ export interface OrganizerFormData {
   financialSponsorshipOffers: string
   offeringTypes: string[]
   brandVisibility: string
+  productSampling: string
   contentCreation: string
   leadGeneration: string
   productFeedback: string
@@ -190,6 +191,8 @@ export function useOrganizerForm() {
         newErrors.organizerName = 'Organization name is required'
       if (!formData.contactName.trim())
         newErrors.contactName = 'Contact name is required'
+      if (!formData.city.trim())
+        newErrors.city = 'City is required'
 
       if (!currentUser) {
         if (!formData.password.trim())

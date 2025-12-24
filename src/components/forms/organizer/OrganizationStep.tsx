@@ -119,8 +119,10 @@ export function OrganizationStep({
         <FormField
           label='City'
           id='city'
+          required
           value={formData.city}
           onChange={onChange}
+          error={errors.city}
         />
       </div>
     </div>

@@ -6,6 +6,7 @@ import {
   ClockIcon,
   LinkIcon,
   MailIcon,
+  MapPinIcon,
   PackageIcon,
   SparklesIcon,
   UsersIcon
@@ -226,6 +227,12 @@ export function ProfileDetailPage() {
                       <p className='text-gray-600 mt-3 max-w-2xl'>
                         {profile.description || 'No description provided yet.'}
                       </p>
+                      {profile.city && (
+                        <div className='mt-2 flex items-center text-sm text-gray-500'>
+                          <MapPinIcon className='h-4 w-4 mr-1' />
+                          {profile.city}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className='space-y-3 w-full md:w-auto'>

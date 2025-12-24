@@ -84,13 +84,12 @@ export function AllOrganizersPage() {
     const organizerToUpdate = organizers.find((o) => o.id === organizerId)
     if (!organizerToUpdate) return
 
+    // Destructure to exclude id and createdAt
+    const { id, createdAt, ...organizerDataWithoutIdAndDate } = organizerToUpdate
     const fullOrganizerData: Omit<Organizer, 'id' | 'createdAt'> = {
-      ...organizerToUpdate,
-      ...updatedData,
-      createdAt: undefined as any
+      ...organizerDataWithoutIdAndDate,
+      ...updatedData
     }
-    delete (fullOrganizerData as any).id
-    delete (fullOrganizerData as any).createdAt
 
     await updateOrganizer(organizerId, fullOrganizerData)
 

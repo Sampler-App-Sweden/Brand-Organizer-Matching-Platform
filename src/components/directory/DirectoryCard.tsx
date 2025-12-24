@@ -2,6 +2,7 @@ import {
   BadgeDollarSign,
   BookmarkIcon,
   Heart,
+  MapPinIcon,
   PackageIcon,
   UsersIcon
 } from 'lucide-react'
@@ -202,6 +203,12 @@ export function DirectoryCard({
               <p className='mt-1 text-sm text-gray-600 line-clamp-2'>
                 {profile.description || 'No description provided yet.'}
               </p>
+              {profile.city && (
+                <div className='mt-1 flex items-center text-xs text-gray-500'>
+                  <MapPinIcon className='h-3 w-3 mr-1' />
+                  {profile.city}
+                </div>
+              )}
             </div>
           </div>
           <div className='border-t border-gray-100 pt-4 space-y-3'>

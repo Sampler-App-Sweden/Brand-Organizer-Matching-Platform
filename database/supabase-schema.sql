@@ -609,6 +609,11 @@ SELECT
   p.created_at,
   p.updated_at,
   CASE
+    WHEN p.role = 'Brand' THEN b.city
+    WHEN p.role = 'Organizer' THEN o.city
+    ELSE NULL
+  END AS city,
+  CASE
     WHEN p.role = 'Brand' THEN jsonb_build_object(
       'sponsorshipTypes', COALESCE(to_jsonb(b.sponsorship_type), '[]'::jsonb),
       'budgetRange', b.budget,
