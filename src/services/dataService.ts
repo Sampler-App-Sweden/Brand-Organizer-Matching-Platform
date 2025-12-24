@@ -650,3 +650,69 @@ export const createManualMatch = async (
 
   return mapMatchRowToMatch(data as MatchRow)
 }
+
+/**
+ * Admin-only: Get all brands from the database
+ */
+export const getAllBrands = async (): Promise<Brand[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('brands')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Failed to load all brands:', error.message)
+      return []
+    }
+
+    return (data as BrandRow[] | null)?.map(mapBrandRowToBrand) ?? []
+  } catch (error) {
+    console.error('Error fetching all brands:', error)
+    return []
+  }
+}
+
+/**
+ * Admin-only: Get all organizers from the database
+ */
+export const getAllOrganizers = async (): Promise<Organizer[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('organizers')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Failed to load all organizers:', error.message)
+      return []
+    }
+
+    return (data as OrganizerRow[] | null)?.map(mapOrganizerRowToOrganizer) ?? []
+  } catch (error) {
+    console.error('Error fetching all organizers:', error)
+    return []
+  }
+}
+
+/**
+ * Admin-only: Get all matches from the database
+ */
+export const getAllMatches = async (): Promise<Match[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('matches')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Failed to load all matches:', error.message)
+      return []
+    }
+
+    return (data as MatchRow[] | null)?.map(mapMatchRowToMatch) ?? []
+  } catch (error) {
+    console.error('Error fetching all matches:', error)
+    return []
+  }
+}

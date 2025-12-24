@@ -4,6 +4,11 @@ import {
   type SupportTicket
 } from '../services/supportTicketService'
 import { sendDataByEmail } from '../services/emailService'
+import {
+  getAllBrands,
+  getAllOrganizers,
+  getAllMatches
+} from '../services/dataService'
 import type { Brand, Organizer, Match } from '../types'
 import type { UserInfo } from '../types/edgeFunctions'
 
@@ -33,19 +38,25 @@ export function useAdminDashboardData() {
 
   useEffect(() => {
     const loadData = async () => {
-      const usersData = JSON.parse(localStorage.getItem('users') || '[]')
-      const brandsData = JSON.parse(localStorage.getItem('brands') || '[]')
-      const organizersData = JSON.parse(
-        localStorage.getItem('organizers') || '[]'
-      )
-      const matchesData = JSON.parse(localStorage.getItem('matches') || '[]')
-      const ticketsData = await getAllSupportTickets()
-      setUsers(usersData)
-      setBrands(brandsData)
-      setOrganizers(organizersData)
-      setMatches(matchesData)
-      setTickets(ticketsData)
-      setLoading(false)
+      try {
+        const usersData = JSON.parse(localStorage.getItem('users') || '[]')
+        const [brandsData, organizersData, matchesData, ticketsData] =
+          await Promise.all([
+            getAllBrands(),
+            getAllOrganizers(),
+            getAllMatches(),
+            getAllSupportTickets()
+          ])
+        setUsers(usersData)
+        setBrands(brandsData)
+        setOrganizers(organizersData)
+        setMatches(matchesData)
+        setTickets(ticketsData)
+      } catch (error) {
+        console.error('Error loading admin dashboard data:', error)
+      } finally {
+        setLoading(false)
+      }
     }
     loadData()
   }, [])

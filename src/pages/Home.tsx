@@ -74,6 +74,51 @@ export function Home() {
         subtitle='Discover how SponsrAI makes brand-organizer connections seamless and effective'
         features={features}
       />
+
+      {/* CTA Section with animated glassy blobs */}
+      <div className='relative overflow-hidden py-16 bg-indigo-900'>
+        {/* Animated glassy blobs */}
+        <div className='absolute -top-24 -left-24 w-80 h-80 bg-gradient-to-br from-indigo-400/30 via-purple-400/20 to-blue-300/20 rounded-full blur-3xl animate-float1 pointer-events-none' />
+        <div className='absolute -bottom-24 -right-24 w-96 h-96 bg-gradient-to-tr from-indigo-500/30 via-blue-400/20 to-purple-300/20 rounded-full blur-3xl animate-float2 pointer-events-none' />
+        <div className='container mx-auto px-4 text-center relative z-10'>
+          <h2 className='text-3xl font-bold text-white mb-4'>
+            Ready to transform your sponsorship strategy?
+          </h2>
+          <p className='text-blue-100 mb-8 max-w-2xl mx-auto'>
+            Join SponsrAI today and start connecting with the perfect partners
+            for your brand or event.
+          </p>
+          <div className='flex flex-col sm:flex-row justify-center gap-4'>
+            <Link
+              to='/register'
+              className='bg-white text-indigo-700 px-6 py-3 rounded-md font-medium transition-all duration-300 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] hover:-translate-y-1 border border-indigo-100 hover:bg-indigo-50 group relative overflow-hidden backdrop-blur-sm'
+            >
+              <span className='relative z-10'>Create Account</span>
+              <span className='absolute inset-0 bg-gradient-to-br from-indigo-100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity'></span>
+            </Link>
+            <Link
+              to='/login'
+              className='bg-brand-primary text-white px-6 py-3 rounded-md font-medium transition-all duration-300 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] hover:-translate-y-1 border border-indigo-700/30 hover:bg-indigo-800 group relative overflow-hidden backdrop-blur-sm'
+            >
+              <span className='relative z-10'>Sign In</span>
+              <span className='absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-400 opacity-0 group-hover:opacity-20 transition-opacity'></span>
+            </Link>
+          </div>
+        </div>
+        <style>{`
+          @keyframes float1 {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+          }
+          @keyframes float2 {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(20px) scale(1.07); }
+          }
+          .animate-float1 { animation: float1 8s ease-in-out infinite; }
+          .animate-float2 { animation: float2 10s ease-in-out infinite; }
+        `}</style>
+      </div>
+
       {/* How It Works - Modernized */}
       <section className='relative py-20 bg-gradient-to-br from-white via-indigo-50 to-blue-100 overflow-hidden'>
         <div className='absolute -top-32 -right-32 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-indigo-300/20 rounded-full blur-3xl animate-float1' />
@@ -185,35 +230,6 @@ export function Home() {
           .animate-float2 { animation: float2 10s ease-in-out infinite; }
         `}</style>
       </section>
-
-      {/* CTA Section */}
-      <div className='bg-indigo-900 py-16'>
-        <div className='container mx-auto px-4 text-center'>
-          <h2 className='text-3xl font-bold text-white mb-4'>
-            Ready to transform your sponsorship strategy?
-          </h2>
-          <p className='text-blue-100 mb-8 max-w-2xl mx-auto'>
-            Join SponsrAI today and start connecting with the perfect partners
-            for your brand or event.
-          </p>
-          <div className='flex flex-col sm:flex-row justify-center gap-4'>
-            <Link
-              to='/register'
-              className='bg-white text-indigo-700 px-6 py-3 rounded-md font-medium transition-all duration-300 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] hover:-translate-y-1 border border-indigo-100 hover:bg-indigo-50 group relative overflow-hidden backdrop-blur-sm'
-            >
-              <span className='relative z-10'>Create Account</span>
-              <span className='absolute inset-0 bg-gradient-to-br from-indigo-100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity'></span>
-            </Link>
-            <Link
-              to='/login'
-              className='bg-brand-primary text-white px-6 py-3 rounded-md font-medium transition-all duration-300 shadow-[0_4px_24px_0_rgba(30,41,59,0.18)] hover:shadow-[0_8px_32px_0_rgba(30,41,59,0.32)] hover:-translate-y-1 border border-indigo-700/30 hover:bg-indigo-800 group relative overflow-hidden backdrop-blur-sm'
-            >
-              <span className='relative z-10'>Sign In</span>
-              <span className='absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-400 opacity-0 group-hover:opacity-20 transition-opacity'></span>
-            </Link>
-          </div>
-        </div>
-      </div>
     </TechLayout>
   )
 }

@@ -131,20 +131,30 @@ export function OrganizersDirectoryPage() {
         profileUserIds
       )
       setInterestStatuses(statuses)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to express interest:', error)
 
       // Provide helpful error messages
-      if (error.message?.includes('Brand profile not found')) {
-        alert(
-          'Please create your brand profile before expressing interest. You can do this from your dashboard.'
-        )
-      } else if (error.message?.includes('Organizer profile not found')) {
-        alert('This organizer profile is not available.')
-      } else if (error.message?.includes('Connection already expressed')) {
-        alert('You have already expressed interest in this organizer.')
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message?: string }).message === 'string'
+      ) {
+        const message = (error as { message: string }).message
+        if (message.includes('Brand profile not found')) {
+          alert(
+            'Please create your brand profile before expressing interest. You can do this from your dashboard.'
+          )
+        } else if (message.includes('Organizer profile not found')) {
+          alert('This organizer profile is not available.')
+        } else if (message.includes('Connection already expressed')) {
+          alert('You have already expressed interest in this organizer.')
+        } else {
+          alert(message || 'Failed to express interest. Please try again.')
+        }
       } else {
-        alert(error.message || 'Failed to express interest. Please try again.')
+        alert('Failed to express interest. Please try again.')
       }
     } finally {
       setExpressingInterest(null)

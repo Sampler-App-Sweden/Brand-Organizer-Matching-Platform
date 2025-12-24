@@ -11,6 +11,9 @@ import { AuthProvider } from './context/AuthContext'
 import { DraftProfileProvider } from './context/DraftProfileContext'
 import { useNotifications } from './context/NotificationsContext'
 import { AdminDashboard } from './pages/admin/AdminDashboard'
+import { AllBrandsPage } from './pages/admin/AllBrandsPage'
+import { AllOrganizersPage } from './pages/admin/AllOrganizersPage'
+import { AllMatchesPage } from './pages/admin/AllMatchesPage'
 import { AiOnboarding } from './pages/AiOnboarding'
 import { BrandForm } from './pages/BrandForm'
 import { BrandsDirectoryPage } from './pages/BrandsDirectoryPage'
@@ -159,6 +162,30 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute requiredType='admin'>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/admin/brands'
+        element={
+          <ProtectedRoute requiredType='admin'>
+            <AllBrandsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/admin/organizers'
+        element={
+          <ProtectedRoute requiredType='admin'>
+            <AllOrganizersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path='/admin/matches'
+        element={
+          <ProtectedRoute requiredType='admin'>
+            <AllMatchesPage />
           </ProtectedRoute>
         }
       />
