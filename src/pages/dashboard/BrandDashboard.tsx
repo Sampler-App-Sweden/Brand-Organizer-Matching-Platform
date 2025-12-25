@@ -1,26 +1,25 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../components/layout'
-import { DASHBOARD_CLASSES } from '../../constants/dashboardStyles.constants'
 import { useAuth } from '../../context/AuthContext'
 import {
   getBrandByUserId,
   getMatchesForBrand,
   getOrganizersByIds
 } from '../../services/dataService'
-import { getConnectionStats, type ConnectionStats } from '../../services/connectionService'
-import { UsersIcon, CheckCircleIcon, AlertCircleIcon, LinkIcon } from 'lucide-react'
+import { getConnectionStats, getMutualConnections, type ConnectionStats, type Connection } from '../../services/connectionService'
 import { Button, LoadingSpinner } from '../../components/ui'
 import { ProductSponsorshipSummary } from '../../components/sponsorship/ProductSponsorshipSummary'
 import { SponsorshipOfferSummary } from '../../components/sponsorship/SponsorshipOfferSummary'
 import { Brand, Organizer, Match } from '../../types'
 import { MatchRow } from '../dashboard/MatchRow'
-import { StatsCard } from '../../components/dashboard/StatsCard'
+import { ConnectionSummary } from '../../components/connections'
 
 export function BrandDashboard() {
   const { currentUser } = useAuth()
   const [brand, setBrand] = useState<Brand | null>(null)
   const [matches, setMatches] = useState<Match[]>([])
+  const [mutualConnections, setMutualConnections] = useState<Connection[]>([])
   const [connectionStats, setConnectionStats] = useState<ConnectionStats | null>(null)
   const [organizersById, setOrganizersById] = useState<
     Record<string, Organizer>
@@ -33,16 +32,21 @@ export function BrandDashboard() {
           const brandData = await getBrandByUserId(currentUser.id)
           setBrand(brandData)
           if (brandData) {
-            // Load both matches and connections
-            const [matchData, connStats] = await Promise.all([
+            // Load matches, connections, and stats
+            const [matchData, connStats, mutualConns] = await Promise.all([
               getMatchesForBrand(brandData.id),
-              getConnectionStats(currentUser.id)
+              getConnectionStats(currentUser.id),
+              getMutualConnections(currentUser.id)
             ])
             setMatches(matchData)
             setConnectionStats(connStats)
+            setMutualConnections(mutualConns)
 
             const organizerIds = Array.from(
-              new Set(matchData.map((m) => m.organizerId))
+              new Set([
+                ...matchData.map((m) => m.organizerId),
+                ...mutualConns.map((c) => c.organizerId)
+              ])
             )
             if (organizerIds.length) {
               try {
@@ -109,14 +113,6 @@ export function BrandDashboard() {
       </DashboardLayout>
     )
   }
-  const totalConnections = connectionStats
-    ? connectionStats.sent.total + connectionStats.received.total
-    : 0
-  const mutualConnections = connectionStats?.mutual ?? 0
-  const pendingConnections = connectionStats
-    ? connectionStats.sent.pending + connectionStats.received.pending
-    : 0
-
   return (
     <DashboardLayout userType='brand'>
       <div className='mb-6 flex justify-between items-start'>
@@ -129,29 +125,72 @@ export function BrandDashboard() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className={DASHBOARD_CLASSES.statsGrid}>
-        <StatsCard
-          icon={UsersIcon}
-          iconColor='indigo'
-          label='Total Connections'
-          value={totalConnections}
-          sublabel='Brand-organizer connections'
-        />
-        <StatsCard
-          icon={LinkIcon}
-          iconColor='green'
-          label='Mutual Connections'
-          value={mutualConnections}
-          sublabel='Two-way partnerships'
-        />
-        <StatsCard
-          icon={AlertCircleIcon}
-          iconColor='yellow'
-          label='Pending Connections'
-          value={pendingConnections}
-          sublabel='Awaiting response'
-        />
+      {/* Connection Summary */}
+      <ConnectionSummary stats={connectionStats} />
+
+      {/* Recent Mutual Connections */}
+      <div className='mb-6'>
+        <div className='flex justify-between items-center mb-4'>
+          <h2 className='text-xl font-bold text-gray-900'>Recent Mutual Connections</h2>
+          <Link
+            to='/dashboard/connections'
+            className='text-sm text-indigo-600 hover:text-indigo-800'
+          >
+            View all connections
+          </Link>
+        </div>
+        {mutualConnections.length === 0 ? (
+          <div className='text-gray-500 text-center py-8'>
+            No mutual connections yet. When both you and an organizer express
+            interest, you'll see your partnerships here.
+          </div>
+        ) : (
+          <div className='overflow-x-auto bg-white rounded-lg shadow-sm'>
+            <table className='min-w-full divide-y divide-gray-200'>
+              <thead className='bg-gray-50'>
+                <tr>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                    Organizer
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                    Connected On
+                  </th>
+                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className='bg-white divide-y divide-gray-200'>
+                {mutualConnections.slice(0, 5).map((connection) => {
+                  const organizer = organizersById[connection.organizerId]
+                  return (
+                    <tr key={connection.id}>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='text-sm font-medium text-gray-900'>
+                          {organizer?.organizerName || 'Loading...'}
+                        </div>
+                        <div className='text-sm text-gray-500'>
+                          {organizer?.eventName || ''}
+                        </div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+                        {new Date(connection.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap text-sm font-medium'>
+                        <Link
+                          to={`/messages?organizerId=${connection.organizerId}`}
+                          className='text-indigo-600 hover:text-indigo-900 mr-4'
+                        >
+                          Message
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Sponsorship Offer Summary */}
@@ -162,58 +201,6 @@ export function BrandDashboard() {
       {/* Product Sponsorship Summary */}
       <div className='mb-6'>
         <ProductSponsorshipSummary brandId={brand.id} />
-      </div>
-
-      {/* Recent Connections */}
-      <div className='mb-6'>
-        <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-xl font-bold text-gray-900'>Recent Connections</h2>
-          <Link
-            to='/dashboard/brand/matches'
-            className='text-sm text-indigo-600 hover:text-indigo-800'
-          >
-            View all connections
-          </Link>
-        </div>
-        {matches.filter((m) => m.status === 'accepted').length === 0 ? (
-          <div className='text-gray-500 text-center py-8'>
-            No connections yet. Express interest for organizers and/or accept
-            connections to start building partnerships.
-          </div>
-        ) : (
-          <div className='overflow-x-auto bg-white rounded-lg shadow-sm'>
-            <table className='min-w-full divide-y divide-gray-200'>
-              <thead className='bg-gray-50'>
-                <tr>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Match Score
-                  </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Event
-                  </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Status
-                  </th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='bg-white divide-y divide-gray-200'>
-                {matches
-                  .filter((m) => m.status === 'accepted')
-                  .slice(0, 5)
-                  .map((match) => (
-                    <MatchRow
-                      key={match.id}
-                      match={match}
-                      organizer={organizersById[match.organizerId]}
-                    />
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
       {/* Profile summary */}
