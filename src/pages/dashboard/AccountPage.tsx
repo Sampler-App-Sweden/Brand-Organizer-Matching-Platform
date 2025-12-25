@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { EditProfileForm } from '../../components/forms/EditProfileForm'
+import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { DashboardLayout } from '../../components/layout'
 import {
   BrandSponsorshipPanel,
@@ -119,7 +120,7 @@ export function AccountPage() {
     <DashboardLayout userType={userType || 'brand'}>
       <div className='flex flex-col'>
         {/* Header */}
-        <div className='mb-4 sm:mb-6'>
+        <div className={DASHBOARD_SPACING.headerMargin}>
           <h1 className='text-2xl font-bold text-gray-900'>Account</h1>
           <p className='text-gray-600 mt-1 hidden sm:block'>
             Manage your profile
@@ -130,7 +131,7 @@ export function AccountPage() {
         </div>
 
         {/* Mobile Dropdown - Visible only on mobile */}
-        <div className='mb-4 md:hidden'>
+        <div className='mb-6 md:hidden'>
           <select
             value={activeTab}
             onChange={(e) => handleTabChange(e.target.value as TabId)}
@@ -190,7 +191,7 @@ function ProductsTabContent({ brandId }: { brandId: string | null }) {
   }
 
   return (
-    <div className='space-y-8'>
+    <div className={DASHBOARD_SPACING.formSectionSpacing}>
       <h2 className='text-xl font-semibold mb-4'>Product Catalog</h2>
       <ProductSponsorshipManager brandId={brandId} />
     </div>
@@ -221,7 +222,7 @@ function BrandSponsorshipTabContent({ brandId }: { brandId: string | null }) {
   }
 
   return (
-    <div className='space-y-8'>
+    <div className={DASHBOARD_SPACING.formSectionSpacing}>
       <div>
         <h2 className='text-xl font-semibold mb-4'>Sponsorship Offerings</h2>
         <BrandSponsorshipPanel brandId={brandId} />
@@ -245,7 +246,7 @@ function OrganizerSponsorshipTabContent({
   }
 
   return (
-    <div className='space-y-8'>
+    <div className={DASHBOARD_SPACING.formSectionSpacing}>
       <h2 className='text-xl font-semibold mb-4'>Sponsorship Needs</h2>
       <OrganizerSponsorshipPanel organizerId={organizerId} />
     </div>

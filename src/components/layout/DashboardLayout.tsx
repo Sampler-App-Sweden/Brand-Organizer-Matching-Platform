@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 
+import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { logoutAndRedirect } from '../../services/logoutService'
 import { DashboardNavbar, Footer } from '../layout'
 import { SidebarItem, sidebarItems } from './sidebarItems'
@@ -15,7 +16,7 @@ export function DashboardLayout({
   children,
   userType,
   mainPaddingClassName = 'p-0',
-  contentPaddingClassName = 'p-4'
+  contentPaddingClassName = DASHBOARD_SPACING.contentPadding
 }: DashboardLayoutProps) {
   const location = useLocation()
   const currentSidebarItems: SidebarItem[] = sidebarItems[userType]

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import { StatsCard } from '../../components/dashboard/StatsCard'
+import { DASHBOARD_CLASSES } from '../../constants/dashboardStyles.constants'
 import { OrganizerEventsSummary } from '../../components/events/OrganizerEventsSummary'
 import { DashboardLayout } from '../../components/layout'
 import { OrganizerSponsorshipSummary } from '../../components/sponsorship/OrganizerSponsorshipSummary'
@@ -95,7 +96,7 @@ export function OrganizerDashboard() {
       </div>
 
       {/* Stats */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6'>
+      <div className={DASHBOARD_CLASSES.statsGrid}>
         <StatsCard
           icon={UsersIcon}
           iconColor='indigo'
@@ -130,7 +131,7 @@ export function OrganizerDashboard() {
       </div>
 
       {/* Event details */}
-      <div className='mb-8'>
+      <div className='mb-6'>
         <div className='flex justify-between items-center mb-4'>
           <h2 className='text-xl font-bold text-gray-900'>Event Details</h2>
           <Link
@@ -204,7 +205,7 @@ export function OrganizerDashboard() {
       </div>
 
       {/* Recent matches */}
-      <div className='mb-8'>
+      <div className='mb-6'>
         <div className='flex justify-between items-center mb-4'>
           <h2 className='text-xl font-bold text-gray-900'>Recent Matches</h2>
           <Link

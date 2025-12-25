@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../components/layout'
+import { DASHBOARD_CLASSES } from '../../constants/dashboardStyles.constants'
 import { useAuth } from '../../context/AuthContext'
 import {
   getBrandByUserId,
@@ -116,7 +117,7 @@ export function BrandDashboard() {
       </div>
 
       {/* Stats */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6'>
+      <div className={DASHBOARD_CLASSES.statsGrid}>
         <StatsCard
           icon={UsersIcon}
           iconColor='indigo'
@@ -151,7 +152,7 @@ export function BrandDashboard() {
       </div>
 
       {/* Recent matches */}
-      <div className='mb-8'>
+      <div className='mb-6'>
         <div className='flex justify-between items-center mb-4'>
           <h2 className='text-xl font-bold text-gray-900'>Recent Matches</h2>
           <Link
@@ -200,7 +201,7 @@ export function BrandDashboard() {
       </div>
 
       {/* Profile summary */}
-      <div className='mb-8'>
+      <div className='mb-6'>
         <div className='flex justify-between items-center mb-4'>
           <h2 className='text-xl font-bold text-gray-900'>Your Profile</h2>
           <Link

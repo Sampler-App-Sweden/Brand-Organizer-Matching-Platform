@@ -4,6 +4,7 @@ import { BrandsTable } from '../../components/admin'
 import { ProductsTable } from '../../components/admin/ProductsTable'
 import { EditBrandModal } from '../../components/admin/EditBrandModal'
 import { DashboardLayout } from '../../components/layout'
+import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { LoadingSpinner } from '../../components/ui'
 import { getAllBrands, updateBrand } from '../../services/dataService'
 import { getAllProducts, ProductWithBrand } from '../../services/sponsorshipService'
@@ -128,7 +129,7 @@ export function AllBrandsPage() {
 
   return (
     <DashboardLayout userType='admin'>
-      <div className='mb-6'>
+      <div className={DASHBOARD_SPACING.headerMargin}>
         <div className='flex items-center justify-between'>
           <div>
             <h1 className='text-2xl font-bold text-gray-900'>All Brands</h1>
@@ -172,7 +173,7 @@ export function AllBrandsPage() {
       </div>
 
       {/* Search and Export */}
-      <div className='mb-4 flex items-center gap-4'>
+      <div className='mb-6 flex items-center gap-4'>
         <input
           type='text'
           placeholder={activeTab === 'brands' ? 'Search brands...' : 'Search products...'}

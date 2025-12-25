@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Calendar, Trash2, Edit2, Save, Send } from 'lucide-react'
 import { DashboardLayout } from '../../components/layout'
+import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { useAuth } from '../../context/AuthContext'
 import { useOrganizerEvents } from '../../hooks/useOrganizerEvents'
 import { getOrganizerByUserId } from '../../services/dataService'
@@ -237,7 +238,7 @@ export function EventsPage() {
   return (
     <DashboardLayout userType={userType || 'organizer'}>
       {/* Header */}
-      <div className='mb-6 flex items-center justify-between'>
+      <div className={`${DASHBOARD_SPACING.headerMargin} flex items-center justify-between`}>
         <div>
           <h1 className='text-2xl font-bold text-gray-900'>Events</h1>
           <p className='text-gray-600'>
@@ -295,7 +296,7 @@ export function EventsPage() {
               </Button>
             </div>
           ) : (
-            <div className='space-y-4'>
+            <div className={DASHBOARD_SPACING.formSectionSpacing}>
               {events.map((event) => (
                 <div
                   key={event.id}
@@ -376,7 +377,7 @@ export function EventsPage() {
               e.preventDefault()
               handleSubmit('published')
             }}
-            className='space-y-8'
+            className={DASHBOARD_SPACING.formSectionSpacing}
           >
             {/* Basic Information */}
             <section>
@@ -550,7 +551,7 @@ export function EventsPage() {
                 </label>
 
                 {isRecurring && (
-                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4 pl-6'>
+                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 pl-6'>
                     <div>
                       <label className='block text-sm font-medium text-gray-700 mb-1'>
                         Frequency
@@ -658,7 +659,7 @@ export function EventsPage() {
                   <label className='block text-sm font-medium text-gray-700 mb-2'>
                     Physical Reach (Per Event)
                   </label>
-                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6'>
                     <div>
                       <label className='block text-xs text-gray-600 mb-1'>
                         Signups
@@ -707,7 +708,7 @@ export function EventsPage() {
               </h3>
               <div className='space-y-3'>
                 {digitalChannels.map((channel, index) => (
-                  <div key={index} className='grid grid-cols-1 md:grid-cols-4 gap-3'>
+                  <div key={index} className='grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6'>
                     <div>
                       <select
                         value={channel.platform}
@@ -858,7 +859,7 @@ export function EventsPage() {
               </h3>
               <div className='space-y-3'>
                 {partnerships.map((partnership, index) => (
-                  <div key={index} className='grid grid-cols-1 md:grid-cols-3 gap-3'>
+                  <div key={index} className='grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6'>
                     <div>
                       <input
                         type='text'

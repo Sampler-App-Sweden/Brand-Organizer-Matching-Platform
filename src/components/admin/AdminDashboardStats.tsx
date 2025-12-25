@@ -2,6 +2,7 @@
 type TabType = 'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections';
 
 import { Dispatch, SetStateAction } from 'react';
+import { DASHBOARD_CLASSES } from '../../constants/dashboardStyles.constants';
 
 interface AdminDashboardStatsProps {
   usersCount: number;
@@ -24,7 +25,7 @@ export const AdminDashboardStats: React.FC<AdminDashboardStatsProps> = ({
   activeTab,
   setActiveTab
 }) => (
-  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-6'>
+  <div className={DASHBOARD_CLASSES.adminStatsGrid}>
     <div
       className={`bg-white rounded-lg shadow-sm p-6 cursor-pointer ${
         activeTab === 'users' ? 'ring-2 ring-indigo-500' : ''

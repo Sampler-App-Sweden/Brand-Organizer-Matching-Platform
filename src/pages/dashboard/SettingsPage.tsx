@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DashboardLayout } from '../../components/layout'
+import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../services/supabaseClient'
 
@@ -59,14 +60,14 @@ export function SettingsPage() {
 
   return (
     <DashboardLayout userType={currentUser?.type || 'brand'}>
-      <div className='mb-6'>
+      <div className={DASHBOARD_SPACING.headerMargin}>
         <h1 className='text-2xl font-bold text-gray-900'>Settings</h1>
         <p className='text-gray-600 mt-1'>
           Manage your account preferences and security settings
         </p>
       </div>
 
-      <div className='max-w-2xl space-y-6'>
+      <div className={`max-w-2xl ${DASHBOARD_SPACING.formSectionSpacing}`}>
         {/* Feedback */}
         {feedback && (
           <div

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { MatchesTable } from '../../components/admin'
 import { DashboardLayout } from '../../components/layout'
+import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { LoadingSpinner } from '../../components/ui'
 import {
   getAllMatches,
@@ -96,7 +97,7 @@ export function AllMatchesPage() {
 
   return (
     <DashboardLayout userType='admin'>
-      <div className='mb-6'>
+      <div className={DASHBOARD_SPACING.headerMargin}>
         <div className='flex items-center justify-between'>
           <div>
             <h1 className='text-2xl font-bold text-gray-900'>All Matches</h1>
@@ -114,7 +115,7 @@ export function AllMatchesPage() {
       </div>
 
       {/* Statistics */}
-      <div className='mb-4 grid grid-cols-1 md:grid-cols-4 gap-4'>
+      <div className='mb-6 grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6'>
         <div className='bg-white p-4 rounded-lg shadow-sm'>
           <p className='text-sm text-gray-600'>Total Matches</p>
           <p className='text-2xl font-bold text-gray-900'>{matches.length}</p>
@@ -134,7 +135,7 @@ export function AllMatchesPage() {
       </div>
 
       {/* Search and Export */}
-      <div className='mb-4 flex items-center gap-4'>
+      <div className='mb-6 flex items-center gap-4'>
         <input
           type='text'
           placeholder='Search matches...'
