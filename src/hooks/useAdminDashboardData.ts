@@ -6,25 +6,23 @@ import {
 import { sendDataByEmail } from '../services/emailService'
 import {
   getAllBrands,
-  getAllOrganizers,
-  getAllMatches
+  getAllOrganizers
 } from '../services/dataService'
 import {
   getAllConnections,
   getBatchEnhancedConnections
 } from '../services/connectionService'
-import type { Brand, Organizer, Match, EnhancedConnection } from '../types'
+import type { Brand, Organizer, EnhancedConnection } from '../types'
 import type { UserInfo } from '../types/edgeFunctions'
 
 export function useAdminDashboardData() {
   const [users, setUsers] = useState<UserInfo[]>([])
   const [brands, setBrands] = useState<Brand[]>([])
   const [organizers, setOrganizers] = useState<Organizer[]>([])
-  const [matches, setMatches] = useState<Match[]>([])
   const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [connections, setConnections] = useState<EnhancedConnection[]>([])
   const [activeTab, setActiveTab] = useState<
-    'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections'
+    'users' | 'brands' | 'organizers' | 'tickets' | 'connections'
   >('users')
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -45,11 +43,10 @@ export function useAdminDashboardData() {
     const loadData = async () => {
       try {
         const usersData = JSON.parse(localStorage.getItem('users') || '[]')
-        const [brandsData, organizersData, matchesData, ticketsData, connectionsData] =
+        const [brandsData, organizersData, ticketsData, connectionsData] =
           await Promise.all([
             getAllBrands(),
             getAllOrganizers(),
-            getAllMatches(),
             getAllSupportTickets(),
             getAllConnections()
           ])
@@ -73,7 +70,6 @@ export function useAdminDashboardData() {
         setUsers(usersData)
         setBrands(brandsData)
         setOrganizers(organizersData)
-        setMatches(matchesData)
         setTickets(ticketsData)
         setConnections(deduplicatedConnections)
       } catch (error) {
@@ -95,7 +91,7 @@ export function useAdminDashboardData() {
   }
 
   const exportData = (
-    dataType: 'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections'
+    dataType: 'users' | 'brands' | 'organizers' | 'tickets' | 'connections'
   ) => {
     let data
     let filename
@@ -111,10 +107,6 @@ export function useAdminDashboardData() {
       case 'organizers':
         data = organizers
         filename = 'organizers.json'
-        break
-      case 'matches':
-        data = matches
-        filename = 'matches.json'
         break
       case 'tickets':
         data = tickets
@@ -138,7 +130,7 @@ export function useAdminDashboardData() {
   }
 
   const emailData = async (
-    dataType: 'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections'
+    dataType: 'users' | 'brands' | 'organizers' | 'tickets' | 'connections'
   ) => {
     setIsExporting(true)
     setExportFeedback({
@@ -160,10 +152,6 @@ export function useAdminDashboardData() {
       case 'organizers':
         data = organizers
         subject = 'SponsrAI Organizers Data Export'
-        break
-      case 'matches':
-        data = matches
-        subject = 'SponsrAI Matches Data Export'
         break
       case 'tickets':
         data = tickets
@@ -203,7 +191,6 @@ export function useAdminDashboardData() {
     users,
     brands,
     organizers,
-    matches,
     tickets,
     connections,
     activeTab,

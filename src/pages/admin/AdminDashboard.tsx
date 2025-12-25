@@ -2,7 +2,6 @@ import {
   AdminDashboardActions,
   AdminDashboardStats,
   BrandsTable,
-  MatchesTable,
   OrganizersTable,
   TicketsTable,
   UsersTable,
@@ -18,7 +17,6 @@ export function AdminDashboard() {
     users,
     brands,
     organizers,
-    matches,
     tickets,
     connections,
     activeTab,
@@ -55,7 +53,7 @@ export function AdminDashboard() {
       <div className='mb-6'>
         <h1 className='text-2xl font-bold text-gray-900'>Admin Dashboard</h1>
         <p className='text-gray-600'>
-          Manage users, brands, organizers, and matches on the SponsrAI
+          Manage users, brands, organizers, and connections on the SponsrAI
           platform.
         </p>
       </div>
@@ -64,7 +62,6 @@ export function AdminDashboard() {
         usersCount={users.length}
         brandsCount={brands.length}
         organizersCount={organizers.length}
-        matchesCount={matches.length}
         ticketsCount={tickets.length}
         connectionsCount={connections.length}
         activeTab={activeTab}
@@ -117,25 +114,6 @@ export function AdminDashboard() {
               sortField,
               sortDirection
             )}
-            handleSort={handleSort}
-            renderSortIcon={renderSortIcon}
-          />
-        )}
-        {activeTab === 'matches' && (
-          <MatchesTable
-            matches={sortData(
-              filterData(matches, searchTerm),
-              sortField,
-              sortDirection
-            ).map((match) => ({
-              ...match,
-              createdAt:
-                typeof match.createdAt === 'string'
-                  ? match.createdAt
-                  : match.createdAt.toISOString()
-            }))}
-            brands={brands}
-            organizers={organizers}
             handleSort={handleSort}
             renderSortIcon={renderSortIcon}
           />

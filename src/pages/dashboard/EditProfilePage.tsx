@@ -168,7 +168,7 @@ export function EditProfilePage() {
     const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
 
     const { error: uploadError } = await supabase.storage
-      .from('profiles')
+      .from('brand-logos')
       .upload(filePath, file, {
         upsert: true,
         contentType: file.type || 'application/octet-stream'
@@ -178,7 +178,7 @@ export function EditProfilePage() {
       throw new Error(`Failed to upload logo: ${uploadError.message}`)
     }
 
-    const { data } = supabase.storage.from('profiles').getPublicUrl(filePath)
+    const { data } = supabase.storage.from('brand-logos').getPublicUrl(filePath)
     return data.publicUrl
   }
 

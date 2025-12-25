@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button } from '../../components/ui'
 
-type TabType = 'users' | 'brands' | 'organizers' | 'matches' | 'tickets' | 'connections'
+type TabType = 'users' | 'brands' | 'organizers' | 'tickets' | 'connections'
 
 interface AdminDashboardActionsProps {
   searchTerm: string

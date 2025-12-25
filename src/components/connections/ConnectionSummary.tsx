@@ -1,4 +1,4 @@
-import { ConnectionStats } from '../../services/connectionService'
+import { ConnectionStats } from '../../types'
 
 interface ConnectionSummaryProps {
   stats: ConnectionStats | null
