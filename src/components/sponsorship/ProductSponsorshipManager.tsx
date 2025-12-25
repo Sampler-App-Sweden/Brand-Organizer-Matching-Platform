@@ -177,7 +177,7 @@ export function ProductSponsorshipManager({
   }
 
   return (
-    <div className='mb-8'>
+    <div>
       {/* Header */}
       <div className='flex flex-col sm:flex-row sm:items-center justify-between mb-6'>
         <div>

@@ -8,7 +8,8 @@ import {
   getMatchesForBrand,
   getOrganizersByIds
 } from '../../services/dataService'
-import { UsersIcon, CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
+import { getConnectionStats, type ConnectionStats } from '../../services/connectionService'
+import { UsersIcon, CheckCircleIcon, AlertCircleIcon, LinkIcon } from 'lucide-react'
 import { Button, LoadingSpinner } from '../../components/ui'
 import { ProductSponsorshipSummary } from '../../components/sponsorship/ProductSponsorshipSummary'
 import { SponsorshipOfferSummary } from '../../components/sponsorship/SponsorshipOfferSummary'
@@ -20,6 +21,7 @@ export function BrandDashboard() {
   const { currentUser } = useAuth()
   const [brand, setBrand] = useState<Brand | null>(null)
   const [matches, setMatches] = useState<Match[]>([])
+  const [connectionStats, setConnectionStats] = useState<ConnectionStats | null>(null)
   const [organizersById, setOrganizersById] = useState<
     Record<string, Organizer>
   >({})
@@ -31,8 +33,13 @@ export function BrandDashboard() {
           const brandData = await getBrandByUserId(currentUser.id)
           setBrand(brandData)
           if (brandData) {
-            const matchData = await getMatchesForBrand(brandData.id)
+            // Load both matches and connections
+            const [matchData, connStats] = await Promise.all([
+              getMatchesForBrand(brandData.id),
+              getConnectionStats(currentUser.id)
+            ])
             setMatches(matchData)
+            setConnectionStats(connStats)
 
             const organizerIds = Array.from(
               new Set(matchData.map((m) => m.organizerId))
@@ -102,8 +109,14 @@ export function BrandDashboard() {
       </DashboardLayout>
     )
   }
-  const pendingMatches = matches.filter((m) => m.status === 'pending')
-  const acceptedMatches = matches.filter((m) => m.status === 'accepted')
+  const totalConnections = connectionStats
+    ? connectionStats.sent.total + connectionStats.received.total
+    : 0
+  const mutualConnections = connectionStats?.mutual ?? 0
+  const pendingConnections = connectionStats
+    ? connectionStats.sent.pending + connectionStats.received.pending
+    : 0
+
   return (
     <DashboardLayout userType='brand'>
       <div className='mb-6 flex justify-between items-start'>
@@ -121,23 +134,23 @@ export function BrandDashboard() {
         <StatsCard
           icon={UsersIcon}
           iconColor='indigo'
-          label='Total Matches'
-          value={matches.length}
+          label='Total Connections'
+          value={totalConnections}
           sublabel='Brand-organizer connections'
+        />
+        <StatsCard
+          icon={LinkIcon}
+          iconColor='green'
+          label='Mutual Connections'
+          value={mutualConnections}
+          sublabel='Two-way partnerships'
         />
         <StatsCard
           icon={AlertCircleIcon}
           iconColor='yellow'
-          label='Pending Matches'
-          value={pendingMatches.length}
+          label='Pending Connections'
+          value={pendingConnections}
           sublabel='Awaiting response'
-        />
-        <StatsCard
-          icon={CheckCircleIcon}
-          iconColor='green'
-          label='Active Sponsorships'
-          value={acceptedMatches.length}
-          sublabel='Confirmed partnerships'
         />
       </div>
 
@@ -151,21 +164,21 @@ export function BrandDashboard() {
         <ProductSponsorshipSummary brandId={brand.id} />
       </div>
 
-      {/* Recent matches */}
+      {/* Recent Connections */}
       <div className='mb-6'>
         <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-xl font-bold text-gray-900'>Recent Matches</h2>
+          <h2 className='text-xl font-bold text-gray-900'>Recent Connections</h2>
           <Link
             to='/dashboard/brand/matches'
             className='text-sm text-indigo-600 hover:text-indigo-800'
           >
-            View all
+            View all connections
           </Link>
         </div>
-        {matches.length === 0 ? (
+        {matches.filter((m) => m.status === 'accepted').length === 0 ? (
           <div className='text-gray-500 text-center py-8'>
-            No matches found yet. Our AI will match you with relevant event
-            organizers soon.
+            No connections yet. Express interest for organizers and/or accept
+            connections to start building partnerships.
           </div>
         ) : (
           <div className='overflow-x-auto bg-white rounded-lg shadow-sm'>
@@ -187,13 +200,16 @@ export function BrandDashboard() {
                 </tr>
               </thead>
               <tbody className='bg-white divide-y divide-gray-200'>
-                {matches.slice(0, 5).map((match) => (
-                  <MatchRow
-                    key={match.id}
-                    match={match}
-                    organizer={organizersById[match.organizerId]}
-                  />
-                ))}
+                {matches
+                  .filter((m) => m.status === 'accepted')
+                  .slice(0, 5)
+                  .map((match) => (
+                    <MatchRow
+                      key={match.id}
+                      match={match}
+                      organizer={organizersById[match.organizerId]}
+                    />
+                  ))}
               </tbody>
             </table>
           </div>

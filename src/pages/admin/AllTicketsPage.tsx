@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { TicketsTable } from '../../components/admin'
 import { DashboardLayout } from '../../components/layout'
+import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { LoadingSpinner } from '../../components/ui'
 import {
   getAllSupportTickets,
@@ -83,7 +84,7 @@ export function AllTicketsPage() {
 
   return (
     <DashboardLayout userType='admin'>
-      <div className='mb-6'>
+      <div className={DASHBOARD_SPACING.headerMargin}>
         <div className='flex items-center justify-between'>
           <div>
             <h1 className='text-2xl font-bold text-gray-900'>
@@ -103,7 +104,7 @@ export function AllTicketsPage() {
       </div>
 
       {/* Statistics */}
-      <div className='mb-4 grid grid-cols-1 md:grid-cols-5 gap-4'>
+      <div className='mb-6 grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-6'>
         <div className='bg-white p-4 rounded-lg shadow-sm'>
           <p className='text-sm text-gray-600'>Total Tickets</p>
           <p className='text-2xl font-bold text-gray-900'>{tickets.length}</p>
@@ -131,7 +132,7 @@ export function AllTicketsPage() {
       </div>
 
       {/* Search and Export */}
-      <div className='mb-4 flex items-center gap-4'>
+      <div className='mb-6 flex items-center gap-4'>
         <input
           type='text'
           placeholder='Search tickets...'

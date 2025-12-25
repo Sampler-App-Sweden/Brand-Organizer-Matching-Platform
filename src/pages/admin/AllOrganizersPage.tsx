@@ -4,6 +4,7 @@ import { OrganizersTable } from '../../components/admin'
 import { EventsTable } from '../../components/admin/EventsTable'
 import { EditOrganizerModal } from '../../components/admin/EditOrganizerModal'
 import { DashboardLayout } from '../../components/layout'
+import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { LoadingSpinner } from '../../components/ui'
 import { getAllOrganizers, updateOrganizer } from '../../services/dataService'
 import { getAllEvents } from '../../services/eventsService'
@@ -129,7 +130,7 @@ export function AllOrganizersPage() {
 
   return (
     <DashboardLayout userType='admin'>
-      <div className='mb-6'>
+      <div className={DASHBOARD_SPACING.headerMargin}>
         <div className='flex items-center justify-between'>
           <div>
             <h1 className='text-2xl font-bold text-gray-900'>All Organizers</h1>
@@ -173,7 +174,7 @@ export function AllOrganizersPage() {
       </div>
 
       {/* Search and Export */}
-      <div className='mb-4 flex items-center gap-4'>
+      <div className='mb-6 flex items-center gap-4'>
         <input
           type='text'
           placeholder={

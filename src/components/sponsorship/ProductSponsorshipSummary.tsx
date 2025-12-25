@@ -34,7 +34,7 @@ export function ProductSponsorshipSummary({ brandId }: ProductSponsorshipSummary
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg shadow-sm">
         <div className="text-gray-500">Loading products...</div>
       </div>
     )
@@ -43,30 +43,30 @@ export function ProductSponsorshipSummary({ brandId }: ProductSponsorshipSummary
   // Show summary if products exist
   if (products.length > 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="flex justify-between items-start mb-4">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Product Catalog</h2>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+            <h2 className="text-xl font-bold text-gray-900">Your Product Catalog</h2>
+            <p className="text-sm text-gray-600 mt-1">
               {products.length} {products.length === 1 ? 'product' : 'products'} available for sponsorship
             </p>
           </div>
           <Link
             to="/dashboard/account?tab=products"
-            className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1 self-start sm:self-auto"
+            className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
           >
             Manage <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {products.slice(0, 6).map((product) => (
             <div
               key={product.id}
-              className="flex items-start gap-3 p-3 border-l-4 border-indigo-500 bg-indigo-50/50 sm:bg-gray-50 sm:border-l-0 sm:border sm:border-gray-200 sm:rounded-lg"
+              className="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg"
             >
               <div className="flex-shrink-0 mt-0.5">
-                <PackageIcon className="h-5 w-5 text-indigo-600 sm:text-gray-600" />
+                <PackageIcon className="h-5 w-5 text-gray-600" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-gray-900 text-sm truncate">
@@ -77,18 +77,8 @@ export function ProductSponsorshipSummary({ brandId }: ProductSponsorshipSummary
                     {product.details}
                   </p>
                 )}
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs text-gray-500">
-                    {product.quantity} {product.unit}
-                  </span>
-                  {product.goals && (
-                    <>
-                      <span className="text-xs text-gray-400">•</span>
-                      <span className="text-xs text-gray-500 truncate">
-                        {product.goals}
-                      </span>
-                    </>
-                  )}
+                <div className="text-xs text-gray-500 mt-2">
+                  {product.quantity} {product.unit}
                 </div>
               </div>
             </div>
@@ -111,7 +101,7 @@ export function ProductSponsorshipSummary({ brandId }: ProductSponsorshipSummary
 
   // Show link to add products if none exist
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300">
+    <div className="bg-white rounded-lg shadow-sm border-2 border-dashed border-gray-300">
       <div className="text-center">
         <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-lg font-semibold text-gray-900">

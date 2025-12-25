@@ -25,13 +25,13 @@ export function StatsCard({
   sublabel
 }: StatsCardProps) {
   return (
-    <div className='bg-white rounded-lg shadow-sm p-4 sm:p-6'>
+    <div className='bg-white rounded-lg shadow-sm p-4'>
       <div className='flex items-center'>
         <div className={`rounded-md p-3 ${colorClasses[iconColor]}`}>
           <Icon className='h-6 w-6' />
         </div>
         <div className='ml-4 flex-1'>
-          <h3 className='text-sm sm:text-base font-semibold text-gray-900'>
+          <h3 className='text-sm font-semibold text-gray-900'>
             {label}
           </h3>
           <p className='text-2xl font-bold text-gray-900'>{value}</p>

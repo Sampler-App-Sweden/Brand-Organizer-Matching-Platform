@@ -13,7 +13,7 @@ export function SponsorshipOfferSummary({ brandId }: SponsorshipOfferSummaryProp
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-white rounded-lg shadow-sm">
         <div className="text-gray-500">Loading sponsorship information...</div>
       </div>
     )
@@ -22,23 +22,23 @@ export function SponsorshipOfferSummary({ brandId }: SponsorshipOfferSummaryProp
   // Show summary only if published and has types selected
   if (status === 'published' && selectedTypes.length > 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="flex justify-between items-start mb-4">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Your Sponsorship Offerings</h2>
-            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+            <h2 className="text-xl font-bold text-gray-900">Your Sponsorship Offerings</h2>
+            <p className="text-sm text-gray-600 mt-1">
               Active sponsorship types visible to organizers
             </p>
           </div>
           <Link
             to="/dashboard/account?tab=sponsorship"
-            className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1 self-start sm:self-auto"
+            className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
           >
             Edit <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
-        <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {selectedTypes.map((typeId) => {
             const config = SPONSORSHIP_TYPE_CONFIGS.find((t) => t.id === typeId)
             if (!config) return null
@@ -48,10 +48,10 @@ export function SponsorshipOfferSummary({ brandId }: SponsorshipOfferSummaryProp
             return (
               <div
                 key={typeId}
-                className="flex items-start gap-3 p-3 border-l-4 border-indigo-500 bg-indigo-50/50 sm:bg-indigo-50 sm:border-l-0 sm:border sm:border-indigo-200 sm:rounded-lg"
+                className="flex items-start gap-3 p-3 bg-indigo-50 border border-indigo-200 rounded-lg"
               >
                 <div className="flex-shrink-0 mt-0.5">
-                  <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600" />
+                  <Icon className="h-5 w-5 text-indigo-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 text-sm">
@@ -71,7 +71,7 @@ export function SponsorshipOfferSummary({ brandId }: SponsorshipOfferSummaryProp
 
   // Show link to configure if not published or no types selected
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300">
+    <div className="bg-white rounded-lg shadow-sm border-2 border-dashed border-gray-300">
       <div className="text-center">
         <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
         <h3 className="mt-2 text-lg font-semibold text-gray-900">

@@ -2,7 +2,8 @@ import {
   AlertCircleIcon,
   CalendarIcon,
   CheckCircleIcon,
-  UsersIcon
+  UsersIcon,
+  LinkIcon
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -16,6 +17,7 @@ import { Button, LoadingSpinner } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { useOrganizerDashboard } from '../../hooks/useOrganizerDashboard'
 import { getBrandById, getBrandsByIds } from '../../services/dataService'
+import { getConnectionStats, type ConnectionStats } from '../../services/connectionService'
 import { Brand, Match } from '../../types'
 
 export function OrganizerDashboard() {
@@ -23,6 +25,23 @@ export function OrganizerDashboard() {
   const { organizer, matches, pendingMatches, acceptedMatches, loading } =
     useOrganizerDashboard(currentUser?.id)
   const [brandsById, setBrandsById] = useState<Record<string, Brand>>({})
+  const [connectionStats, setConnectionStats] = useState<ConnectionStats | null>(null)
+
+  // Load connection stats
+  useEffect(() => {
+    const loadConnectionStats = async () => {
+      if (!currentUser?.id) return
+      try {
+        const stats = await getConnectionStats(currentUser.id)
+        setConnectionStats(stats)
+      } catch (error) {
+        console.error('Failed to load connection stats:', error)
+        setConnectionStats(null)
+      }
+    }
+
+    loadConnectionStats()
+  }, [currentUser?.id])
 
   // Load brand details for all matches
   useEffect(() => {
@@ -81,6 +100,14 @@ export function OrganizerDashboard() {
     )
   }
 
+  const totalConnections = connectionStats
+    ? connectionStats.sent.total + connectionStats.received.total
+    : 0
+  const mutualConnections = connectionStats?.mutual ?? 0
+  const pendingConnections = connectionStats
+    ? connectionStats.sent.pending + connectionStats.received.pending
+    : 0
+
   return (
     <DashboardLayout userType='organizer'>
       <div className='mb-6 flex justify-between items-start'>
@@ -100,23 +127,23 @@ export function OrganizerDashboard() {
         <StatsCard
           icon={UsersIcon}
           iconColor='indigo'
-          label='Total Matches'
-          value={matches.length}
+          label='Total Connections'
+          value={totalConnections}
           sublabel='Brand connections found'
+        />
+        <StatsCard
+          icon={LinkIcon}
+          iconColor='green'
+          label='Mutual Connections'
+          value={mutualConnections}
+          sublabel='Two-way partnerships'
         />
         <StatsCard
           icon={AlertCircleIcon}
           iconColor='yellow'
-          label='Pending Matches'
-          value={pendingMatches.length}
+          label='Pending Connections'
+          value={pendingConnections}
           sublabel='Awaiting response'
-        />
-        <StatsCard
-          icon={CheckCircleIcon}
-          iconColor='green'
-          label='Active Sponsorships'
-          value={acceptedMatches.length}
-          sublabel='Confirmed partnerships'
         />
       </div>
 
@@ -204,21 +231,21 @@ export function OrganizerDashboard() {
         </div>
       </div>
 
-      {/* Recent matches */}
+      {/* Recent Connections */}
       <div className='mb-6'>
         <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-xl font-bold text-gray-900'>Recent Matches</h2>
+          <h2 className='text-xl font-bold text-gray-900'>Recent Connections</h2>
           <Link
             to='/dashboard/organizer/matches'
             className='text-sm text-indigo-600 hover:text-indigo-800'
           >
-            View all
+            View all connections
           </Link>
         </div>
-        {matches.length === 0 ? (
+        {matches.filter((m) => m.status === 'accepted').length === 0 ? (
           <div className='text-gray-500 text-center py-8'>
-            No matches found yet. Our AI will match you with relevant brands
-            soon.
+            No connections yet. Express interest for brands and/or accept
+            connections to start building partnerships.
           </div>
         ) : (
           <div className='overflow-x-auto bg-white rounded-lg shadow-sm'>
@@ -240,13 +267,16 @@ export function OrganizerDashboard() {
                 </tr>
               </thead>
               <tbody className='bg-white divide-y divide-gray-200'>
-                {matches.slice(0, 5).map((match) => (
-                  <MatchRow
-                    key={match.id}
-                    match={match}
-                    brand={brandsById[match.brandId]}
-                  />
-                ))}
+                {matches
+                  .filter((m) => m.status === 'accepted')
+                  .slice(0, 5)
+                  .map((match) => (
+                    <MatchRow
+                      key={match.id}
+                      match={match}
+                      brand={brandsById[match.brandId]}
+                    />
+                  ))}
               </tbody>
             </table>
           </div>
