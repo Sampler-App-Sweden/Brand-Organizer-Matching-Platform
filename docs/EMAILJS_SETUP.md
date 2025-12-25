@@ -189,20 +189,20 @@ For production use:
 
 ## Step 8: Apply Supabase RLS Fix
 
-Run this SQL in your Supabase SQL Editor to allow only authenticated users to create tickets:
+Run this SQL in your Supabase SQL Editor to allow both anonymous and authenticated users to create tickets:
 
 1. Open [Supabase Dashboard](https://app.supabase.com/)
 2. Go to **SQL Editor**
 3. Run this SQL:
 
 ```sql
--- Fix Support Tickets RLS Policy to allow only authenticated users
+-- Fix Support Tickets RLS Policy to allow both anonymous and authenticated users
 DROP POLICY IF EXISTS "Allow anyone to create support tickets" ON public.support_tickets;
 DROP POLICY IF EXISTS "Allow authenticated users to create support tickets" ON public.support_tickets;
 
-CREATE POLICY "Allow authenticated users to create support tickets"
+CREATE POLICY "Allow anyone to create support tickets"
   ON public.support_tickets FOR INSERT
-  TO authenticated
+  TO anon, authenticated
   WITH CHECK (true);
 ```
 
@@ -213,9 +213,9 @@ FROM pg_policies
 WHERE tablename = 'support_tickets' AND cmd = 'INSERT';
 ```
 
-You should see: `{authenticated}` in the roles column.
+You should see: `{anon,authenticated}` in the roles column.
 
-**Note:** Users must be logged in to submit support tickets. If you want to allow anonymous users, change `TO authenticated` to `TO anon, authenticated`.
+**Note:** This allows anyone (logged in or not) to submit support tickets. If you want to restrict to only logged-in users, change `TO anon, authenticated` to `TO authenticated`.
 
 ## Troubleshooting
 
