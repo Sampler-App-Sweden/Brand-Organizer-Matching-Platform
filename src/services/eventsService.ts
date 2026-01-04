@@ -21,6 +21,8 @@ interface EventRow {
   id: string
   organizer_id: string
   event_name: string
+  event_type: string
+  custom_event_type: string
   slogan: string
   essence: string
   concept: string
@@ -124,6 +126,8 @@ const mapEventRow = (row: EventRow): Event => ({
   id: row.id,
   organizerId: row.organizer_id,
   eventName: row.event_name,
+  eventType: row.event_type,
+  customEventType: row.custom_event_type,
   slogan: row.slogan,
   essence: row.essence,
   concept: row.concept,
@@ -153,6 +157,8 @@ const mapEventToRow = (
 ) => ({
   organizer_id: organizerId,
   event_name: input.eventName,
+  event_type: input.eventType,
+  custom_event_type: input.customEventType,
   slogan: input.slogan,
   essence: input.essence,
   concept: input.concept,
@@ -232,6 +238,9 @@ export async function updateEvent(
   const payload: Partial<ReturnType<typeof mapEventToRow>> = {}
 
   if (input.eventName !== undefined) payload.event_name = input.eventName
+  if (input.eventType !== undefined) payload.event_type = input.eventType
+  if (input.customEventType !== undefined)
+    payload.custom_event_type = input.customEventType
   if (input.slogan !== undefined) payload.slogan = input.slogan
   if (input.essence !== undefined) payload.essence = input.essence
   if (input.concept !== undefined) payload.concept = input.concept

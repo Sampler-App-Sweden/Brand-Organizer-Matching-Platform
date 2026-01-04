@@ -41,23 +41,24 @@ export function EditProfileForm() {
 
     const file = currentImage.file
 
-    try {
-      // Use the proper uploadFile function from edgeFunctions
-      // This handles optimization, validation, and secure upload
-      const publicUrl = await uploadFile(file, 'brand-logos', {
-        onOptimizationComplete: (result) => {
-          const savings = result.savings.toFixed(0)
-          const originalSizeMB = (result.originalSize / (1024 * 1024)).toFixed(1)
-          const optimizedSizeMB = (result.optimizedSize / (1024 * 1024)).toFixed(1)
-          showToast(`Image optimized: ${originalSizeMB}MB → ${optimizedSizeMB}MB (${savings}% smaller)`, 'success')
-        }
+    // Simple direct upload without edge function
+    // Upload the original file directly to storage
+    const fileExt = file.name.split('.').pop() || 'png'
+    const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('brand-logos')
+      .upload(filePath, file, {
+        upsert: true
       })
 
-      return publicUrl
-    } catch (error) {
-      console.error('Upload failed:', error)
-      throw error
+    if (uploadError) {
+      console.error('Upload error:', uploadError)
+      throw new Error(`Failed to upload logo: ${uploadError.message}`)
     }
+
+    const { data } = supabase.storage.from('brand-logos').getPublicUrl(filePath)
+    return data.publicUrl
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

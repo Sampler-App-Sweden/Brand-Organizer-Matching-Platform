@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Plus, Calendar, Trash2, Edit2, Save, Send } from 'lucide-react'
 import { useOrganizerEvents } from '../../hooks/useOrganizerEvents'
+import { eventTypeOptions } from '../../constants/organizerFormOptions'
+import { toTitleCase } from '../../utils/formatting'
 import { Button } from '../ui'
 import type {
   CreateEventInput,
@@ -33,6 +35,8 @@ export function EventsManager({ organizerId, showHeader = true }: EventsManagerP
 
   // Form state
   const [eventName, setEventName] = useState('')
+  const [eventType, setEventType] = useState('')
+  const [customEventType, setCustomEventType] = useState('')
   const [slogan, setSlogan] = useState('')
   const [essence, setEssence] = useState('')
   const [concept, setConcept] = useState('')
@@ -64,6 +68,8 @@ export function EventsManager({ organizerId, showHeader = true }: EventsManagerP
 
   const resetForm = () => {
     setEventName('')
+    setEventType('')
+    setCustomEventType('')
     setSlogan('')
     setEssence('')
     setConcept('')
@@ -95,6 +101,8 @@ export function EventsManager({ organizerId, showHeader = true }: EventsManagerP
     if (!event) return
 
     setEventName(event.eventName)
+    setEventType(event.eventType)
+    setCustomEventType(event.customEventType)
     setSlogan(event.slogan)
     setEssence(event.essence)
     setConcept(event.concept)
@@ -133,6 +141,8 @@ export function EventsManager({ organizerId, showHeader = true }: EventsManagerP
   const handleSubmit = async (status: 'draft' | 'published') => {
     const input: CreateEventInput = {
       eventName,
+      eventType,
+      customEventType,
       slogan,
       essence,
       concept,
@@ -362,6 +372,47 @@ export function EventsManager({ organizerId, showHeader = true }: EventsManagerP
                     className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
                   />
                 </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    Event Type *
+                  </label>
+                  <select
+                    value={eventType}
+                    onChange={(e) => setEventType(e.target.value)}
+                    required
+                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                  >
+                    <option value=''>Select event type...</option>
+                    {eventTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {eventType === 'other' && (
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                      Custom Event Type *
+                    </label>
+                    <input
+                      type='text'
+                      value={customEventType}
+                      onChange={(e) =>
+                        setCustomEventType(toTitleCase(e.target.value))
+                      }
+                      required
+                      placeholder='Enter your event type (e.g., Fashion Show, Charity Gala)'
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    />
+                    <p className='text-xs text-gray-500 mt-1'>
+                      The first letter of each word will be capitalized
+                      automatically
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>

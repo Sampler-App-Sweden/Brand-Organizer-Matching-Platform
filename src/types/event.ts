@@ -45,6 +45,8 @@ export interface Event {
 
   // Basic Info
   eventName: string
+  eventType: string
+  customEventType: string
   slogan: string
 
   // Story & Identity
@@ -80,6 +82,8 @@ export interface Event {
 
 export interface CreateEventInput {
   eventName: string
+  eventType: string
+  customEventType: string
   slogan: string
   essence: string
   concept: string

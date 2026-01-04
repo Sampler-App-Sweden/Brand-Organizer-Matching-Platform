@@ -5,6 +5,8 @@ import { DASHBOARD_SPACING } from '../../constants/dashboardStyles.constants'
 import { useAuth } from '../../context/AuthContext'
 import { useOrganizerEvents } from '../../hooks/useOrganizerEvents'
 import { getOrganizerByUserId } from '../../services/dataService'
+import { eventTypeOptions } from '../../constants/organizerFormOptions'
+import { toTitleCase } from '../../utils/formatting'
 import { Button } from '../../components/ui'
 import type {
   CreateEventInput,
@@ -67,6 +69,8 @@ export function EventsPage() {
 
   // Form state
   const [eventName, setEventName] = useState('')
+  const [eventType, setEventType] = useState('')
+  const [customEventType, setCustomEventType] = useState('')
   const [slogan, setSlogan] = useState('')
   const [essence, setEssence] = useState('')
   const [concept, setConcept] = useState('')
@@ -98,6 +102,8 @@ export function EventsPage() {
 
   const resetForm = () => {
     setEventName('')
+    setEventType('')
+    setCustomEventType('')
     setSlogan('')
     setEssence('')
     setConcept('')
@@ -129,6 +135,8 @@ export function EventsPage() {
     if (!event) return
 
     setEventName(event.eventName)
+    setEventType(event.eventType)
+    setCustomEventType(event.customEventType)
     setSlogan(event.slogan)
     setEssence(event.essence)
     setConcept(event.concept)
@@ -169,6 +177,8 @@ export function EventsPage() {
 
     const input: CreateEventInput = {
       eventName,
+      eventType,
+      customEventType,
       slogan,
       essence,
       concept,
@@ -398,6 +408,47 @@ export function EventsPage() {
                     className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
                   />
                 </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
+                    Event Type *
+                  </label>
+                  <select
+                    value={eventType}
+                    onChange={(e) => setEventType(e.target.value)}
+                    required
+                    className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                  >
+                    <option value=''>Select event type...</option>
+                    {eventTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {eventType === 'other' && (
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700 mb-1'>
+                      Custom Event Type *
+                    </label>
+                    <input
+                      type='text'
+                      value={customEventType}
+                      onChange={(e) =>
+                        setCustomEventType(toTitleCase(e.target.value))
+                      }
+                      required
+                      placeholder='Enter your event type (e.g., Fashion Show, Charity Gala)'
+                      className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+                    />
+                    <p className='text-xs text-gray-500 mt-1'>
+                      The first letter of each word will be capitalized
+                      automatically
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label className='block text-sm font-medium text-gray-700 mb-1'>
