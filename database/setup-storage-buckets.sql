@@ -29,7 +29,7 @@ VALUES
     'brand-logos',
     'brand-logos',
     true,  -- public bucket
-    524288,  -- 512KB limit
+    2097152,  -- 2MB limit
     ARRAY['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp']
   ),
   (

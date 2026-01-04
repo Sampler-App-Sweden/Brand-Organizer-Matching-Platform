@@ -17,8 +17,8 @@ export const STORAGE_CONFIG = {
     'brand-logos': {
       name: 'brand-logos',
       public: true,
-      maxSize: 512 * 1024, // 512KB
-      maxSizeLabel: '512KB',
+      maxSize: 2 * 1024 * 1024, // 2MB
+      maxSizeLabel: '2MB',
       allowedTypes: ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'],
       allowedExtensions: ['.jpg', '.jpeg', '.png', '.svg', '.webp'],
       description: 'Brand and company logos'

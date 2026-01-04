@@ -6,7 +6,9 @@ import {
   saveOrganizer,
   updateOrganizer
 } from '../services/dataService'
+import { createEvent, fetchOrganizerEvents } from '../services/eventsService'
 import type { Organizer } from '../types'
+import type { CreateEventInput } from '../types/event'
 
 export interface OrganizerFormData {
   organizerName: string

@@ -10,6 +10,7 @@ import {
   getOrganizerByUserId
 } from '../../services/dataService'
 import { supabase } from '../../services/supabaseClient'
+import { validateAndOptimizeImage, getOptimizationMessage } from '../../utils/imageValidator'
 
 import type { Brand, Organizer } from '../../types'
 import type { ProductImage } from '../../types/sponsorship'
@@ -164,14 +165,30 @@ export function EditProfilePage() {
     if (!currentImage.file) return currentImage.url
 
     const file = currentImage.file
-    const fileExt = file.name.split('.').pop() || 'png'
+
+    // Validate and optimize the image
+    const validationResult = await validateAndOptimizeImage(file, 'brand-logos')
+
+    if (!validationResult.valid) {
+      throw new Error(validationResult.error || 'Invalid image file')
+    }
+
+    // Show optimization message if image was optimized
+    const optimizationMsg = getOptimizationMessage(validationResult)
+    if (optimizationMsg) {
+      showToast(optimizationMsg, 'success')
+    }
+
+    // Use the optimized file for upload
+    const optimizedFile = validationResult.file!
+    const fileExt = optimizedFile.name.split('.').pop() || 'webp'
     const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
 
     const { error: uploadError } = await supabase.storage
       .from('brand-logos')
-      .upload(filePath, file, {
+      .upload(filePath, optimizedFile, {
         upsert: true,
-        contentType: file.type || 'application/octet-stream'
+        contentType: optimizedFile.type
       })
 
     if (uploadError) {
