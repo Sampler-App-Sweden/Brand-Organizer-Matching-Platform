@@ -187,8 +187,8 @@ export function EditProfilePage() {
     const { error: uploadError } = await supabase.storage
       .from('brand-logos')
       .upload(filePath, optimizedFile, {
-        upsert: true,
-        contentType: optimizedFile.type
+        upsert: true
+        // Let Supabase auto-detect content type from file extension
       })
 
     if (uploadError) {

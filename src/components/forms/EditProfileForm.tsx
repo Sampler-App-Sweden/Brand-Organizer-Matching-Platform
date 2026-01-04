@@ -59,16 +59,35 @@ export function EditProfileForm() {
     const fileExt = optimizedFile.name.split('.').pop() || 'webp'
     const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
 
-    const { error: uploadError } = await supabase.storage
+    console.log('Uploading file:', {
+      path: filePath,
+      size: optimizedFile.size,
+      type: optimizedFile.type,
+      name: optimizedFile.name
+    })
+
+    // Convert File to ArrayBuffer to avoid MIME type issues
+    const arrayBuffer = await optimizedFile.arrayBuffer()
+    const blob = new Blob([arrayBuffer], { type: 'image/webp' })
+
+    console.log('Uploading blob:', {
+      blobSize: blob.size,
+      blobType: blob.type
+    })
+
+    const { error: uploadError, data: uploadData } = await supabase.storage
       .from('brand-logos')
-      .upload(filePath, optimizedFile, {
+      .upload(filePath, blob, {
         upsert: true,
-        contentType: optimizedFile.type
+        contentType: 'image/webp'
       })
 
     if (uploadError) {
+      console.error('Upload error details:', uploadError)
       throw new Error(`Failed to upload logo: ${uploadError.message}`)
     }
+
+    console.log('Upload successful:', uploadData)
 
     const { data } = supabase.storage.from('brand-logos').getPublicUrl(filePath)
     return data.publicUrl

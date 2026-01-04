@@ -83,9 +83,20 @@ export async function optimizeImage(
 
     // Create new file with .webp extension
     const originalName = file.name.replace(/\.[^.]+$/, '')
+
+    // Create a proper File object from the blob
+    // Use a more explicit approach to ensure the type is preserved
     const optimizedFile = new File([blob], `${originalName}.webp`, {
       type: 'image/webp',
       lastModified: Date.now()
+    })
+
+    // Verify the file was created correctly
+    console.log('Created optimized file:', {
+      name: optimizedFile.name,
+      type: optimizedFile.type,
+      size: optimizedFile.size,
+      blobType: blob.type
     })
 
     const savings = ((file.size - optimizedFile.size) / file.size) * 100
