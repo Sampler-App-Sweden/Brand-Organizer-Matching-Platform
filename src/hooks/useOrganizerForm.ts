@@ -233,6 +233,82 @@ export function useOrganizerForm() {
     return Object.keys(newErrors).length === 0
   }
 
+  // Helper function to create initial event from organizer form data
+  const createInitialEvent = async (organizerId: string) => {
+    // Only create event if we have event data
+    if (!formData.eventName.trim()) {
+      return
+    }
+
+    // Check if organizer already has events
+    try {
+      const existingEvents = await fetchOrganizerEvents(organizerId)
+      if (existingEvents.length > 0) {
+        // Organizer already has events, don't create another one
+        return
+      }
+    } catch (error) {
+      console.error('Error checking existing events:', error)
+      // Continue with event creation even if check fails
+    }
+
+    // Determine the event type display name
+    const eventTypeDisplay =
+      formData.eventType === 'other'
+        ? formData.customEventType
+        : formData.eventType
+
+    // Map frequency to recurring concept
+    const isRecurring = formData.eventFrequency !== 'one-time'
+    const recurringConcept = {
+      isRecurring,
+      frequency: isRecurring ? formData.eventFrequency : undefined
+    }
+
+    // Create event dates array
+    const eventDates = formData.eventDate
+      ? [{ date: formData.eventDate, description: eventTypeDisplay }]
+      : []
+
+    // Map attendee count to physical reach
+    const physicalReach = {
+      signups: '',
+      attendees: formData.attendeeCount || '',
+      waitlist: ''
+    }
+
+    // Create the event input
+    const eventInput: CreateEventInput = {
+      eventName: formData.eventName,
+      slogan: formData.elevatorPitch || `${eventTypeDisplay} in ${formData.city}`,
+      essence:
+        formData.elevatorPitch ||
+        `${formData.eventName} is a ${eventTypeDisplay.toLowerCase()} event${formData.location ? ` held at ${formData.location}` : ''}.`,
+      concept: `${eventTypeDisplay} event bringing together the community${formData.location ? ` at ${formData.location}` : ''}.`,
+      setup: formData.location || 'To be determined',
+      positioning: '',
+      eventDates,
+      recurringConcept,
+      corePillars: eventTypeDisplay ? [eventTypeDisplay] : [],
+      audienceDescription: formData.audienceDescription || '',
+      physicalReach,
+      digitalChannels: [],
+      pastEvents: { totalEventsHosted: '' },
+      eventMedia: { images: [], description: '' },
+      partnerships: [],
+      applicationLink: '',
+      totalEventBudget: ''
+    }
+
+    try {
+      await createEvent(organizerId, eventInput, 'draft')
+      console.log('Initial event created successfully')
+    } catch (error) {
+      console.error('Failed to create initial event:', error)
+      // Don't throw error - we don't want to block registration if event creation fails
+    }
+  }
+
   const handleSubmit = async () => {
     setIsSubmitting(true)
 
@@ -297,6 +373,10 @@ export function useOrganizerForm() {
 
         const createdOrganizer = await saveOrganizer(organizerPayload)
         setExistingOrganizerId(createdOrganizer.id)
+
+        // Create initial event from form data
+        await createInitialEvent(createdOrganizer.id)
+
         navigate('/dashboard/organizer')
         return {
           success: true,
@@ -304,7 +384,11 @@ export function useOrganizerForm() {
         }
       }
 
-      await saveOrganizer(organizerPayload)
+      const savedOrganizer = await saveOrganizer(organizerPayload)
+
+      // Create initial event from form data
+      await createInitialEvent(savedOrganizer.id)
+
       navigate('/dashboard/organizer')
       return {
         success: true,
