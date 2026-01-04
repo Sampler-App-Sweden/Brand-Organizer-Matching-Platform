@@ -4,7 +4,6 @@ import { Button, StepIndicator, Toast, LoadingSpinner } from '../components/ui'
 import { useOrganizerForm } from '../hooks/useOrganizerForm'
 import {
   OrganizationStep,
-  EventStep,
   AudienceStep,
   OfferingsStep
 } from '../components/forms/organizer'
@@ -30,8 +29,8 @@ export function OrganizerForm() {
     handleSubmit
   } = useOrganizerForm()
 
-  const totalSteps = 4
-  const stepLabels = ['Organization', 'Event', 'Audience', 'Offerings']
+  const totalSteps = 3
+  const stepLabels = ['Organization', 'Audience', 'Offerings']
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
@@ -102,13 +101,6 @@ export function OrganizerForm() {
                     />
                   )}
                   {currentStep === 2 && (
-                    <EventStep
-                      formData={formData}
-                      errors={errors}
-                      onChange={handleInputChange}
-                    />
-                  )}
-                  {currentStep === 3 && (
                     <AudienceStep
                       formData={formData}
                       errors={errors}
@@ -116,7 +108,7 @@ export function OrganizerForm() {
                       onMultiSelect={handleMultiSelectChange}
                     />
                   )}
-                  {currentStep === 4 && (
+                  {currentStep === 3 && (
                     <OfferingsStep
                       formData={formData}
                       errors={errors}

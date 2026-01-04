@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context/NotificationsContext'
 import { useProfileLoader } from '../../hooks/useProfileLoader'
 import { supabase } from '../../services/supabaseClient'
-import { validateAndOptimizeImage, getOptimizationMessage } from '../../utils/imageValidator'
+import { uploadFile } from '../../services/edgeFunctions'
 import { ImageUpload } from '../media'
 import { Button, FormField } from '../ui'
 import LoadingSpinner from '../ui/LoadingSpinner'
@@ -41,56 +41,23 @@ export function EditProfileForm() {
 
     const file = currentImage.file
 
-    // Validate and optimize the image
-    const validationResult = await validateAndOptimizeImage(file, 'brand-logos')
-
-    if (!validationResult.valid) {
-      throw new Error(validationResult.error || 'Invalid image file')
-    }
-
-    // Show optimization message if image was optimized
-    const optimizationMsg = getOptimizationMessage(validationResult)
-    if (optimizationMsg) {
-      showToast(optimizationMsg, 'success')
-    }
-
-    // Use the optimized file for upload
-    const optimizedFile = validationResult.file!
-    const fileExt = optimizedFile.name.split('.').pop() || 'webp'
-    const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
-
-    console.log('Uploading file:', {
-      path: filePath,
-      size: optimizedFile.size,
-      type: optimizedFile.type,
-      name: optimizedFile.name
-    })
-
-    // Convert File to ArrayBuffer to avoid MIME type issues
-    const arrayBuffer = await optimizedFile.arrayBuffer()
-    const blob = new Blob([arrayBuffer], { type: 'image/webp' })
-
-    console.log('Uploading blob:', {
-      blobSize: blob.size,
-      blobType: blob.type
-    })
-
-    const { error: uploadError, data: uploadData } = await supabase.storage
-      .from('brand-logos')
-      .upload(filePath, blob, {
-        upsert: true,
-        contentType: 'image/webp'
+    try {
+      // Use the proper uploadFile function from edgeFunctions
+      // This handles optimization, validation, and secure upload
+      const publicUrl = await uploadFile(file, 'brand-logos', {
+        onOptimizationComplete: (result) => {
+          const savings = result.savings.toFixed(0)
+          const originalSizeMB = (result.originalSize / (1024 * 1024)).toFixed(1)
+          const optimizedSizeMB = (result.optimizedSize / (1024 * 1024)).toFixed(1)
+          showToast(`Image optimized: ${originalSizeMB}MB → ${optimizedSizeMB}MB (${savings}% smaller)`, 'success')
+        }
       })
 
-    if (uploadError) {
-      console.error('Upload error details:', uploadError)
-      throw new Error(`Failed to upload logo: ${uploadError.message}`)
+      return publicUrl
+    } catch (error) {
+      console.error('Upload failed:', error)
+      throw error
     }
-
-    console.log('Upload successful:', uploadData)
-
-    const { data } = supabase.storage.from('brand-logos').getPublicUrl(filePath)
-    return data.publicUrl
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

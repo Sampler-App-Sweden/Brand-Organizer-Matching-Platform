@@ -6,9 +6,7 @@ import {
   saveOrganizer,
   updateOrganizer
 } from '../services/dataService'
-import { createEvent, fetchOrganizerEvents } from '../services/eventsService'
 import type { Organizer } from '../types'
-import type { CreateEventInput } from '../types/event'
 
 export interface OrganizerFormData {
   organizerName: string
@@ -21,13 +19,6 @@ export interface OrganizerFormData {
   address: string
   postalCode: string
   city: string
-  eventName: string
-  eventType: string
-  customEventType: string
-  elevatorPitch: string
-  eventFrequency: string
-  eventDate: string
-  location: string
   attendeeCount: string
   audienceDescription: string
   audienceDemographics: string[]
@@ -58,13 +49,6 @@ const initialFormData: OrganizerFormData = {
   address: '',
   postalCode: '',
   city: '',
-  eventName: '',
-  eventType: '',
-  customEventType: '',
-  elevatorPitch: '',
-  eventFrequency: '',
-  eventDate: '',
-  location: '',
   attendeeCount: '',
   audienceDescription: '',
   audienceDemographics: [],
@@ -118,13 +102,6 @@ export function useOrganizerForm() {
             address: organizer.address || '',
             postalCode: organizer.postalCode || '',
             city: organizer.city || '',
-            eventName: organizer.eventName || '',
-            eventType: organizer.eventType || '',
-            customEventType: organizer.customEventType || '',
-            elevatorPitch: organizer.elevatorPitch || '',
-            eventFrequency: organizer.eventFrequency || '',
-            eventDate: organizer.eventDate || '',
-            location: organizer.location || '',
             attendeeCount: organizer.attendeeCount || '',
             audienceDescription: organizer.audienceDescription || '',
             audienceDemographics: organizer.audienceDemographics || [],
@@ -210,103 +187,19 @@ export function useOrganizerForm() {
           newErrors.confirmPassword = 'Passwords do not match'
       }
     } else if (step === 2) {
-      if (!formData.eventName.trim())
-        newErrors.eventName = 'Event name is required'
-      if (!formData.eventType) newErrors.eventType = 'Event type is required'
-      if (formData.eventType === 'other' && !formData.customEventType.trim())
-        newErrors.customEventType = 'Custom event type is required'
-      if (!formData.eventFrequency)
-        newErrors.eventFrequency = 'Event frequency is required'
-    } else if (step === 3) {
       if (!formData.attendeeCount)
         newErrors.attendeeCount = 'Attendee count is required'
       if (!formData.audienceDescription.trim())
         newErrors.audienceDescription = 'Audience description is required'
       if (formData.audienceDemographics.length === 0)
         newErrors.audienceDemographics = 'Select at least one demographic'
-    } else if (step === 4) {
+    } else if (step === 3) {
       if (formData.offeringTypes.length === 0)
         newErrors.offeringTypes = 'Select at least one offering type'
     }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }
-
-  // Helper function to create initial event from organizer form data
-  const createInitialEvent = async (organizerId: string) => {
-    // Only create event if we have event data
-    if (!formData.eventName.trim()) {
-      return
-    }
-
-    // Check if organizer already has events
-    try {
-      const existingEvents = await fetchOrganizerEvents(organizerId)
-      if (existingEvents.length > 0) {
-        // Organizer already has events, don't create another one
-        return
-      }
-    } catch (error) {
-      console.error('Error checking existing events:', error)
-      // Continue with event creation even if check fails
-    }
-
-    // Determine the event type display name
-    const eventTypeDisplay =
-      formData.eventType === 'other'
-        ? formData.customEventType
-        : formData.eventType
-
-    // Map frequency to recurring concept
-    const isRecurring = formData.eventFrequency !== 'one-time'
-    const recurringConcept = {
-      isRecurring,
-      frequency: isRecurring ? formData.eventFrequency : undefined
-    }
-
-    // Create event dates array
-    const eventDates = formData.eventDate
-      ? [{ date: formData.eventDate, description: eventTypeDisplay }]
-      : []
-
-    // Map attendee count to physical reach
-    const physicalReach = {
-      signups: '',
-      attendees: formData.attendeeCount || '',
-      waitlist: ''
-    }
-
-    // Create the event input
-    const eventInput: CreateEventInput = {
-      eventName: formData.eventName,
-      slogan: formData.elevatorPitch || `${eventTypeDisplay} in ${formData.city}`,
-      essence:
-        formData.elevatorPitch ||
-        `${formData.eventName} is a ${eventTypeDisplay.toLowerCase()} event${formData.location ? ` held at ${formData.location}` : ''}.`,
-      concept: `${eventTypeDisplay} event bringing together the community${formData.location ? ` at ${formData.location}` : ''}.`,
-      setup: formData.location || 'To be determined',
-      positioning: '',
-      eventDates,
-      recurringConcept,
-      corePillars: eventTypeDisplay ? [eventTypeDisplay] : [],
-      audienceDescription: formData.audienceDescription || '',
-      physicalReach,
-      digitalChannels: [],
-      pastEvents: { totalEventsHosted: '' },
-      eventMedia: { images: [], description: '' },
-      partnerships: [],
-      applicationLink: '',
-      totalEventBudget: ''
-    }
-
-    try {
-      await createEvent(organizerId, eventInput, 'draft')
-      console.log('Initial event created successfully')
-    } catch (error) {
-      console.error('Failed to create initial event:', error)
-      // Don't throw error - we don't want to block registration if event creation fails
-    }
   }
 
   const handleSubmit = async () => {
@@ -335,13 +228,15 @@ export function useOrganizerForm() {
         address: formData.address,
         postalCode: formData.postalCode,
         city: formData.city,
-        eventName: formData.eventName,
-        eventType: formData.eventType,
-        customEventType: formData.customEventType,
-        elevatorPitch: formData.elevatorPitch,
-        eventFrequency: formData.eventFrequency,
-        eventDate: formData.eventDate,
-        location: formData.location,
+        // Event fields removed from registration - set as empty
+        eventName: '',
+        eventType: '',
+        customEventType: '',
+        elevatorPitch: '',
+        eventFrequency: '',
+        eventDate: '',
+        location: '',
+        // Audience and offering fields
         attendeeCount: formData.attendeeCount,
         audienceDescription: formData.audienceDescription,
         audienceDemographics: formData.audienceDemographics,
@@ -371,12 +266,7 @@ export function useOrganizerForm() {
           }
         }
 
-        const createdOrganizer = await saveOrganizer(organizerPayload)
-        setExistingOrganizerId(createdOrganizer.id)
-
-        // Create initial event from form data
-        await createInitialEvent(createdOrganizer.id)
-
+        await saveOrganizer(organizerPayload)
         navigate('/dashboard/organizer')
         return {
           success: true,
@@ -384,11 +274,7 @@ export function useOrganizerForm() {
         }
       }
 
-      const savedOrganizer = await saveOrganizer(organizerPayload)
-
-      // Create initial event from form data
-      await createInitialEvent(savedOrganizer.id)
-
+      await saveOrganizer(organizerPayload)
       navigate('/dashboard/organizer')
       return {
         success: true,
