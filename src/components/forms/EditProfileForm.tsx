@@ -46,10 +46,18 @@ export function EditProfileForm() {
     const fileExt = file.name.split('.').pop() || 'png'
     const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
 
+    console.log('Uploading original file:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      path: filePath
+    })
+
     const { error: uploadError } = await supabase.storage
       .from('brand-logos')
       .upload(filePath, file, {
-        upsert: true
+        upsert: true,
+        contentType: file.type
       })
 
     if (uploadError) {
