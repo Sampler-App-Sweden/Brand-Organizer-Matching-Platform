@@ -5,9 +5,10 @@ import { useOrganizerEvents } from '../../hooks/useOrganizerEvents'
 
 interface OrganizerEventsSummaryProps {
   organizerId: string
+  hasProfileEvent?: boolean
 }
 
-export function OrganizerEventsSummary({ organizerId }: OrganizerEventsSummaryProps) {
+export function OrganizerEventsSummary({ organizerId, hasProfileEvent = false }: OrganizerEventsSummaryProps) {
   const { events, loading } = useOrganizerEvents(organizerId)
 
   if (loading) {
@@ -104,7 +105,7 @@ export function OrganizerEventsSummary({ organizerId }: OrganizerEventsSummaryPr
   }
 
   // Show link to create events if none exist
-  const hasAnyEvents = events.length > 0
+  const hasAnyEvents = events.length > 0 || hasProfileEvent
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300">

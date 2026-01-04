@@ -10,8 +10,8 @@ import { Button, LoadingSpinner } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { useOrganizerDashboard } from '../../hooks/useOrganizerDashboard'
 import { getBrandById, getBrandsByIds } from '../../services/dataService'
-import { getConnectionStats, getMutualConnections, type ConnectionStats, type Connection } from '../../services/connectionService'
-import { Brand, Match } from '../../types'
+import { getConnectionStats, getMutualConnections } from '../../services/connectionService'
+import { Brand, Match, ConnectionStats, Connection } from '../../types'
 
 export function OrganizerDashboard() {
   const { currentUser } = useAuth()
@@ -189,14 +189,12 @@ export function OrganizerDashboard() {
         <OrganizerSponsorshipSummary organizerId={organizer.id} />
       </div>
 
-      {/* Events Summary - only show if organizer doesn't have event data in profile */}
-      {!organizer.eventName && (
-        <div className='mb-6'>
-          <OrganizerEventsSummary organizerId={organizer.id} />
-        </div>
-      )}
+      {/* Events Summary */}
+      <div className='mb-6'>
+        <OrganizerEventsSummary organizerId={organizer.id} hasProfileEvent={!!organizer.eventName} />
+      </div>
 
-      {/* Event details - only show if organizer has event data in profile */}
+      {/* Event details */}
       {organizer.eventName && (
         <div className='mb-6'>
           <div className='flex justify-between items-center mb-4'>
@@ -269,7 +267,7 @@ export function OrganizerDashboard() {
             </p>
           </div>
         </div>
-        </div>
+      </div>
       )}
     </DashboardLayout>
   )
