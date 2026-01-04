@@ -47,11 +47,18 @@ type OrganizerRow = {
   address: string | null
   postal_code: string | null
   city: string | null
-  event_name: string | null
+  created_at: string | null
+}
+
+type EventRow = {
+  id: string
+  organizer_id: string
+  name: string | null
   event_type: string | null
+  custom_event_type: string | null
   elevator_pitch: string | null
-  event_frequency: string | null
-  event_date: string | null
+  frequency: string | null
+  start_date: string | null
   location: string | null
   attendee_count: string | null
   audience_description: string | null
@@ -70,6 +77,7 @@ type OrganizerRow = {
   additional_info: string | null
   media_files: string[] | null
   created_at: string | null
+  updated_at: string | null
 }
 
 type MatchRow = {
@@ -130,42 +138,47 @@ const mapBrandRowToBrand = (row: BrandRow): Brand => ({
   createdAt: row.created_at ? new Date(row.created_at) : new Date()
 })
 
-const mapOrganizerRowToOrganizer = (row: OrganizerRow): Organizer => ({
-  id: row.id,
-  userId: row.user_id ?? '',
-  organizerName: row.organizer_name ?? '',
-  contactName: row.contact_name ?? '',
-  email: row.email ?? '',
-  phone: row.phone ?? '',
-  website: row.website ?? '',
-  address: row.address ?? '',
-  postalCode: row.postal_code ?? '',
-  city: row.city ?? '',
-  eventName: row.event_name ?? '',
-  eventType: row.event_type ?? '',
-  elevatorPitch: row.elevator_pitch ?? '',
-  eventFrequency: row.event_frequency ?? '',
-  eventDate: row.event_date ?? '',
-  location: row.location ?? '',
-  attendeeCount: row.attendee_count ?? '',
-  audienceDescription: row.audience_description ?? '',
-  audienceDemographics: row.audience_demographics ?? [],
-  sponsorshipNeeds: row.sponsorship_needs ?? '',
+const mapOrganizerRowToOrganizer = (
+  organizerRow: OrganizerRow,
+  eventRow: EventRow | null = null
+): Organizer => ({
+  id: organizerRow.id,
+  userId: organizerRow.user_id ?? '',
+  organizerName: organizerRow.organizer_name ?? '',
+  contactName: organizerRow.contact_name ?? '',
+  email: organizerRow.email ?? '',
+  phone: organizerRow.phone ?? '',
+  website: organizerRow.website ?? '',
+  address: organizerRow.address ?? '',
+  postalCode: organizerRow.postal_code ?? '',
+  city: organizerRow.city ?? '',
+  eventName: eventRow?.name ?? '',
+  eventType: eventRow?.event_type ?? '',
+  customEventType: eventRow?.custom_event_type ?? '',
+  elevatorPitch: eventRow?.elevator_pitch ?? '',
+  eventFrequency: eventRow?.frequency ?? '',
+  eventDate: eventRow?.start_date ?? '',
+  location: eventRow?.location ?? '',
+  attendeeCount: eventRow?.attendee_count ?? '',
+  audienceDescription: eventRow?.audience_description ?? '',
+  audienceDemographics: eventRow?.audience_demographics ?? [],
+  sponsorshipNeeds: eventRow?.sponsorship_needs ?? '',
   seekingFinancialSponsorship: booleanToYesNo(
-    row.seeking_financial_sponsorship
+    eventRow?.seeking_financial_sponsorship
   ),
-  financialSponsorshipAmount: row.financial_sponsorship_amount ?? '',
-  financialSponsorshipOffers: row.financial_sponsorship_offers ?? '',
-  offeringTypes: row.offering_types ?? [],
-  brandVisibility: row.brand_visibility ?? '',
-  contentCreation: row.content_creation ?? '',
-  leadGeneration: row.lead_generation ?? '',
-  productFeedback: row.product_feedback ?? '',
-  bonusValue: row.bonus_value ?? [],
-  bonusValueDetails: row.bonus_value_details ?? '',
-  additionalInfo: row.additional_info ?? '',
-  mediaFiles: row.media_files ?? [],
-  createdAt: row.created_at ? new Date(row.created_at) : new Date()
+  financialSponsorshipAmount: eventRow?.financial_sponsorship_amount ?? '',
+  financialSponsorshipOffers: eventRow?.financial_sponsorship_offers ?? '',
+  offeringTypes: eventRow?.offering_types ?? [],
+  brandVisibility: eventRow?.brand_visibility ?? '',
+  contentCreation: eventRow?.content_creation ?? '',
+  leadGeneration: eventRow?.lead_generation ?? '',
+  productFeedback: eventRow?.product_feedback ?? '',
+  bonusValue: eventRow?.bonus_value ?? [],
+  bonusValueDetails: eventRow?.bonus_value_details ?? '',
+  additionalInfo: eventRow?.additional_info ?? '',
+  mediaFiles: eventRow?.media_files ?? [],
+  createdAt: organizerRow.created_at ? new Date(organizerRow.created_at) : new Date(),
+  productSampling: '' // This field exists in Organizer type but not in database
 })
 
 const mapMatchRowToMatch = (row: MatchRow): Match => ({
@@ -224,12 +237,20 @@ const buildOrganizerPayload = (
   website: organizerData.website,
   address: organizerData.address,
   postal_code: organizerData.postalCode,
-  city: organizerData.city,
-  event_name: organizerData.eventName,
+  city: organizerData.city
+})
+
+const buildEventPayload = (
+  organizerId: string,
+  organizerData: Omit<Organizer, 'id' | 'createdAt'>
+) => ({
+  organizer_id: organizerId,
+  name: organizerData.eventName,
   event_type: organizerData.eventType,
+  custom_event_type: organizerData.customEventType,
   elevator_pitch: organizerData.elevatorPitch,
-  event_frequency: organizerData.eventFrequency,
-  event_date: organizerData.eventDate,
+  frequency: organizerData.eventFrequency,
+  start_date: organizerData.eventDate || null,
   location: organizerData.location,
   attendee_count: organizerData.attendeeCount,
   audience_description: organizerData.audienceDescription,
@@ -251,13 +272,42 @@ const buildOrganizerPayload = (
   media_files: organizerData.mediaFiles
 })
 
+// Helper to fetch the primary event for an organizer (most recent)
+const fetchPrimaryEvent = async (organizerId: string): Promise<EventRow | null> => {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*')
+    .eq('organizer_id', organizerId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error && error.code !== 'PGRST116') {
+    console.error('Failed to fetch event for organizer:', error)
+    return null
+  }
+
+  return data as EventRow | null
+}
+
 const fetchAllOrganizers = async (): Promise<Organizer[]> => {
   const { data, error } = await supabase.from('organizers').select('*')
   if (error) {
     console.error('Failed to fetch organizers for matching:', error)
     return []
   }
-  return (data as OrganizerRow[] | null)?.map(mapOrganizerRowToOrganizer) ?? []
+
+  const organizers = data as OrganizerRow[] | null
+  if (!organizers) return []
+
+  // Fetch events for all organizers
+  const result: Organizer[] = []
+  for (const org of organizers) {
+    const event = await fetchPrimaryEvent(org.id)
+    result.push(mapOrganizerRowToOrganizer(org, event))
+  }
+
+  return result
 }
 
 const fetchAllBrands = async (): Promise<Brand[]> => {
@@ -339,19 +389,43 @@ export const saveBrand = async (
 export const saveOrganizer = async (
   organizerData: Omit<Organizer, 'id' | 'createdAt'>
 ): Promise<Organizer> => {
-  const { data, error } = await supabase
+  // First, insert organizer
+  const { data: organizerRow, error: organizerError } = await supabase
     .from('organizers')
     .insert([buildOrganizerPayload(organizerData)])
     .select('*')
     .single()
 
-  if (error || !data) {
+  if (organizerError || !organizerRow) {
     throw new Error(
-      `Failed to save organizer: ${error?.message ?? 'Unknown error'}`
+      `Failed to save organizer: ${organizerError?.message ?? 'Unknown error'}`
     )
   }
 
-  const newOrganizer = mapOrganizerRowToOrganizer(data as OrganizerRow)
+  const organizerId = (organizerRow as OrganizerRow).id
+
+  // Then, insert event if event data exists
+  let eventRow: EventRow | null = null
+  if (organizerData.eventName || organizerData.eventType) {
+    const { data: newEvent, error: eventError } = await supabase
+      .from('events')
+      .insert([buildEventPayload(organizerId, organizerData)])
+      .select('*')
+      .single()
+
+    if (eventError) {
+      // If event creation fails, we should probably delete the organizer
+      // But for now, just log the error
+      console.error('Failed to save event for organizer:', eventError)
+    } else {
+      eventRow = newEvent as EventRow
+    }
+  }
+
+  const newOrganizer = mapOrganizerRowToOrganizer(
+    organizerRow as OrganizerRow,
+    eventRow
+  )
 
   // Generate matches using Edge Function (server-side)
   try {
@@ -411,20 +485,59 @@ export const updateOrganizer = async (
   organizerId: string,
   organizerData: Omit<Organizer, 'id' | 'createdAt'>
 ): Promise<Organizer> => {
-  const { data, error } = await supabase
+  // Update organizer record
+  const { data: organizerRow, error: organizerError } = await supabase
     .from('organizers')
     .update(buildOrganizerPayload(organizerData))
     .eq('id', organizerId)
     .select('*')
     .single()
 
-  if (error || !data) {
+  if (organizerError || !organizerRow) {
     throw new Error(
-      `Failed to update organizer: ${error?.message ?? 'Unknown error'}`
+      `Failed to update organizer: ${organizerError?.message ?? 'Unknown error'}`
     )
   }
 
-  const updatedOrganizer = mapOrganizerRowToOrganizer(data as OrganizerRow)
+  // Update or create event record
+  let eventRow: EventRow | null = null
+
+  // Check if event already exists
+  const existingEvent = await fetchPrimaryEvent(organizerId)
+
+  if (existingEvent) {
+    // Update existing event
+    const { data: updatedEvent, error: eventError } = await supabase
+      .from('events')
+      .update(buildEventPayload(organizerId, organizerData))
+      .eq('id', existingEvent.id)
+      .select('*')
+      .single()
+
+    if (eventError) {
+      console.error('Failed to update event for organizer:', eventError)
+    } else {
+      eventRow = updatedEvent as EventRow
+    }
+  } else if (organizerData.eventName || organizerData.eventType) {
+    // Create new event if it doesn't exist
+    const { data: newEvent, error: eventError } = await supabase
+      .from('events')
+      .insert([buildEventPayload(organizerId, organizerData)])
+      .select('*')
+      .single()
+
+    if (eventError) {
+      console.error('Failed to create event for organizer:', eventError)
+    } else {
+      eventRow = newEvent as EventRow
+    }
+  }
+
+  const updatedOrganizer = mapOrganizerRowToOrganizer(
+    organizerRow as OrganizerRow,
+    eventRow
+  )
 
   // Notify users who saved this profile (non-blocking)
   if (updatedOrganizer.userId) {
@@ -471,7 +584,12 @@ export const getOrganizerByUserId = async (
     throw new Error(`Failed to load organizer: ${error.message}`)
   }
 
-  return data ? mapOrganizerRowToOrganizer(data as OrganizerRow) : null
+  if (!data) return null
+
+  const organizerRow = data as OrganizerRow
+  const eventRow = await fetchPrimaryEvent(organizerRow.id)
+
+  return mapOrganizerRowToOrganizer(organizerRow, eventRow)
 }
 
 // Get matches for a brand
@@ -568,7 +686,12 @@ export const getOrganizerById = async (
     throw new Error(`Failed to load organizer: ${error.message}`)
   }
 
-  return data ? mapOrganizerRowToOrganizer(data as OrganizerRow) : null
+  if (!data) return null
+
+  const organizerRow = data as OrganizerRow
+  const eventRow = await fetchPrimaryEvent(organizerRow.id)
+
+  return mapOrganizerRowToOrganizer(organizerRow, eventRow)
 }
 
 export const getOrganizersByIds = async (
@@ -585,7 +708,17 @@ export const getOrganizersByIds = async (
     throw new Error(`Failed to load organizers: ${error.message}`)
   }
 
-  return (data as OrganizerRow[] | null)?.map(mapOrganizerRowToOrganizer) ?? []
+  const organizers = data as OrganizerRow[] | null
+  if (!organizers) return []
+
+  // Fetch events for all organizers
+  const result: Organizer[] = []
+  for (const org of organizers) {
+    const event = await fetchPrimaryEvent(org.id)
+    result.push(mapOrganizerRowToOrganizer(org, event))
+  }
+
+  return result
 }
 
 export const getBrandsByIds = async (brandIds: string[]): Promise<Brand[]> => {
@@ -688,7 +821,17 @@ export const getAllOrganizers = async (): Promise<Organizer[]> => {
       return []
     }
 
-    return (data as OrganizerRow[] | null)?.map(mapOrganizerRowToOrganizer) ?? []
+    const organizers = data as OrganizerRow[] | null
+    if (!organizers) return []
+
+    // Fetch events for all organizers
+    const result: Organizer[] = []
+    for (const org of organizers) {
+      const event = await fetchPrimaryEvent(org.id)
+      result.push(mapOrganizerRowToOrganizer(org, event))
+    }
+
+    return result
   } catch (error) {
     console.error('Error fetching all organizers:', error)
     return []

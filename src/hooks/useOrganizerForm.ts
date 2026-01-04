@@ -21,6 +21,7 @@ export interface OrganizerFormData {
   city: string
   eventName: string
   eventType: string
+  customEventType: string
   elevatorPitch: string
   eventFrequency: string
   eventDate: string
@@ -57,6 +58,7 @@ const initialFormData: OrganizerFormData = {
   city: '',
   eventName: '',
   eventType: '',
+  customEventType: '',
   elevatorPitch: '',
   eventFrequency: '',
   eventDate: '',
@@ -116,6 +118,7 @@ export function useOrganizerForm() {
             city: organizer.city || '',
             eventName: organizer.eventName || '',
             eventType: organizer.eventType || '',
+            customEventType: organizer.customEventType || '',
             elevatorPitch: organizer.elevatorPitch || '',
             eventFrequency: organizer.eventFrequency || '',
             eventDate: organizer.eventDate || '',
@@ -208,6 +211,8 @@ export function useOrganizerForm() {
       if (!formData.eventName.trim())
         newErrors.eventName = 'Event name is required'
       if (!formData.eventType) newErrors.eventType = 'Event type is required'
+      if (formData.eventType === 'other' && !formData.customEventType.trim())
+        newErrors.customEventType = 'Custom event type is required'
       if (!formData.eventFrequency)
         newErrors.eventFrequency = 'Event frequency is required'
     } else if (step === 3) {
@@ -254,6 +259,7 @@ export function useOrganizerForm() {
         city: formData.city,
         eventName: formData.eventName,
         eventType: formData.eventType,
+        customEventType: formData.customEventType,
         elevatorPitch: formData.elevatorPitch,
         eventFrequency: formData.eventFrequency,
         eventDate: formData.eventDate,

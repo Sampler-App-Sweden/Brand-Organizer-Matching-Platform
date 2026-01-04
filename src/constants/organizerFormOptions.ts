@@ -16,7 +16,8 @@ export const eventTypeOptions = [
   { value: 'concert', label: 'Concert/Performance' },
   { value: 'sports', label: 'Sports Event' },
   { value: 'networking', label: 'Networking Event' },
-  { value: 'community', label: 'Community Event' }
+  { value: 'community', label: 'Community Event' },
+  { value: 'other', label: 'Other' }
 ]
 
 export const eventFrequencyOptions = [

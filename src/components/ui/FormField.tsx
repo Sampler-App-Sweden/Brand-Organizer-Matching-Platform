@@ -91,7 +91,7 @@ export function FormField({
           required={required}
           disabled={disabled}
         >
-          <option value=''>Välj ett alternativ</option>
+          <option value=''>Select an option</option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

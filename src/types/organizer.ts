@@ -11,6 +11,7 @@ export interface Organizer {
   city: string
   eventName: string
   eventType: string
+  customEventType: string
   elevatorPitch: string
   eventFrequency: string
   eventDate: string

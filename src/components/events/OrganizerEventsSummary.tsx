@@ -104,6 +104,8 @@ export function OrganizerEventsSummary({ organizerId }: OrganizerEventsSummaryPr
   }
 
   // Show link to create events if none exist
+  const hasAnyEvents = events.length > 0
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-6 border-2 border-dashed border-gray-300">
       <div className="text-center">
@@ -117,7 +119,7 @@ export function OrganizerEventsSummary({ organizerId }: OrganizerEventsSummaryPr
         <div className="mt-4">
           <Link to="/dashboard/account?tab=events">
             <Button variant="primary">
-              Create Your First Event
+              {hasAnyEvents ? 'Create Event' : 'Create Your First Event'}
             </Button>
           </Link>
         </div>

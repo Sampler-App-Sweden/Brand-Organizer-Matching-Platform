@@ -189,22 +189,25 @@ export function OrganizerDashboard() {
         <OrganizerSponsorshipSummary organizerId={organizer.id} />
       </div>
 
-      {/* Events Summary */}
-      <div className='mb-6'>
-        <OrganizerEventsSummary organizerId={organizer.id} />
-      </div>
-
-      {/* Event details */}
-      <div className='mb-6'>
-        <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-xl font-bold text-gray-900'>Event Details</h2>
-          <Link
-            to='/organizer'
-            className='text-sm text-indigo-600 hover:text-indigo-800'
-          >
-            Edit event
-          </Link>
+      {/* Events Summary - only show if organizer doesn't have event data in profile */}
+      {!organizer.eventName && (
+        <div className='mb-6'>
+          <OrganizerEventsSummary organizerId={organizer.id} />
         </div>
+      )}
+
+      {/* Event details - only show if organizer has event data in profile */}
+      {organizer.eventName && (
+        <div className='mb-6'>
+          <div className='flex justify-between items-center mb-4'>
+            <h2 className='text-xl font-bold text-gray-900'>Event Details</h2>
+            <Link
+              to='/organizer'
+              className='text-sm text-indigo-600 hover:text-indigo-800'
+            >
+              Edit event
+            </Link>
+          </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           <div className='bg-white rounded-lg shadow-sm p-4'>
             <h3 className='text-lg font-medium text-gray-900 mb-2'>
@@ -266,7 +269,8 @@ export function OrganizerDashboard() {
             </p>
           </div>
         </div>
-      </div>
+        </div>
+      )}
     </DashboardLayout>
   )
 }

@@ -5,6 +5,7 @@ import {
   eventTypeOptions
 } from '../../../constants/organizerFormOptions'
 import { OrganizerFormData } from '../../../hooks/useOrganizerForm'
+import { toTitleCase } from '../../../utils/formatting'
 import { FormField } from '../../ui'
 
 interface EventStepProps {
@@ -18,6 +19,25 @@ interface EventStepProps {
 }
 
 export function EventStep({ formData, errors, onChange }: EventStepProps) {
+  const handleCustomEventTypeChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const capitalizedValue = toTitleCase(e.target.value)
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'customEventType',
+        value: capitalizedValue
+      }
+    } as React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+    onChange(syntheticEvent)
+  }
+
   return (
     <div className='space-y-6'>
       <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
@@ -44,6 +64,19 @@ export function EventStep({ formData, errors, onChange }: EventStepProps) {
         onChange={onChange}
         error={errors.eventType}
       />
+
+      {formData.eventType === 'other' && (
+        <FormField
+          label='Custom Event Type'
+          id='customEventType'
+          required
+          placeholder='Enter your event type (e.g., fashion show, charity gala)'
+          value={formData.customEventType}
+          onChange={handleCustomEventTypeChange}
+          error={errors.customEventType}
+          helpText='The first letter of each word will be capitalized automatically'
+        />
+      )}
 
       <FormField
         label='Elevator Pitch'
