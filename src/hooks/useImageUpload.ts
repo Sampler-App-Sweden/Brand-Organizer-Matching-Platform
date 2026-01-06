@@ -34,28 +34,30 @@ export function useImageUpload({ maxImages, onError }: UseImageUploadOptions) {
     const newImages: ProductImage[] = []
 
     try {
-      // Convert all images to WebP
+      // Upload original files without WebP conversion (temporary fix for Supabase issue)
       for (let index = 0; index < fileArray.length; index++) {
         const file = fileArray[index]
         try {
           // Ensure unique ID by using baseTimestamp + index + random string
           const uniqueId = `img-${baseTimestamp}-${index}-${Math.random().toString(36).substring(2, 15)}`
-          const { dataUrl, blob } = await convertToWebP(file)
 
-          // Create a new File object from the blob with .webp extension
-          const webpFile = new File([blob], file.name.replace(/\.[^.]+$/, '.webp'), {
-            type: 'image/webp'
+          // Create data URL for preview
+          const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result as string)
+            reader.onerror = reject
+            reader.readAsDataURL(file)
           })
 
           const newImage: ProductImage = {
             id: uniqueId,
             url: dataUrl,
-            file: webpFile
+            file: file // Use original file instead of WebP
           }
 
           newImages.push(newImage)
         } catch (error) {
-          console.error('Failed to convert image to WebP:', error)
+          console.error('Failed to process image:', error)
           const errorMsg = `Failed to process image: ${file.name}`
           if (onError) {
             onError(errorMsg)

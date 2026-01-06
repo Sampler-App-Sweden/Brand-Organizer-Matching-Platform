@@ -14,6 +14,7 @@ interface User {
   email: string
   type: 'brand' | 'organizer' | 'admin'
   name: string
+  logoUrl?: string
 }
 interface AuthContextType {
   currentUser: User | null
@@ -39,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Fetch updated profile data from Supabase
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('name, role')
+          .select('name, role, logo_url')
           .eq('id', user.id)
           .single()
 
@@ -53,7 +54,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: user.email || '',
           type:
             profile?.role?.toLowerCase() || user.user_metadata?.type || 'brand',
-          name: profile?.name || user.user_metadata?.name || ''
+          name: profile?.name || user.user_metadata?.name || '',
+          logoUrl: profile?.logo_url || undefined
         }
 
         console.log('Refreshing user with updated name:', updatedUser.name)
@@ -75,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Fetch profile data from Supabase
             const { data: profile } = await supabase
               .from('profiles')
-              .select('name, role')
+              .select('name, role, logo_url')
               .eq('id', user.id)
               .single()
 
@@ -86,7 +88,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 profile?.role?.toLowerCase() ||
                 user.user_metadata?.type ||
                 'brand',
-              name: profile?.name || user.user_metadata?.name || ''
+              name: profile?.name || user.user_metadata?.name || '',
+              logoUrl: profile?.logo_url || undefined
             })
           }
         }

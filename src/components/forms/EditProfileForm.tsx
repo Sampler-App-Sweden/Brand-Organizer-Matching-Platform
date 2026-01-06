@@ -55,10 +55,7 @@ export function EditProfileForm() {
 
     const { error: uploadError } = await supabase.storage
       .from('brand-logos')
-      .upload(filePath, file, {
-        upsert: true,
-        contentType: file.type
-      })
+      .upload(filePath, file)
 
     if (uploadError) {
       console.error('Upload error:', uploadError)
