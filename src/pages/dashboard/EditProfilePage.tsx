@@ -184,11 +184,20 @@ export function EditProfilePage() {
     const fileExt = optimizedFile.name.split('.').pop() || 'webp'
     const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
 
+    console.log('Uploading file:', {
+      name: optimizedFile.name,
+      type: optimizedFile.type,
+      size: optimizedFile.size,
+      path: filePath
+    })
+
+    // Convert File to ArrayBuffer to ensure clean upload
+    const arrayBuffer = await optimizedFile.arrayBuffer()
+
     const { error: uploadError } = await supabase.storage
       .from('brand-logos')
-      .upload(filePath, optimizedFile, {
-        upsert: true
-        // Let Supabase auto-detect content type from file extension
+      .upload(filePath, arrayBuffer, {
+        contentType: optimizedFile.type
       })
 
     if (uploadError) {

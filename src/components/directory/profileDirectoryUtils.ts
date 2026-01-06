@@ -43,16 +43,13 @@ export function isProfileComplete(profile: ProfileOverview): boolean {
     return hasSponsorshipTypes && hasBudget && hasAudienceTags
   } else if (profile.role === 'Organizer') {
     // For organizers, check:
-    // - Has event types
-    // - Has audience tags (demographics)
-    const hasEventTypes =
-      !!whatTheySeek.eventTypes &&
-      whatTheySeek.eventTypes.length > 0
+    // - Has audience tags (demographics) - REQUIRED
+    // - Event types are optional (will show if added to profile later)
     const hasAudienceTags =
       !!whatTheySeek.audienceTags &&
       whatTheySeek.audienceTags.length > 0
 
-    return hasEventTypes && hasAudienceTags
+    return hasAudienceTags
   }
 
   return false

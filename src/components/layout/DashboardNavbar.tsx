@@ -80,11 +80,18 @@ export function DashboardNavbar() {
                 className='flex items-center space-x-2 text-gray-700 hover:text-indigo-600 transition-colors'
               >
                 {currentUser?.logoUrl ? (
-                  <img
-                    src={currentUser.logoUrl}
-                    alt={currentUser.name}
-                    className='h-8 w-8 rounded-full object-cover border border-gray-200'
-                  />
+                  <>
+                    {console.log('Logo URL:', currentUser.logoUrl)}
+                    <img
+                      src={currentUser.logoUrl}
+                      alt={currentUser.name}
+                      className='h-8 w-8 rounded-full object-cover border border-gray-200'
+                      onError={(e) => {
+                        console.error('Failed to load logo:', currentUser.logoUrl)
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                  </>
                 ) : (
                   <div className='bg-blue-100 text-indigo-800 rounded-full h-8 w-8 flex items-center justify-center font-semibold'>
                     {currentUser?.name?.charAt(0).toUpperCase() || '?'}

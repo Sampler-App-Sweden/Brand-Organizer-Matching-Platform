@@ -53,9 +53,14 @@ export function EditProfileForm() {
       path: filePath
     })
 
+    // Convert File to ArrayBuffer to ensure clean upload
+    const arrayBuffer = await file.arrayBuffer()
+
     const { error: uploadError } = await supabase.storage
       .from('brand-logos')
-      .upload(filePath, file)
+      .upload(filePath, arrayBuffer, {
+        contentType: file.type
+      })
 
     if (uploadError) {
       console.error('Upload error:', uploadError)
