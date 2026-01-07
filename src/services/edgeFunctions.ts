@@ -179,7 +179,6 @@ export const uploadFile = async (
       })
 
       if (result.wasOptimized) {
-        console.log(`Image optimized: ${result.originalSize} → ${result.optimizedSize} bytes (${result.savings.toFixed(1)}% saved)`)
         fileToUpload = result.file
 
         // Notify caller of optimization results

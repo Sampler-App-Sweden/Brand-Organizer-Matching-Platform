@@ -91,14 +91,6 @@ export async function optimizeImage(
       lastModified: Date.now()
     })
 
-    // Verify the file was created correctly
-    console.log('Created optimized file:', {
-      name: optimizedFile.name,
-      type: optimizedFile.type,
-      size: optimizedFile.size,
-      blobType: blob.type
-    })
-
     const savings = ((file.size - optimizedFile.size) / file.size) * 100
 
     return {

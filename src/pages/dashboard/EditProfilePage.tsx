@@ -10,7 +10,7 @@ import {
   getOrganizerByUserId
 } from '../../services/dataService'
 import { supabase } from '../../services/supabaseClient'
-import { validateAndOptimizeImage, getOptimizationMessage } from '../../utils/imageValidator'
+import { uploadFile } from '../../services/edgeFunctions'
 
 import type { Brand, Organizer } from '../../types'
 import type { ProductImage } from '../../types/sponsorship'
@@ -166,46 +166,19 @@ export function EditProfilePage() {
 
     const file = currentImage.file
 
-    // Validate and optimize the image
-    const validationResult = await validateAndOptimizeImage(file, 'brand-logos')
-
-    if (!validationResult.valid) {
-      throw new Error(validationResult.error || 'Invalid image file')
-    }
-
-    // Show optimization message if image was optimized
-    const optimizationMsg = getOptimizationMessage(validationResult)
-    if (optimizationMsg) {
-      showToast(optimizationMsg, 'success')
-    }
-
-    // Use the optimized file for upload
-    const optimizedFile = validationResult.file!
-    const fileExt = optimizedFile.name.split('.').pop() || 'webp'
-    const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
-
-    console.log('Uploading file:', {
-      name: optimizedFile.name,
-      type: optimizedFile.type,
-      size: optimizedFile.size,
-      path: filePath
-    })
-
-    // Convert File to ArrayBuffer to ensure clean upload
-    const arrayBuffer = await optimizedFile.arrayBuffer()
-
-    const { error: uploadError } = await supabase.storage
-      .from('brand-logos')
-      .upload(filePath, arrayBuffer, {
-        contentType: optimizedFile.type
+    try {
+      // Use edge function for secure upload with optimization
+      const publicUrl = await uploadFile(file, 'brand-logos', {
+        onOptimizationComplete: (result) => {
+          const optimizationMsg = `Image optimized: ${(result.originalSize / 1024).toFixed(1)}KB → ${(result.optimizedSize / 1024).toFixed(1)}KB (${result.savings.toFixed(1)}% saved)`
+          showToast(optimizationMsg, 'success')
+        }
       })
-
-    if (uploadError) {
-      throw new Error(`Failed to upload logo: ${uploadError.message}`)
+      return publicUrl
+    } catch (error) {
+      console.error('Upload error:', error)
+      throw new Error(`Failed to upload logo: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
-
-    const { data } = supabase.storage.from('brand-logos').getPublicUrl(filePath)
-    return data.publicUrl
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

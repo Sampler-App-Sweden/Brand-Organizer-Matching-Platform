@@ -41,34 +41,14 @@ export function EditProfileForm() {
 
     const file = currentImage.file
 
-    // Simple direct upload without edge function
-    // Upload the original file directly to storage
-    const fileExt = file.name.split('.').pop() || 'png'
-    const filePath = `${currentUser.id}/${Date.now()}.${fileExt}`
-
-    console.log('Uploading original file:', {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      path: filePath
-    })
-
-    // Convert File to ArrayBuffer to ensure clean upload
-    const arrayBuffer = await file.arrayBuffer()
-
-    const { error: uploadError } = await supabase.storage
-      .from('brand-logos')
-      .upload(filePath, arrayBuffer, {
-        contentType: file.type
-      })
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError)
-      throw new Error(`Failed to upload logo: ${uploadError.message}`)
+    try {
+      // Use edge function for secure upload with optimization
+      const publicUrl = await uploadFile(file, 'brand-logos')
+      return publicUrl
+    } catch (error) {
+      console.error('Upload error:', error)
+      throw new Error(`Failed to upload logo: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
-
-    const { data } = supabase.storage.from('brand-logos').getPublicUrl(filePath)
-    return data.publicUrl
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
