@@ -1,5 +1,7 @@
 # Supabase Configuration
 
+project_id = "cbqoveptykptzlkahamd"
+
 [api]
 enabled = true
 port = 54321
@@ -15,18 +17,29 @@ major_version = 15
 enabled = true
 port = 54323
 
-[functions]
-# Edge Functions configuration
-enabled = true
-port = 54321
-
-# Verify JWT tokens
+[functions."upload-file"]
 verify_jwt = true
 
-# Import map for Deno runtime
-[functions.import_map]
-# You can add custom import mappings here if needed
+[functions."ai-assistant"]
+verify_jwt = true
 
-# Environment variables for local development
-# Create a .env.local file for sensitive values
-# Don't commit .env.local to git!
+[functions."generate-matches"]
+verify_jwt = true
+
+[functions."send-email"]
+verify_jwt = true
+
+[functions."admin-operations"]
+verify_jwt = true
+
+[functions."export-data"]
+verify_jwt = true
+
+[functions."get-storage-config"]
+verify_jwt = true
+
+[functions."process-payment"]
+verify_jwt = true
+
+[functions."track-analytics"]
+verify_jwt = true
