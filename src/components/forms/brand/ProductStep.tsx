@@ -1,7 +1,9 @@
 import { PackageIcon } from 'lucide-react'
-import { FormField } from '../../ui'
-import { BrandFormData } from '../../../hooks/useBrandForm'
+
 import { industryOptions } from '../../../constants/brandFormOptions'
+import { BrandFormData } from '../../../hooks/useBrandForm'
+import { formatBusinessText } from '../../../utils/formatting'
+import { FormField } from '../../ui'
 
 interface ProductStepProps {
   formData: BrandFormData
@@ -14,6 +16,22 @@ interface ProductStepProps {
 }
 
 export function ProductStep({ formData, errors, onChange }: ProductStepProps) {
+  const handleCustomIndustryBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const formatted = formatBusinessText(e.target.value)
+    // Create a synthetic event with the formatted value
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'customIndustry',
+        value: formatted
+      }
+    } as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    onChange(syntheticEvent)
+  }
+
   return (
     <div className='space-y-6'>
       <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
@@ -31,6 +49,20 @@ export function ProductStep({ formData, errors, onChange }: ProductStepProps) {
         onChange={onChange}
         error={errors.industry}
       />
+
+      {formData.industry === 'other' && (
+        <FormField
+          label='Specify Industry'
+          id='customIndustry'
+          required
+          value={formData.customIndustry}
+          onChange={onChange}
+          onBlur={handleCustomIndustryBlur}
+          error={errors.customIndustry}
+          placeholder='e.g., Arts & Culture'
+          helpText='First letter of each word will be capitalized, "and" will be replaced with "&"'
+        />
+      )}
 
       <FormField
         label='Product Name'

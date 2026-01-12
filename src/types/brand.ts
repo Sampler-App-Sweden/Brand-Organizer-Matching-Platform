@@ -11,12 +11,14 @@ export interface Brand {
   postalCode: string
   city: string
   industry: string
+  customIndustry?: string
   productName: string
   productDescription: string
   productQuantity: string
   targetAudience: string
   ageRange: string
   sponsorshipType: string[]
+  customSponsorshipType?: string
   marketingGoals: string
   budget: string
   eventMarketingBudget: string

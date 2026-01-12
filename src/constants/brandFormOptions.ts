@@ -2,6 +2,7 @@ import {
   BadgePercentIcon,
   BriefcaseIcon,
   DollarSignIcon,
+  HelpCircleIcon,
   PackageIcon,
   UsersIcon
 } from 'lucide-react'
@@ -14,7 +15,8 @@ export const industryOptions = [
   { value: 'fashion', label: 'Fashion & Apparel' },
   { value: 'home_goods', label: 'Home Goods' },
   { value: 'sports_fitness', label: 'Sports & Fitness' },
-  { value: 'entertainment', label: 'Entertainment' }
+  { value: 'entertainment', label: 'Entertainment' },
+  { value: 'other', label: 'Other' }
 ]
 
 export const ageRangeOptions = [
@@ -65,5 +67,11 @@ export const sponsorshipTypes = [
     label: 'Brand Experience',
     description: 'Create interactive brand experiences',
     IconComponent: UsersIcon
+  },
+  {
+    id: 'other',
+    label: 'Other',
+    description: 'Other sponsorship type',
+    IconComponent: HelpCircleIcon
   }
 ]

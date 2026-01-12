@@ -25,6 +25,11 @@ interface FormFieldProps {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => void
+  onBlur?: (
+    e: React.FocusEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => void
   options?: Option[]
   helpText?: string
   className?: string
@@ -41,6 +46,7 @@ export function FormField({
   required = false,
   value,
   onChange,
+  onBlur,
   options = [],
   helpText,
   className = '',
@@ -74,6 +80,7 @@ export function FormField({
           placeholder={placeholder}
           value={value as string}
           onChange={onChange}
+          onBlur={onBlur}
           required={required}
           disabled={disabled}
         />
@@ -88,6 +95,7 @@ export function FormField({
           } ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
           value={value as string}
           onChange={onChange}
+          onBlur={onBlur}
           required={required}
           disabled={disabled}
         >
@@ -111,6 +119,7 @@ export function FormField({
           placeholder={placeholder}
           value={value as string}
           onChange={onChange}
+          onBlur={onBlur}
           required={required}
           disabled={disabled}
         />

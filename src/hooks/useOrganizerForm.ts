@@ -123,6 +123,12 @@ export function useOrganizerForm() {
             additionalInfo: organizer.additionalInfo || '',
             mediaFiles: []
           })
+        } else {
+          // No existing organizer - populate email from currentUser
+          setFormData((prev) => ({
+            ...prev,
+            email: currentUser.email || ''
+          }))
         }
       } catch (error) {
         console.error('Unexpected error:', error)

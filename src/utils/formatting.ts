@@ -44,6 +44,28 @@ export function toTitleCase(text: string): string {
 }
 
 /**
+ * Format text for industry/business names:
+ * - Capitalize first letter of each word
+ * - Convert "and" to "&"
+ * @example
+ * formatBusinessText('food and beverage') // 'Food & Beverage'
+ * formatBusinessText('health and wellness') // 'Health & Wellness'
+ */
+export function formatBusinessText(text: string): string {
+  if (!text) return text
+  return text
+    .toLowerCase()
+    .split(' ')
+    .map(word => {
+      // Convert "and" to "&"
+      if (word === 'and') return '&'
+      // Capitalize first letter
+      return word.charAt(0).toUpperCase() + word.slice(1)
+    })
+    .join(' ')
+}
+
+/**
  * Get initials from a name
  */
 export function getInitials(name: string): string {

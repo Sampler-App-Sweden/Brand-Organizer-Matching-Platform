@@ -22,12 +22,14 @@ export interface BrandFormData {
   postalCode: string
   city: string
   industry: string
+  customIndustry: string
   productName: string
   productDescription: string
   productQuantity: string
   targetAudience: string
   ageRange: string
   sponsorshipType: string[]
+  customSponsorshipType: string
   marketingGoals: string
   budget: string
   eventMarketingBudget: string
@@ -53,12 +55,14 @@ const initialFormData: BrandFormData = {
   postalCode: '',
   city: '',
   industry: '',
+  customIndustry: '',
   productName: '',
   productDescription: '',
   productQuantity: '',
   targetAudience: '',
   ageRange: '',
   sponsorshipType: [],
+  customSponsorshipType: '',
   marketingGoals: '',
   budget: '',
   eventMarketingBudget: '',
@@ -105,12 +109,14 @@ export function useBrandForm() {
             postalCode: brand.postalCode || '',
             city: brand.city || '',
             industry: brand.industry || '',
+            customIndustry: brand.customIndustry || '',
             productName: brand.productName || '',
             productDescription: brand.productDescription || '',
             productQuantity: brand.productQuantity || '',
             targetAudience: brand.targetAudience || '',
             ageRange: brand.ageRange || '',
             sponsorshipType: brand.sponsorshipType || [],
+            customSponsorshipType: brand.customSponsorshipType || '',
             marketingGoals: brand.marketingGoals || '',
             budget: brand.budget || '',
             eventMarketingBudget: brand.eventMarketingBudget || '',
@@ -123,6 +129,12 @@ export function useBrandForm() {
             testPanelDetails: brand.testPanelDetails || '',
             additionalInfo: brand.additionalInfo || ''
           })
+        } else {
+          // No existing brand - populate email from currentUser
+          setFormData((prev) => ({
+            ...prev,
+            email: currentUser.email || ''
+          }))
         }
       } catch (error) {
         console.error('Error loading brand data:', error)
@@ -189,6 +201,8 @@ export function useBrandForm() {
       }
     } else if (step === 2) {
       if (!formData.industry) newErrors.industry = 'Industry is required'
+      if (formData.industry === 'other' && !formData.customIndustry.trim())
+        newErrors.customIndustry = 'Please specify your industry'
       if (!formData.productName.trim())
         newErrors.productName = 'Product name is required'
       if (!formData.productDescription.trim())
@@ -196,6 +210,8 @@ export function useBrandForm() {
     } else if (step === 3) {
       if (formData.sponsorshipType.length === 0)
         newErrors.sponsorshipType = 'Select at least one sponsorship type'
+      if (formData.sponsorshipType.includes('other') && !formData.customSponsorshipType.trim())
+        newErrors.customSponsorshipType = 'Please specify the sponsorship type'
       if (!formData.budget) newErrors.budget = 'Budget range is required'
       if (!formData.targetAudience.trim())
         newErrors.targetAudience = 'Target audience is required'
@@ -234,12 +250,14 @@ export function useBrandForm() {
         postalCode: formData.postalCode,
         city: formData.city,
         industry: formData.industry,
+        customIndustry: formData.customIndustry,
         productName: formData.productName,
         productDescription: formData.productDescription,
         productQuantity: formData.productQuantity,
         targetAudience: formData.targetAudience,
         ageRange: formData.ageRange,
         sponsorshipType: formData.sponsorshipType,
+        customSponsorshipType: formData.customSponsorshipType,
         marketingGoals: formData.marketingGoals,
         budget: formData.budget,
         eventMarketingBudget: formData.eventMarketingBudget,

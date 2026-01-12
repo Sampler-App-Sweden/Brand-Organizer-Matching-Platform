@@ -6,6 +6,7 @@ import {
   ageRangeOptions,
   budgetOptions
 } from '../../../constants/brandFormOptions'
+import { formatBusinessText } from '../../../utils/formatting'
 
 interface SponsorshipStepProps {
   formData: BrandFormData
@@ -24,6 +25,21 @@ export function SponsorshipStep({
   onChange,
   onMultiSelect
 }: SponsorshipStepProps) {
+  const handleCustomSponsorshipBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const formatted = formatBusinessText(e.target.value)
+    const syntheticEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        name: 'customSponsorshipType',
+        value: formatted
+      }
+    } as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    onChange(syntheticEvent)
+  }
+
   return (
     <div className='space-y-6'>
       <h2 className='text-xl font-semibold text-gray-900 mb-4 flex items-center'>
@@ -57,6 +73,20 @@ export function SponsorshipStep({
           })}
         </div>
       </div>
+
+      {formData.sponsorshipType.includes('other') && (
+        <FormField
+          label='Specify Sponsorship Type'
+          id='customSponsorshipType'
+          required
+          value={formData.customSponsorshipType}
+          onChange={onChange}
+          onBlur={handleCustomSponsorshipBlur}
+          error={errors.customSponsorshipType}
+          placeholder='e.g., Event Equipment, Logistics & Transportation'
+          helpText='First letter of each word will be capitalized, "and" will be replaced with "&"'
+        />
+      )}
 
       <FormField
         label='Target Audience'

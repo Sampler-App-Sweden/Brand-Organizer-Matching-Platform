@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import { Layout } from '../components/layout'
-import { Button, StepIndicator, Toast, LoadingSpinner } from '../components/ui'
-import { useBrandForm } from '../hooks/useBrandForm'
+
 import {
   CompanyStep,
+  DetailsStep,
   ProductStep,
-  SponsorshipStep,
-  DetailsStep
+  SponsorshipStep
 } from '../components/forms/brand'
+import { Layout } from '../components/layout'
+import { Button, LoadingSpinner, StepIndicator, Toast } from '../components/ui'
+import { useBrandForm } from '../hooks/useBrandForm'
 
 export function BrandForm() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -58,8 +59,8 @@ export function BrandForm() {
   return (
     <Layout>
       <div className='min-h-screen w-full bg-white'>
-        <div className='max-w-3xl mx-auto px-4 py-12'>
-          <div className='text-center mb-8'>
+        <div className='max-w-3xl mx-auto px-0 py-6 md:px-4 md:py-12'>
+          <div className='text-center mb-6 md:mb-8 px-4 md:px-0'>
             <h1 className='text-3xl font-bold text-gray-900 mb-2'>
               {currentUser ? 'Update Brand Profile' : 'Brand Registration'}
             </h1>
@@ -79,14 +80,14 @@ export function BrandForm() {
           )}
           {!isLoading && (
             <>
-              <div className='mb-8'>
+              <div className='mb-6 md:mb-8 px-4 md:px-0'>
                 <StepIndicator
                   currentStep={currentStep}
                   totalSteps={totalSteps}
                   labels={stepLabels}
                 />
               </div>
-              <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8'>
+              <div className='bg-white md:rounded-lg md:shadow-sm md:border border-gray-200 p-4 md:p-6 lg:p-8'>
                 <form onSubmit={onSubmit}>
                   {currentStep === 1 && (
                     <CompanyStep

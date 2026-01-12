@@ -59,8 +59,8 @@ export function OrganizerForm() {
   return (
     <Layout>
       <div className='min-h-screen w-full bg-white'>
-        <div className='max-w-3xl mx-auto px-4 py-12'>
-          <div className='text-center mb-8'>
+        <div className='max-w-3xl mx-auto px-0 py-6 md:px-4 md:py-12'>
+          <div className='text-center mb-6 md:mb-8 px-4 md:px-0'>
             <h1 className='text-3xl font-bold text-gray-900 mb-2'>
               {currentUser
                 ? 'Update Organizer Profile'
@@ -82,7 +82,7 @@ export function OrganizerForm() {
             </div>
           ) : (
             <>
-              <div className='mb-8'>
+              <div className='mb-6 md:mb-8 px-4 md:px-0'>
                 <StepIndicator
                   currentStep={currentStep}
                   totalSteps={totalSteps}
@@ -90,7 +90,7 @@ export function OrganizerForm() {
                 />
               </div>
 
-              <div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8'>
+              <div className='bg-white md:rounded-lg md:shadow-sm md:border border-gray-200 p-4 md:p-6 lg:p-8'>
                 <form onSubmit={onSubmit}>
                   {currentStep === 1 && (
                     <OrganizationStep
