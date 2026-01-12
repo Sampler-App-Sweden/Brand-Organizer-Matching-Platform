@@ -1,6 +1,7 @@
 import { BarChart3Icon } from 'lucide-react'
-import { FormField, SelectionCard } from '../../ui'
+
 import { BrandFormData } from '../../../hooks/useBrandForm'
+import { FormField, SelectionCard } from '../../ui'
 
 interface DetailsStepProps {
   formData: BrandFormData
