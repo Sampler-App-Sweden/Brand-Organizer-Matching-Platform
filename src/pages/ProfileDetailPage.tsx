@@ -5,7 +5,6 @@ import {
   CalendarIcon,
   ClockIcon,
   LinkIcon,
-  MailIcon,
   MapPinIcon,
   PackageIcon,
   SparklesIcon,
@@ -238,7 +237,7 @@ export function ProfileDetailPage() {
                   <div className='space-y-3 w-full md:w-auto'>
                     {currentUser && currentUser.id !== profile.id &&
                      ((profile.role === 'Brand' && currentUser.type === 'organizer') ||
-                      (profile.role === 'Organizer' && currentUser.type === 'brand')) ? (
+                      (profile.role === 'Organizer' && currentUser.type === 'brand')) && (
                       <InterestButton
                         profileId={profile.id}
                         profileRole={profile.role.toLowerCase() as 'brand' | 'organizer'}
@@ -247,16 +246,6 @@ export function ProfileDetailPage() {
                         interestStatus={interestStatus}
                         onInterestChange={handleInterestChange}
                       />
-                    ) : (
-                      <Button
-                        className='w-full md:w-auto'
-                        onClick={() =>
-                          window.open(`mailto:${profile.email}`, '_blank')
-                        }
-                      >
-                        <MailIcon className='h-4 w-4 mr-2' />
-                        Contact {profile.role === 'Brand' ? 'Brand' : 'Organizer'}
-                      </Button>
                     )}
                     <div className='text-sm text-gray-500 flex items-center gap-2 justify-center md:justify-end'>
                       <LinkIcon className='h-4 w-4' />
@@ -288,15 +277,6 @@ export function ProfileDetailPage() {
                   Overview
                 </div>
                 <div className='space-y-2 text-sm text-gray-700'>
-                  <p>
-                    <span className='font-semibold text-gray-900'>Email:</span>{' '}
-                    <a
-                      href={`mailto:${profile.email}`}
-                      className='text-indigo-600 hover:text-indigo-800'
-                    >
-                      {profile.email}
-                    </a>
-                  </p>
                   <p>
                     <span className='font-semibold text-gray-900'>Joined:</span>{' '}
                     {new Date(profile.created_at).toLocaleDateString()}

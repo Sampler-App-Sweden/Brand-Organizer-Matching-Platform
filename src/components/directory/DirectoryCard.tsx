@@ -49,7 +49,7 @@ export function DirectoryCard({
     : profile.whatTheySeek?.eventTypes ?? []
 
   // Check if this profile belongs to the current user
-  const isOwnProfile = currentUser?.email === profile.email
+  const isOwnProfile = currentUser?.id === profile.id
   const [isSaved, setIsSaved] = useState<boolean>(initialSaved ?? false)
   const [isCheckingSaved, setIsCheckingSaved] = useState<boolean>(
     showSaveAction && initialSaved === undefined && Boolean(userId)

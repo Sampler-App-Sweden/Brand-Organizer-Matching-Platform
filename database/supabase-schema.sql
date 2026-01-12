@@ -603,7 +603,6 @@ SELECT
   p.id,
   p.role,
   p.name,
-  p.email,
   p.logo_url,
   p.description,
   p.created_at,

@@ -3,7 +3,6 @@ import {
   CalendarIcon,
   ExternalLinkIcon,
   GlobeIcon,
-  MailIcon,
   PackageIcon,
   PhoneIcon,
   SparklesIcon,
@@ -189,15 +188,6 @@ export function ExploreMemberDetail() {
                       <GlobeIcon className='h-4 w-4 mr-1' />
                       Website
                       <ExternalLinkIcon className='h-3 w-3 ml-1' />
-                    </a>
-                  )}
-                  {member.email && (
-                    <a
-                      href={`mailto:${member.email}`}
-                      className='inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800'
-                    >
-                      <MailIcon className='h-4 w-4 mr-1' />
-                      Email
                     </a>
                   )}
                   {member.phone && (

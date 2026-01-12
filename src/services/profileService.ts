@@ -19,7 +19,6 @@ export interface ProfileOverview {
   id: string
   role: 'Brand' | 'Organizer'
   name: string
-  email: string
   logoURL?: string | null
   description?: string | null
   city?: string | null
@@ -39,7 +38,6 @@ type ProfileOverviewRow = {
   id: string
   role: 'Brand' | 'Organizer'
   name: string
-  email: string
   logo_url?: string | null
   description?: string | null
   city?: string | null
@@ -79,7 +77,6 @@ const mapRowToProfile = (row: ProfileOverviewRow): ProfileOverview => ({
   id: row.id,
   role: row.role,
   name: row.name,
-  email: row.email,
   logoURL: row.logo_url,
   description: row.description,
   city: row.city,
