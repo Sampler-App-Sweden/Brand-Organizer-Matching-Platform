@@ -1,17 +1,14 @@
 import {
-  ArrowRightIcon,
   BarChartIcon,
   CalendarIcon,
   MessageSquareIcon,
-  PackageIcon,
   SparklesIcon,
   TrendingUpIcon,
-  UsersIcon,
   ZapIcon
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-import { TechCard, TechFeatureSection, TechHero } from '../components/landing'
+import { TechFeatureSection, TechHero } from '../components/landing'
 import { TechLayout } from '../components/layout'
 
 export function Home() {
@@ -62,18 +59,20 @@ export function Home() {
         ctaText='Register Account'
         ctaLink='/register'
         secondaryCtaText='Explore Benefits'
-        secondaryCtaLink='#features'
+        secondaryCtaLink='#benefits'
       />
 
       {/* Search Section */}
       {/* <Search /> */}
 
       {/* Features Section */}
-      <TechFeatureSection
-        title='Platform Benefits'
-        subtitle='Discover how SponsrAI makes brand-organizer connections seamless and effective'
-        features={features}
-      />
+      <div id='benefits'>
+        <TechFeatureSection
+          title='Platform Benefits'
+          subtitle='Discover how SponsrAI makes brand-organizer connections seamless and effective'
+          features={features}
+        />
+      </div>
 
       {/* CTA Section with animated glassy blobs */}
       <div className='relative overflow-hidden py-16 bg-indigo-900'>
@@ -120,7 +119,7 @@ export function Home() {
       </div>
 
       {/* How It Works - Modernized */}
-      <section className='relative py-20 bg-gradient-to-br from-white via-indigo-50 to-blue-100 overflow-hidden'>
+      {/*  <section className='relative py-20 bg-gradient-to-br from-white via-indigo-50 to-blue-100 overflow-hidden'>
         <div className='absolute -top-32 -right-32 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-indigo-300/20 rounded-full blur-3xl animate-float1' />
         <div className='absolute -bottom-32 -left-32 w-96 h-96 bg-gradient-to-tr from-indigo-400/30 to-purple-300/20 rounded-full blur-3xl animate-float2' />
         <div className='container mx-auto px-4 relative z-10'>
@@ -231,7 +230,7 @@ export function Home() {
           .animate-float1 { animation: float1 8s ease-in-out infinite; }
           .animate-float2 { animation: float2 10s ease-in-out infinite; }
         `}</style>
-      </section>
+      </section> */}
     </TechLayout>
   )
 }

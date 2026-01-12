@@ -68,13 +68,25 @@ export function TechHero({
               <span className='absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-400 opacity-0 group-hover:opacity-20 transition-opacity'></span>
             </Link>
             {secondaryCtaText && secondaryCtaLink && (
-              <Link
-                to={secondaryCtaLink}
-                className='border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-3 rounded-md font-medium flex items-center justify-center transition-all hover:shadow-md group'
-              >
-                <span>{secondaryCtaText}</span>
-                <ArrowRightIcon className='h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform' />
-              </Link>
+              <>
+                {secondaryCtaLink.startsWith('#') ? (
+                  <a
+                    href={secondaryCtaLink}
+                    className='border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-3 rounded-md font-medium flex items-center justify-center transition-all hover:shadow-md group'
+                  >
+                    <span>{secondaryCtaText}</span>
+                    <ArrowRightIcon className='h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform' />
+                  </a>
+                ) : (
+                  <Link
+                    to={secondaryCtaLink}
+                    className='border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-6 py-3 rounded-md font-medium flex items-center justify-center transition-all hover:shadow-md group'
+                  >
+                    <span>{secondaryCtaText}</span>
+                    <ArrowRightIcon className='h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform' />
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>
