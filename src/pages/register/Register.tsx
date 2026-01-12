@@ -53,8 +53,8 @@ export function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [userType, setUserType] = useState<'brand' | 'organizer'>(
-    'brand'
+  const [userType, setUserType] = useState<'brand' | 'organizer' | undefined>(
+    undefined
   )
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -164,6 +164,26 @@ export function Register() {
     e.preventDefault()
     // Clear any previous debug info
     setDebugInfo(null)
+
+    // Validate that user has selected a type
+    if (!userType) {
+      setToast({
+        isVisible: true,
+        type: 'error',
+        message: 'Please select whether you are a Brand/Sponsor or Event Organizer'
+      })
+      trackError(
+        ERROR_TYPES.VALIDATION_ERROR,
+        'User type not selected',
+        undefined,
+        {},
+        undefined,
+        REGISTRATION_EXPERIMENT,
+        experimentVariant
+      )
+      return
+    }
+
     emitEvent(
       EVENTS.REGISTRATION_STARTED,
       {

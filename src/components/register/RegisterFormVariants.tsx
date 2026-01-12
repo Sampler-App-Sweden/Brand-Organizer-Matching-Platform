@@ -2,11 +2,11 @@ import { CheckCircleIcon, EyeIcon, EyeOffIcon, XCircleIcon } from 'lucide-react'
 import React from 'react'
 
 import { Button, FormField } from '../../components/ui'
-import { UserType } from './registerTypes'
+import { UserType, UserTypeOrUndefined } from './registerTypes'
 
 interface VariantFormProps {
-  userType: UserType
-  setUserType: (type: UserType) => void
+  userType: UserTypeOrUndefined
+  setUserType: (type: UserTypeOrUndefined) => void
   email: string
   setEmail: (email: string) => void
   password: string

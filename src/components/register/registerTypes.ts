@@ -1,4 +1,5 @@
 export type UserType = 'brand' | 'organizer'
+export type UserTypeOrUndefined = UserType | undefined
 export type ExperimentVariant = 'A' | 'B' | 'C'
 
 export interface PasswordErrors {
