@@ -81,46 +81,6 @@ export function SettingsPage() {
           </div>
         )}
 
-        {/* Account Information */}
-        <section className='bg-white rounded-lg shadow-sm p-6'>
-          <h3 className='text-lg font-semibold text-gray-900 mb-4'>
-            Account Information
-          </h3>
-          <div className='space-y-3'>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Email
-              </label>
-              <input
-                type='email'
-                value={currentUser?.email || ''}
-                disabled
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
-              />
-              <p className='text-xs text-gray-500 mt-1'>
-                Your email address cannot be changed. Contact support if you need
-                assistance.
-              </p>
-            </div>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Account Type
-              </label>
-              <input
-                type='text'
-                value={
-                  currentUser?.type
-                    ? currentUser.type.charAt(0).toUpperCase() +
-                      currentUser.type.slice(1)
-                    : ''
-                }
-                disabled
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
-              />
-            </div>
-          </div>
-        </section>
-
         {/* Notification Preferences */}
         <section className='bg-white rounded-lg shadow-sm p-6'>
           <h3 className='text-lg font-semibold text-gray-900 mb-4'>

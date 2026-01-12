@@ -6,6 +6,7 @@ import {
   saveOrganizer,
   updateOrganizer
 } from '../services/dataService'
+import { supabase } from '../services/supabaseClient'
 import type { Organizer } from '../types'
 
 export interface OrganizerFormData {
@@ -260,6 +261,18 @@ export function useOrganizerForm() {
         bonusValueDetails: formData.bonusValueDetails,
         additionalInfo: formData.additionalInfo,
         mediaFiles: []
+      }
+
+      // Upsert profile to ensure it's in sync with organizer data
+      if (currentUser) {
+        await supabase.from('profiles').upsert({
+          id: userId,
+          role: 'Organizer',
+          name: formData.organizerName,
+          email: formData.email,
+          phone: formData.phone,
+          updated_at: new Date().toISOString()
+        })
       }
 
       if (currentUser) {

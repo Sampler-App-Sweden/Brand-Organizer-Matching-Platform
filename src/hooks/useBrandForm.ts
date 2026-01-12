@@ -6,6 +6,7 @@ import {
   saveBrand,
   updateBrand
 } from '../services/dataService'
+import { supabase } from '../services/supabaseClient'
 
 type YesNo = 'yes' | 'no' | ''
 
@@ -269,6 +270,18 @@ export function useBrandForm() {
         hasTestPanels: formData.hasTestPanels,
         testPanelDetails: formData.testPanelDetails,
         additionalInfo: formData.additionalInfo
+      }
+
+      // Upsert profile to ensure it's in sync with brand data
+      if (currentUser) {
+        await supabase.from('profiles').upsert({
+          id: userId,
+          role: 'Brand',
+          name: formData.companyName,
+          email: formData.email,
+          phone: formData.phone,
+          updated_at: new Date().toISOString()
+        })
       }
 
       if (currentUser) {
