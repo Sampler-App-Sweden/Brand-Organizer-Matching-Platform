@@ -33,6 +33,12 @@ import { fetchSponsorshipProducts } from '../services/sponsorshipService'
 import { Event } from '../types/event'
 import { SponsorshipProduct } from '../types/sponsorship'
 import { categorizeEventsByDate } from '../utils/eventUtils'
+import {
+  formatBudgetRange,
+  formatSponsorshipType,
+  formatEventType,
+  formatUnderscoredValue
+} from '../utils/formatProfileValues'
 
 export function ProfileDetailPage() {
   const { profileId } = useParams<{ profileId: string }>()
@@ -263,7 +269,7 @@ export function ProfileDetailPage() {
                         className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white shadow-sm border border-gray-200'
                       >
                         <SparklesIcon className='h-3 w-3 text-indigo-500 mr-1' />
-                        {tag}
+                        {formatUnderscoredValue(tag)}
                       </span>
                     ))}
                   </div>
@@ -310,7 +316,9 @@ export function ProfileDetailPage() {
                       Budget Range
                     </p>
                     <p className='text-base font-semibold text-gray-900'>
-                      {profile.whatTheySeek?.budgetRange || 'Not specified'}
+                      {profile.whatTheySeek?.budgetRange
+                        ? formatBudgetRange(profile.whatTheySeek.budgetRange)
+                        : 'Not specified'}
                     </p>
                   </div>
                   <div>
@@ -324,7 +332,7 @@ export function ProfileDetailPage() {
                             key={type}
                             className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700'
                           >
-                            {type}
+                            {formatSponsorshipType(type)}
                           </span>
                         ))
                       ) : (
@@ -354,7 +362,9 @@ export function ProfileDetailPage() {
                             className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800'
                           >
                             <UsersIcon className='h-3 w-3 text-purple-500 mr-1' />
-                            {entry}
+                            {profile.role === 'Organizer'
+                              ? formatEventType(entry)
+                              : formatUnderscoredValue(entry)}
                           </span>
                         ))
                       ) : (

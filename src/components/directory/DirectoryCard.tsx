@@ -16,6 +16,12 @@ import {
   toggleSavedProfile
 } from '../../services/savedProfilesService'
 import { Badge, IconButton } from '../ui'
+import {
+  formatBudgetRange,
+  formatSponsorshipType,
+  formatEventType,
+  formatUnderscoredValue
+} from '../../utils/formatProfileValues'
 
 type InterestStatus = 'none' | 'sent' | 'received' | 'mutual'
 
@@ -221,7 +227,7 @@ export function DirectoryCard({
                 {sponsorshipTypes.length ? (
                   sponsorshipTypes.map((type) => (
                     <Badge key={type} variant='primary' size='sm'>
-                      {type}
+                      {formatSponsorshipType(type)}
                     </Badge>
                   ))
                 ) : (
@@ -237,7 +243,9 @@ export function DirectoryCard({
                 <span className='font-medium'>Budget</span>
               </div>
               <span>
-                {profile.whatTheySeek?.budgetRange || 'Not specified'}
+                {profile.whatTheySeek?.budgetRange
+                  ? formatBudgetRange(profile.whatTheySeek.budgetRange)
+                  : 'Not specified'}
               </span>
             </div>
             {eventOrAudience.length > 0 && (
@@ -249,7 +257,9 @@ export function DirectoryCard({
                 <div className='flex flex-wrap gap-2'>
                   {eventOrAudience.map((entry) => (
                     <Badge key={entry} variant='secondary' size='sm'>
-                      {entry}
+                      {isBrand
+                        ? formatUnderscoredValue(entry)
+                        : formatEventType(entry)}
                     </Badge>
                   ))}
                 </div>
