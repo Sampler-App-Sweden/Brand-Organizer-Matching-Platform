@@ -41,11 +41,13 @@ export function BasicRegistrationForm(props: VariantFormProps) {
           id='userType'
           type='select'
           options={[
+            { value: '', label: 'Select your role...' },
             { value: 'brand', label: 'Brand / Sponsor' },
             { value: 'organizer', label: 'Event Organizer' }
           ]}
-          value={props.userType}
+          value={props.userType || ''}
           onChange={(e) => props.setUserType(e.target.value as UserType)}
+          required
         />
         <FormField
           label='Email Address'
@@ -151,11 +153,13 @@ export function PasswordStrengthRegistrationForm(props: VariantFormProps) {
           id='userType'
           type='select'
           options={[
+            { value: '', label: 'Select your role...' },
             { value: 'brand', label: 'Brand / Sponsor' },
             { value: 'organizer', label: 'Event Organizer' }
           ]}
-          value={props.userType}
+          value={props.userType || ''}
           onChange={(e) => props.setUserType(e.target.value as UserType)}
+          required
         />
         <FormField
           label='Email Address'
@@ -359,10 +363,11 @@ export function EnhancedRegistrationForm(props: VariantFormProps) {
           id='userType'
           type='select'
           options={[
+            { value: '', label: 'Select your role...' },
             { value: 'brand', label: 'Brand / Sponsor' },
             { value: 'organizer', label: 'Event Organizer' }
           ]}
-          value={props.userType}
+          value={props.userType || ''}
           onChange={(e) => {
             props.setUserType(e.target.value as UserType)
             if (
@@ -383,20 +388,23 @@ export function EnhancedRegistrationForm(props: VariantFormProps) {
               )
             }
           }}
+          required
         />
-        <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2'>
-          <p className='text-sm text-blue-800'>
-            <strong>
+        {props.userType && (
+          <div className='bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2'>
+            <p className='text-sm text-blue-800'>
+              <strong>
+                {props.userType === 'brand'
+                  ? 'Brand / Sponsor'
+                  : 'Event Organizer'}
+              </strong>
+              :
               {props.userType === 'brand'
-                ? 'Brand / Sponsor'
-                : 'Event Organizer'}
-            </strong>
-            :
-            {props.userType === 'brand'
-              ? ' Perfect for companies looking to promote products or services through events.'
-              : ' Ideal for those organizing events and seeking brand partnerships.'}
-          </p>
-        </div>
+                ? ' Perfect for companies looking to promote products or services through events.'
+                : ' Ideal for those organizing events and seeking brand partnerships.'}
+            </p>
+          </div>
+        )}
         <FormField
           label='Email Address'
           id='email'

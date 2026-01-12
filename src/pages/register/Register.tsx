@@ -340,7 +340,7 @@ export function Register() {
       <RegistrationSuccess
         email={email}
         experimentVariant={experimentVariant}
-        userType={userType}
+        userType={userType || 'brand'}
         toast={toast}
         setToast={setToast}
         navigate={navigate}
