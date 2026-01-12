@@ -50,7 +50,7 @@ export function Home() {
       icon: <ZapIcon className='h-6 w-6' />,
       title: 'Quick Setup',
       description:
-        'Get started in minutes with our intuitive onboarding process and AI assistant.'
+        'Get started in minutes with our intuitive onboarding process.'
     }
   ]
   return (
