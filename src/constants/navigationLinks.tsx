@@ -32,8 +32,7 @@ export const MARKETING_NAV_LINKS: NavLink[] = [
   },
   {
     label: 'Help',
-    path: '/help',
-    icon: <BookOpenIcon className='h-4 w-4 mr-0.5' />
+    path: '/help'
   }
 ]
 
@@ -52,8 +51,7 @@ export const DASHBOARD_NAV_LINKS: NavLink[] = [
   },
   {
     label: 'Help',
-    path: '/help',
-    icon: <BookOpenIcon className='h-4 w-4 mr-0.5' />
+    path: '/help'
   }
 ]
 

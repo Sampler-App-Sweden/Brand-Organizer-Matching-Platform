@@ -7,11 +7,11 @@ import {
   DASHBOARD_NAV_LINKS,
   MARKETING_NAV_LINKS
 } from '../../constants/navigationLinks'
-import { HamburgerMenu } from './HamburgerMenu'
 import { useNotifications } from '../../context'
 import { useAuth } from '../../context/AuthContext'
 import { logoutAndRedirect } from '../../services/logoutService'
 import { Avatar, Badge, IconButton } from '../ui'
+import { HamburgerMenu } from './HamburgerMenu'
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -149,13 +149,6 @@ export function Navbar() {
                       ref={userMenuRef}
                       className='absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1'
                     >
-                      <Link
-                        to='/dashboard/edit-profile'
-                        className='block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50'
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        Profile Settings
-                      </Link>
                       <button
                         onClick={handleLogout}
                         className='w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50'

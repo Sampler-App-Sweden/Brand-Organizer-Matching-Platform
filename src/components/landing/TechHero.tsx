@@ -1,5 +1,6 @@
+import { ArrowRightIcon, SparklesIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { SparklesIcon, ArrowRightIcon } from 'lucide-react'
+
 interface TechHeroProps {
   title: string
   subtitle: string
@@ -14,8 +15,8 @@ interface TechHeroProps {
 export function TechHero({
   title,
   subtitle,
-  ctaText = 'Get Started',
-  ctaLink = '/register',
+  ctaText,
+  ctaLink,
   secondaryCtaText,
   secondaryCtaLink,
   videoSrc,
