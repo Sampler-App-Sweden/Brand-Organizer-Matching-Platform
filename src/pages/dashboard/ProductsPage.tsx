@@ -439,7 +439,7 @@ export function ProductsPage() {
                       <p className='mb-2 text-sm text-gray-500'>
                         <span className='font-semibold'>Click to upload</span> or drag and drop
                       </p>
-                      <p className='text-xs text-gray-500'>PNG, JPG, GIF (auto-converted to WebP, {getImageLimitText(IMAGE_LIMITS.PRODUCT)})</p>
+                      <p className='text-xs text-gray-500'>PNG, JPG, SVG (auto-converted to WebP, {getImageLimitText(IMAGE_LIMITS.PRODUCT)})</p>
                     </div>
                     <input
                       type='file'

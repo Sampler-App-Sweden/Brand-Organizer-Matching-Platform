@@ -8,12 +8,14 @@ import {
   getOrganizersByIds
 } from '../../services/dataService'
 import { getConnectionStats, getMutualConnections, type ConnectionStats, type Connection } from '../../services/connectionService'
+import { getProfileOverviewById, type ProfileOverview } from '../../services/profileService'
 import { Button, LoadingSpinner } from '../../components/ui'
 import { ProductSponsorshipSummary } from '../../components/sponsorship/ProductSponsorshipSummary'
 import { SponsorshipOfferSummary } from '../../components/sponsorship/SponsorshipOfferSummary'
 import { Brand, Organizer, Match } from '../../types'
 import { MatchRow } from '../dashboard/MatchRow'
 import { ConnectionSummary } from '../../components/connections'
+import { ProfileCompletenessIndicator } from '../../components/profile'
 
 export function BrandDashboard() {
   const { currentUser } = useAuth()
@@ -21,6 +23,7 @@ export function BrandDashboard() {
   const [matches, setMatches] = useState<Match[]>([])
   const [mutualConnections, setMutualConnections] = useState<Connection[]>([])
   const [connectionStats, setConnectionStats] = useState<ConnectionStats | null>(null)
+  const [profileOverview, setProfileOverview] = useState<ProfileOverview | null>(null)
   const [organizersById, setOrganizersById] = useState<
     Record<string, Organizer>
   >({})
@@ -32,15 +35,17 @@ export function BrandDashboard() {
           const brandData = await getBrandByUserId(currentUser.id)
           setBrand(brandData)
           if (brandData) {
-            // Load matches, connections, and stats
-            const [matchData, connStats, mutualConns] = await Promise.all([
+            // Load matches, connections, stats, and profile overview
+            const [matchData, connStats, mutualConns, profile] = await Promise.all([
               getMatchesForBrand(brandData.id),
               getConnectionStats(currentUser.id),
-              getMutualConnections(currentUser.id)
+              getMutualConnections(currentUser.id),
+              getProfileOverviewById(currentUser.id)
             ])
             setMatches(matchData)
             setConnectionStats(connStats)
             setMutualConnections(mutualConns)
+            setProfileOverview(profile)
 
             const organizerIds = Array.from(
               new Set([
@@ -124,6 +129,18 @@ export function BrandDashboard() {
           </p>
         </div>
       </div>
+
+      {/* Profile Completeness Indicator */}
+      {profileOverview && (
+        <ProfileCompletenessIndicator
+          profile={{
+            description: profileOverview.description,
+            role: profileOverview.role,
+            whatTheySeek: profileOverview.whatTheySeek
+          }}
+          className='mb-6'
+        />
+      )}
 
       {/* Connection Summary */}
       <ConnectionSummary stats={connectionStats} />

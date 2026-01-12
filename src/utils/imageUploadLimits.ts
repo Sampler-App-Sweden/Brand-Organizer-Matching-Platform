@@ -54,7 +54,8 @@ export function validateImageUpload(
  */
 export function getImageLimitText(maxImages: number): string {
   const sizeMB = IMAGE_LIMITS.MAX_FILE_SIZE / (1024 * 1024)
-  return `MAX. ${sizeMB}MB each, ${maxImages} images total`
+  const imageText = maxImages === 1 ? 'image' : 'images'
+  return `MAX. ${sizeMB}MB each, ${maxImages} ${imageText} total`
 }
 
 /**

@@ -78,7 +78,7 @@ export function ImageUpload({
         onChange={handleImageUpload}
       />
       <p className='text-xs text-gray-500'>
-        JPG, PNG, GIF (auto-converted to WebP). {getImageLimitText(maxImages)}
+        JPG, PNG, SVG (auto-converted to WebP). {getImageLimitText(maxImages)}
       </p>
     </div>
   )

@@ -1,0 +1,1 @@
+export { ProfileCompletenessIndicator } from './ProfileCompletenessIndicator'

@@ -5,6 +5,7 @@ import { DashboardLayout } from '../../components/layout'
 import { FormField, Button, LoadingSpinner } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { ImageUpload } from '../../components/media/ImageUpload'
+import { ProfileCompletenessIndicator } from '../../components/profile'
 import {
   getBrandByUserId,
   getOrganizerByUserId
@@ -256,6 +257,21 @@ export function EditProfilePage() {
   return (
     <DashboardLayout userType={currentUser?.type || 'brand'}>
       <div className='max-w-2xl mx-auto'>
+        {/* Profile Completeness Indicator */}
+        <ProfileCompletenessIndicator
+          profile={{
+            description: profile.description,
+            role: currentUser?.type === 'organizer' ? 'Organizer' : 'Brand',
+            whatTheySeek: {
+              sponsorshipTypes: [],
+              budgetRange: null,
+              audienceTags: [],
+              eventTypes: []
+            }
+          }}
+          className='mb-6'
+        />
+
         <div className='bg-white rounded-lg shadow-sm p-6'>
           <h1 className='text-2xl font-bold text-gray-900 mb-6'>
             Edit Profile

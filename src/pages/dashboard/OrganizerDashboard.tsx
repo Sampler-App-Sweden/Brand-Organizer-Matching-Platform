@@ -6,12 +6,15 @@ import { OrganizerEventsSummary } from '../../components/events/OrganizerEventsS
 import { DashboardLayout } from '../../components/layout'
 import { OrganizerSponsorshipSummary } from '../../components/sponsorship/OrganizerSponsorshipSummary'
 import { ConnectionSummary } from '../../components/connections'
+import { ProfileCompletenessIndicator } from '../../components/profile'
 import { Button, LoadingSpinner } from '../../components/ui'
 import { useAuth } from '../../context/AuthContext'
 import { useOrganizerDashboard } from '../../hooks/useOrganizerDashboard'
 import { getBrandById, getBrandsByIds } from '../../services/dataService'
 import { getConnectionStats, getMutualConnections } from '../../services/connectionService'
+import { getProfileOverviewById } from '../../services/profileService'
 import { Brand, Match, ConnectionStats, Connection } from '../../types'
+import type { ProfileOverview } from '../../services/profileService'
 
 export function OrganizerDashboard() {
   const { currentUser } = useAuth()
@@ -20,22 +23,26 @@ export function OrganizerDashboard() {
   const [brandsById, setBrandsById] = useState<Record<string, Brand>>({})
   const [mutualConnections, setMutualConnections] = useState<Connection[]>([])
   const [connectionStats, setConnectionStats] = useState<ConnectionStats | null>(null)
+  const [profileOverview, setProfileOverview] = useState<ProfileOverview | null>(null)
 
-  // Load connection stats and mutual connections
+  // Load connection stats, mutual connections, and profile overview
   useEffect(() => {
     const loadConnectionData = async () => {
       if (!currentUser?.id) return
       try {
-        const [stats, mutualConns] = await Promise.all([
+        const [stats, mutualConns, profile] = await Promise.all([
           getConnectionStats(currentUser.id),
-          getMutualConnections(currentUser.id)
+          getMutualConnections(currentUser.id),
+          getProfileOverviewById(currentUser.id)
         ])
         setConnectionStats(stats)
         setMutualConnections(mutualConns)
+        setProfileOverview(profile)
       } catch (error) {
         console.error('Failed to load connection data:', error)
         setConnectionStats(null)
         setMutualConnections([])
+        setProfileOverview(null)
       }
     }
 
@@ -115,6 +122,18 @@ export function OrganizerDashboard() {
           </p>
         </div>
       </div>
+
+      {/* Profile Completeness Indicator */}
+      {profileOverview && (
+        <ProfileCompletenessIndicator
+          profile={{
+            description: profileOverview.description,
+            role: profileOverview.role,
+            whatTheySeek: profileOverview.whatTheySeek
+          }}
+          className='mb-6'
+        />
+      )}
 
       {/* Connection Summary */}
       <ConnectionSummary stats={connectionStats} />
