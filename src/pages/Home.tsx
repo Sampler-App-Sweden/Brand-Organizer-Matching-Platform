@@ -44,7 +44,7 @@ export function Home() {
       icon: <BarChartIcon className='h-6 w-6' />,
       title: 'Performance Analytics',
       description:
-        'Measure the impact of your sponsorships with detailed reporting and insights.'
+        'Measure the impact of your sponsorships with detailed reporting and insights. [Upcoming Feature]'
     },
     {
       icon: <ZapIcon className='h-6 w-6' />,
