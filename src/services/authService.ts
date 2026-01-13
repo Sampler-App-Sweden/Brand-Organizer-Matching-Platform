@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { validatePassword } from '../utils/password-security'
 
 // Authentication service backed by Supabase
 export interface User {
@@ -133,6 +134,13 @@ export const register = async (
   type: 'brand' | 'organizer' | 'community',
   name: string
 ): Promise<User> => {
+  // Check password against HaveIBeenPwned (client-side protection)
+  // This compensates for Supabase Free tier not having HIBP protection
+  const passwordValidation = await validatePassword(password)
+  if (!passwordValidation.valid) {
+    throw new Error(passwordValidation.error || 'Invalid password')
+  }
+
   const supabaseRole = mapTypeToRole(type)
   const { data, error } = await supabase.auth.signUp({
     email,

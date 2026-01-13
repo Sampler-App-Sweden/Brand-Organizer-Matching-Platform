@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { validatePassword } from '../utils/password-security'
 
 import type { UserAttributes } from '@supabase/supabase-js'
 
@@ -8,6 +9,12 @@ export async function signUp(
   password: string,
   metadata: Record<string, unknown> = {}
 ) {
+  // Validate password against HIBP and Supabase requirements
+  const passwordValidation = await validatePassword(password)
+  if (!passwordValidation.valid) {
+    throw new Error(passwordValidation.error || 'Invalid password')
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -73,6 +80,14 @@ export async function resetPassword(email: string) {
 
 // Update user
 export async function updateUser(updates: UserAttributes) {
+  // If password is being updated, validate it first
+  if (updates.password) {
+    const passwordValidation = await validatePassword(updates.password)
+    if (!passwordValidation.valid) {
+      throw new Error(passwordValidation.error || 'Invalid password')
+    }
+  }
+
   const { data, error } = await supabase.auth.updateUser(updates)
   if (error) {
     console.error('Error updating user:', error)
