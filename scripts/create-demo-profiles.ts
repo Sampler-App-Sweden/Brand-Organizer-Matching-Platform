@@ -168,10 +168,10 @@ const brandSeeds: BrandSeed[] = [
       sponsorship_type: ['Sampling', 'Product Placement'],
       marketing_goals:
         'Showcase sustainability story, collect creator-generated content',
-      budget: '$18,000',
-      event_marketing_budget: '$6,000',
+      budget: '18,000 SEK',
+      event_marketing_budget: '6,000 SEK',
       interested_in_financial_sponsorship: true,
-      financial_sponsorship_amount: '$10,000',
+      financial_sponsorship_amount: '10,000 SEK',
       success_metrics:
         'Samples distributed, newsletter signups, social mentions',
       interested_in_sampling_tools: true,
@@ -250,10 +250,10 @@ const brandSeeds: BrandSeed[] = [
       sponsorship_type: ['Sampling', 'Co-branded Content'],
       marketing_goals:
         'Illuminate gin rituals to sustainability-minded travelers',
-      budget: '$22,000',
-      event_marketing_budget: '$7,000',
+      budget: '22,000 SEK',
+      event_marketing_budget: '7,000 SEK',
       interested_in_financial_sponsorship: true,
-      financial_sponsorship_amount: '$12,000',
+      financial_sponsorship_amount: '12,000 SEK',
       success_metrics: 'Taste guide downloads, bartender leads',
       interested_in_sampling_tools: true,
       has_test_panels: false,
@@ -324,10 +324,10 @@ const brandSeeds: BrandSeed[] = [
       age_range: '24-60',
       sponsorship_type: ['Sampling', 'Employee Wellness'],
       marketing_goals: 'Highlight ritualized wellness moments',
-      budget: '$16,000',
-      event_marketing_budget: '$5,500',
+      budget: '16,000 SEK',
+      event_marketing_budget: '5,500 SEK',
       interested_in_financial_sponsorship: false,
-      financial_sponsorship_amount: '$0',
+      financial_sponsorship_amount: '0 SEK',
       success_metrics: 'Social stories, retreat bookings',
       interested_in_sampling_tools: true,
       has_test_panels: true,
@@ -399,10 +399,10 @@ const brandSeeds: BrandSeed[] = [
       sponsorship_type: ['Sampling', 'Content Collaboration'],
       marketing_goals:
         'Secure salon lounge placements and collect creator testimonial reels',
-      budget: '$18,000',
-      event_marketing_budget: '$7,500',
+      budget: '18,000 SEK',
+      event_marketing_budget: '7,500 SEK',
       interested_in_financial_sponsorship: true,
-      financial_sponsorship_amount: '$12,000',
+      financial_sponsorship_amount: '12,000 SEK',
       success_metrics: 'Stocking invitations, social mentions, waitlist spikes',
       interested_in_sampling_tools: true,
       has_test_panels: true,
@@ -483,10 +483,10 @@ const brandSeeds: BrandSeed[] = [
       ],
       marketing_goals:
         'Place installations at flagship events and capture cinematic footage',
-      budget: '$30,000',
-      event_marketing_budget: '$12,000',
+      budget: '30,000 SEK',
+      event_marketing_budget: '12,000 SEK',
       interested_in_financial_sponsorship: true,
-      financial_sponsorship_amount: '$15,000',
+      financial_sponsorship_amount: '15,000 SEK',
       success_metrics: 'Cinematic coverage, live reactions, social tags',
       interested_in_sampling_tools: false,
       has_test_panels: false,
@@ -573,7 +573,7 @@ const organizerSeeds: OrganizerSeed[] = [
         sponsorship_needs:
           'Sampling partners, immersive lounge builders, and content collaborations.',
         seeking_financial_sponsorship: true,
-        financial_sponsorship_amount: '$8,000',
+        financial_sponsorship_amount: '8,000 SEK',
         financial_sponsorship_offers:
           'Stage visibility, digital co-creation, and community highlights.',
         offering_types: ['Sampling', 'Co-branded Content', 'Workshop'],
@@ -639,7 +639,7 @@ const organizerSeeds: OrganizerSeed[] = [
         sponsorship_needs:
           'Sampling partners, stage experiences, and educator booths.',
         seeking_financial_sponsorship: true,
-        financial_sponsorship_amount: '$5,000',
+        financial_sponsorship_amount: '5,000 SEK',
         financial_sponsorship_offers:
           'Featured in community newsletter and stage interviews.',
         offering_types: ['Sampling', 'Educational Sessions'],
@@ -694,7 +694,7 @@ const organizerSeeds: OrganizerSeed[] = [
         sponsorship_needs:
           'Sampling partners, interactive lounges, and immersive crafts.',
         seeking_financial_sponsorship: true,
-        financial_sponsorship_amount: '$9,000',
+        financial_sponsorship_amount: '9,000 SEK',
         financial_sponsorship_offers:
           'Featured lounges, runway integrations, and digital programs.',
         offering_types: [
@@ -756,7 +756,7 @@ const organizerSeeds: OrganizerSeed[] = [
         sponsorship_needs:
           'Sampling partners, workshop leaders, and immersive storytelling teams.',
         seeking_financial_sponsorship: true,
-        financial_sponsorship_amount: '$10,000',
+        financial_sponsorship_amount: '10,000 SEK',
         financial_sponsorship_offers:
           'Digital content suite, wellness guide inclusion, and elevated dwell moments.',
         offering_types: [
@@ -823,7 +823,7 @@ const organizerSeeds: OrganizerSeed[] = [
         sponsorship_needs:
           'Light installations, immersive lounges, and content collab partners.',
         seeking_financial_sponsorship: true,
-        financial_sponsorship_amount: '$14,000',
+        financial_sponsorship_amount: '14,000 SEK',
         financial_sponsorship_offers:
           'Brand takeover nights, curated VIP lounges, and digital film packages.',
         offering_types: [
@@ -909,7 +909,7 @@ const contractSeeds: ContractSeed[] = [
   {
     brandEmail: 'glowco@demo.com',
     organizerEmail: 'urbanwellness@demo.com',
-    sponsorship_amount: '$12,000',
+    sponsorship_amount: '12,000 SEK',
     sponsorship_type: 'Sampling & Content',
     deliverables:
       'Glow Serum Hospitality kits, guided lounge rituals, and creator interviews captured for Urban Wellness Week.',
@@ -927,7 +927,7 @@ const contractSeeds: ContractSeed[] = [
   {
     brandEmail: 'lumen@demo.com',
     organizerEmail: 'lumenstages@demo.com',
-    sponsorship_amount: '$22,000',
+    sponsorship_amount: '22,000 SEK',
     sponsorship_type: 'Experiential Lighting',
     deliverables:
       'Aurora Bar sets, Lumen Story Kits, and technical staff for Immersive Voltage Series lounges.',

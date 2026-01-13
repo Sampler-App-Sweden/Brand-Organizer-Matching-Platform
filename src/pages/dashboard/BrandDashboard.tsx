@@ -268,15 +268,15 @@ export function BrandDashboard() {
             </h3>
             <p className='text-gray-900'>
               {brand.budget === 'under_1000'
-                ? 'Under $1,000'
+                ? 'Under 1,000 SEK'
                 : brand.budget === '1000_5000'
-                ? '$1,000 - $5,000'
+                ? '1,000 - 5,000 SEK'
                 : brand.budget === '5000_10000'
-                ? '$5,000 - $10,000'
+                ? '5,000 - 10,000 SEK'
                 : brand.budget === '10000_25000'
-                ? '$10,000 - $25,000'
+                ? '10,000 - 25,000 SEK'
                 : brand.budget === '25000_plus'
-                ? '$25,000+'
+                ? '25,000+ SEK'
                 : 'Not specified'}
             </p>
           </div>

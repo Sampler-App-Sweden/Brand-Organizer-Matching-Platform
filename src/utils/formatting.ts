@@ -13,8 +13,8 @@ export function formatDate(dateString: string): string {
 /**
  * Format a currency value
  */
-export function formatCurrency(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(amount: number, currency = 'SEK'): string {
+  return new Intl.NumberFormat('sv-SE', {
     style: 'currency',
     currency
   }).format(amount)
